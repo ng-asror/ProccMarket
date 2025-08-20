@@ -17,10 +17,18 @@ class User extends Authenticatable
      *
      * @var list<string>
      */
+
     protected $fillable = [
-        'name',
+        'telegram_id',
         'email',
+        'role_id',
+        'balance',
+        'name',
+        'avatar',
+        'banned',
+        'last_deposit_at',
         'password',
+        'is_admin',
     ];
 
     /**
@@ -29,8 +37,7 @@ class User extends Authenticatable
      * @var list<string>
      */
     protected $hidden = [
-        'password',
-        'remember_token',
+        'password'
     ];
 
     /**
@@ -43,6 +50,33 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'balance' => 'decimal:0',
+            'banned' => 'boolean',
+            'last_deposit_at' => 'datetime',
         ];
+    }
+
+    public function role() {
+        return $this->belongsTo(Role::class);
+    }
+
+    public function sections() {
+        return $this->belongsToMany(Section::class);
+    }
+
+    public function topics() {
+        return $this->hasMany(Topic::class);
+    }
+
+    public function posts() {
+        return $this->hasMany(Post::class);
+    }
+
+    public function transactions() {
+        return $this->hasMany(Transaction::class);
+    }
+
+    public function withdrawalRequests() {
+        return $this->hasMany(WithdrawalRequest::class);
     }
 }

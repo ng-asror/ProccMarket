@@ -13,12 +13,20 @@ return new class extends Migration
     {
         Schema::create('users', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
+            $table->string('telegram_id')->unique()->nullable();
             $table->string('email')->unique();
+            $table->foreignId('role_id')->nullable()->constrained('roles');
+            $table->decimal('balance', 10, 0)->default(0);
+            $table->string('name')->nullable();
+            $table->string('avatar')->nullable();
+            $table->boolean('banned')->default(false);
+            $table->timestamp('last_deposit_at')->nullable(); // 30 kun cheklovi uchun
+            $table->boolean('is_admin')->default(false);
             $table->timestamp('email_verified_at')->nullable();
-            $table->string('password');
+            $table->string('password')->nullable();
             $table->rememberToken();
             $table->timestamps();
+            $table->softDeletes();
         });
 
         Schema::create('password_reset_tokens', function (Blueprint $table) {

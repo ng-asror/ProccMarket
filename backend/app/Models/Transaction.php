@@ -14,7 +14,7 @@ class Transaction extends Model {
     ];
 
     protected $casts = [
-        'amount' => 'decimal:0',
+        'amount' => 'float',
         'type' => 'string', // deposit, withdrawal, access_purchase
         'status' => 'string', // pending, completed, rejected
     ];

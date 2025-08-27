@@ -1,7 +1,7 @@
 import * as React from "react"
 import { IconEdit, IconPlus, IconTrash } from "@tabler/icons-react"
 import { toast } from "sonner"
-import { z } from "zod"
+import { set, z } from "zod"
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
@@ -16,6 +16,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { router } from '@inertiajs/react'
+import { Download } from "lucide-react"
 
 // Schema for setting data validation
 export const settingSchema = z.object({
@@ -37,34 +38,58 @@ function SettingDialog({ setting, onUpdate, isEdit = false }: {
     name: setting?.name || "",
     value: setting?.value || "",
   })
+  const [file, setFile] = React.useState<File | null>(null)
+
+  const isFileType = formData.key.includes('_img') || formData.key.includes('_file')
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
 
+    const data = new FormData()
+    data.append('key', formData.key)
+    data.append('name', formData.name)
+    
+    if (isFileType && file) {
+      data.append('file', file)
+    } else {
+      data.append('value', formData.value)
+    }
+
     if (isEdit && setting) {
-      router.patch(route('admin.settings.update', setting.id), {
-        name: formData.name,
-        value: formData.value,
-      }, {
+      data.append('_method', 'PATCH');
+      router.post(route('admin.settings.update', setting.id), data, {
         onSuccess: () => {
           toast.success("Setting updated successfully")
           setOpen(false)
           onUpdate()
         },
-        onError: () => {
-          toast.error("Failed to update setting")
+        onError: (errors) => {
+          if (errors) {
+            Object.entries(errors).forEach(([field, message]) => {
+              toast.error(`${field}: ${message}`);
+            });
+          } else {
+            toast.error("Failed to update setting");
+          }
         }
       })
     } else {
-      router.post(route('admin.settings.store'), formData, {
+      router.post(route('admin.settings.store'), data, {
         onSuccess: () => {
           toast.success("Setting created successfully")
           setOpen(false)
           setFormData({ key: "", name: "", value: "" })
+          setFile(null)
           onUpdate()
         },
-        onError: () => {
-          toast.error("Failed to create setting")
+        onError: (errors) => {
+          if (errors) {
+            Object.entries(errors).forEach(([field, message]) => {
+              toast.error(`${field}: ${message}`);
+            });
+          } else {
+            toast.error("Failed to create setting");
+          }
         }
       })
     }
@@ -119,14 +144,24 @@ function SettingDialog({ setting, onUpdate, isEdit = false }: {
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="value" className="text-right">
-                Value
+                {isFileType ? 'File' : 'Value'}
               </Label>
-              <Input
-                id="value"
-                value={formData.value}
-                onChange={(e) => setFormData({...formData, value: e.target.value})}
-                className="col-span-3"
-              />
+              {isFileType ? (
+                <Input
+                  id="file"
+                  type="file"
+                  accept={formData.key.includes('_img') ? 'image/*' : '*/*'}
+                  onChange={(e) => setFile(e.target.files?.[0] || null)}
+                  className="col-span-3"
+                />
+              ) : (
+                <Input
+                  id="value"
+                  value={formData.value}
+                  onChange={(e) => setFormData({...formData, value: e.target.value})}
+                  className="col-span-3"
+                />
+              )}
             </div>
           </div>
           <DialogFooter>
@@ -171,7 +206,7 @@ export function SettingsPage({ settings }: { settings: Record<string, z.infer<ty
               </CardTitle>
               <div className="flex items-center gap-1">
                 <SettingDialog setting={setting} onUpdate={refreshData} isEdit={true} />
-                {!['site_title', 'logo', 'support_link'].includes(setting.key) && (
+                {!['site_title', 'logo_img', 'support_link'].includes(setting.key) && (
                   <Button variant="ghost" size="icon" onClick={() => handleDelete(setting.id)}>
                     <IconTrash className="h-4 w-4 text-red-500" />
                   </Button>
@@ -180,15 +215,32 @@ export function SettingsPage({ settings }: { settings: Record<string, z.infer<ty
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                {setting.value || 'Not set'}
+                {(setting.key.includes('_img') || setting.key.includes('_file')) ? (
+                  <span className="flex items-center gap-2">File Attached
+                    <a
+                      href={setting.value || '#'}
+                      target="_blank"
+                      download={setting.name}
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-2 h-10 w-auto text-blue-600 hover:underline"
+                    >
+                      <Download className="w-5 h-5" />
+                    </a>
+
+                  </span> ) : (setting.value || 'Not set')}
               </div>
               <p className="text-xs text-muted-foreground">
                 Key: {setting.key}
               </p>
             </CardContent>
             <CardFooter>
-              {setting.key === 'logo' && setting.value && (
+              {(setting.key.includes('_img') || setting.key === 'logo_img') && setting.value && (
                 <img src={setting.value} alt="Logo" className="h-10 w-auto" />
+              )}
+              {(setting.key.includes('_file')) && setting.value && (
+                <a href={setting.value} target="_blank" rel="noopener noreferrer" className="h-10 w-auto">
+                View File
+                </a>
               )}
             </CardFooter>
           </Card>

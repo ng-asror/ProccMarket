@@ -22,7 +22,7 @@ return new class extends Migration
         // Seed default settings
         DB::table('settings')->insert([
             ['key' => 'site_title', 'name' => 'Site Title', 'value' => 'My Forum'],
-            ['key' => 'logo', 'name' => 'Logo URL', 'value' => null],
+            ['key' => 'logo_img', 'name' => 'Logo URL', 'value' => null],
             ['key' => 'support_link', 'name' => 'Support Link', 'value' => 'https://support.example.com'],
         ]);
     }

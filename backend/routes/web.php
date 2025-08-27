@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\SectionController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\SettingController;
+use App\Http\Controllers\Admin\TopicController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -44,6 +45,11 @@ Route::middleware(['auth', 'verified', 'admin'])->group(function () {
     });
 
     Route::resource('sections', SectionController::class)->names('admin.sections')->middleware(['auth', 'admin']);
+    
+    Route::resource('topics', TopicController::class)->names('admin.topics');
+    Route::patch('topics/{topic}/toggle-status', [TopicController::class, 'toggleStatus'])->name('admin.topics.toggle-status');
+    Route::post('topics/bulk-delete', [TopicController::class, 'bulkDelete'])->name('admin.topics.bulk-delete');
+    Route::post('topics/bulk-toggle-status', [TopicController::class, 'bulkToggleStatus'])->name('admin.topics.bulk-toggle-status');
 });
 
 require __DIR__.'/settings.php';

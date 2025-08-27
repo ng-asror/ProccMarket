@@ -15,7 +15,7 @@ class Section extends Model
     ];
 
     protected $casts = [
-        'access_price' => 'decimal:0',
+        'access_price' => 'float',
         'default_roles' => 'array',
     ];
 

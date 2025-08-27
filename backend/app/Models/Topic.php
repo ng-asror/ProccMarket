@@ -9,12 +9,21 @@ class Topic extends Model {
         'section_id',
         'user_id',
         'title',
+        'content',
+        'image',
         'closed',
     ];
 
     protected $casts = [
         'closed' => 'boolean',
     ];
+
+    protected $appends = ['image_url'];
+
+    public function getImageUrlAttribute()
+    {
+        return $this->image ? asset('storage/' . $this->image) : null;
+    }
 
     public function section() {
         return $this->belongsTo(Section::class);
@@ -26,5 +35,18 @@ class Topic extends Model {
 
     public function posts() {
         return $this->hasMany(Post::class);
+    }
+
+    public function likes() {
+        return $this->morphMany(Like::class, 'likeable');
+    }
+
+    public function shares() {
+        return $this->morphMany(Share::class, 'shareable');
+    }
+
+    public function views()
+    {
+        return $this->hasMany(TopicView::class);
     }
 }

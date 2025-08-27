@@ -9,6 +9,8 @@ class Post extends Model {
         'topic_id',
         'user_id',
         'content',
+        'image',
+        'reply_id',
     ];
 
     public function topic() {
@@ -17,5 +19,13 @@ class Post extends Model {
 
     public function user() {
         return $this->belongsTo(User::class);
+    }
+
+    public function likes() {
+        return $this->morphMany(Like::class, 'likeable');
+    }
+
+    public function shares() {
+        return $this->morphMany(Share::class, 'shareable');
     }
 }

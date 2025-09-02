@@ -1,13 +1,21 @@
 import { Component } from '@angular/core';
-import { RouterLink } from '@angular/router';
-import { House, LucideAngularModule } from 'lucide-angular';
+import { RouterLink, RouterLinkActive } from '@angular/router';
+import {
+  House,
+  LucideAngularModule,
+  MessageCircle,
+  Search,
+  UserRound,
+  Wallet,
+} from 'lucide-angular';
+import { ICONS } from './icons';
 
 @Component({
   selector: 'app-menubar',
-  imports: [RouterLink,  LucideAngularModule],
+  imports: [RouterLink, LucideAngularModule, RouterLinkActive],
   templateUrl: './menubar.html',
-  styleUrl: './menubar.scss'
+  styleUrl: './menubar.scss',
 })
 export class Menubar {
-	readonly house = House;
+  icons = ICONS;
 }

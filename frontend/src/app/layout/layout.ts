@@ -1,0 +1,13 @@
+import { Component } from '@angular/core';
+import { Navbar } from './components';
+import { Menubar } from './components/menubar/menubar';
+
+@Component({
+  selector: 'app-layout',
+  imports: [Navbar, Menubar],
+  templateUrl: './layout.html',
+  styleUrl: './layout.scss'
+})
+export class Layout {
+
+}

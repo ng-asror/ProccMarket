@@ -2,10 +2,10 @@
 	<app-home-slide class="px-[15px]"></app-home-slide>
 	<div class="flex items-bottom gap-x-[20px] px-[15px] overflow-x-scroll">
 		<ng-container *ngFor="let item of formsTap">
-			<a routerLink="/home" [queryParams]="{forms: item.type}" routerLinkActive="active"
-				class="flex flex-col items-center justify-between shrink-[0] forms-tab h-[43px] leading-[100%] text-[16px] font-[500]">
+			<a routerLink="/home" [queryParams]="{forms: item.type}" routerLinkActive="active" [ngxTooltip]="item.name"
+				placement="top"
+				class="flex flex-col items-center justify-between shrink-[0] p-[10px] rounded-[6px] bg-[#F2F2F2] gap-y-[4px] forms-tab h-auto leading-[100%] text-[16px] font-[500]">
 				<lucide-icon [name]="item.icons" size="24"></lucide-icon>
-				{{item.name}}
 			</a>
 		</ng-container>
 	</div>

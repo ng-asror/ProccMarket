@@ -39,7 +39,7 @@ jobs:
           host: 194.147.95.108
           username: fastuser
           password: 58vLvDDfaBjMHMIC
-          source: "frontend/dist/frontend/browser/*"
+          source: "frontend/dist/frontend/server/*"
           target: "/var/www/fastuser/data/www/web.proccmarket.com"
           rm: true   # eski fayllarni o‘chirib tashlaydi
 

@@ -1,6 +1,6 @@
 <div class="grid grid-cols-1 gap-y-[15px]">
-	<app-home-slide class="px-[15px]"></app-home-slide>
-	<div class="flex items-bottom gap-x-[20px] px-[15px] overflow-x-scroll">
+	<app-home-slide class="px-[15px] max-w-[768px] mx-auto"></app-home-slide>
+	<div class="flex items-bottom gap-x-[20px] px-[15px] w-full max-w-[768px] mx-auto overflow-x-scroll">
 		<ng-container *ngFor="let item of formsTap">
 			<a routerLink="/home" [queryParams]="{forms: item.type}" routerLinkActive="active" [ngxTooltip]="item.name"
 				placement="top"
@@ -10,5 +10,4 @@
 		</ng-container>
 	</div>
 	<app-tab-content class="px-[15px]" />
-	<router-outlet />
 </div>

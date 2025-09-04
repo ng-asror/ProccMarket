@@ -57,7 +57,7 @@ jobs:
         run: |
           sshpass -p "58vLvDDfaBjMHMIC" ssh -o StrictHostKeyChecking=no fastuser@194.147.95.108 "
             cd /var/www/fastuser/data/www/web.proccmarket.com &&
-            pm2 restart frontend/dist/frontend/server/server.mjs || node frontend/dist/frontend/server/server.mjs &
+            pm2 restart frontend-server || pm2 start frontend/dist/frontend/server/server.mjs --name frontend-server
           "
 
   backend:

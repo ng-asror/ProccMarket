@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\API\V1\SectionController;
 use App\Http\Controllers\API\V1\AuthController;
+use App\Http\Controllers\API\V1\CryptoBotController;
 use App\Http\Controllers\API\V1\PublicApiController;
 use App\Http\Controllers\API\V1\WebSocketController;
 use App\Http\Controllers\API\V1\LikeController;
@@ -93,4 +94,6 @@ Route::prefix('v1')->group(function () {
         // Views tracking
         Route::post('/topics/{topic}/view', [TopicController::class, 'incrementView']);
     });
+
+    Route::get('/pay/crypto-bot/get-me', [CryptoBotController::class, 'getMe']);
 });

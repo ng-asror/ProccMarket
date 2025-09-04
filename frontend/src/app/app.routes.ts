@@ -6,6 +6,11 @@ export const routes: Routes = [
     loadComponent: () => import('./layout/layout').then((p) => p.Layout),
     children: [
       {
+        path: '',
+        redirectTo: 'home',
+        pathMatch: 'full',
+      },
+      {
         path: 'home',
         loadComponent: () => import('./modules').then((m) => m.Home),
       },
@@ -25,11 +30,10 @@ export const routes: Routes = [
         path: 'profile',
         loadComponent: () => import('./modules').then((m) => m.Profile),
       },
-      {
-        path: '',
-        redirectTo: 'home',
-        pathMatch: 'full',
-      },
     ],
+  },
+  {
+    path: '**',
+    redirectTo: 'home',
   },
 ];

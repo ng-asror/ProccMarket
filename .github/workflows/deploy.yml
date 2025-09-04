@@ -31,7 +31,7 @@ jobs:
 
       - name: Build SSR frontend
         working-directory: ./frontend
-        run: pnpm run build:ssr
+        run: pnpm run build
 
       - name: Deploy SSR frontend files
         uses: appleboy/scp-action@v0.1.7

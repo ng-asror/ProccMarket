@@ -6,4 +6,5 @@ export type TFormsTap =
   | 'legal'
   | 'bl'
   | 'priv'
-  | 'train';
+  | 'train'
+  | 'blog';

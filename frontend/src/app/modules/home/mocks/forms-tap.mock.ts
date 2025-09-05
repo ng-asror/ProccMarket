@@ -30,4 +30,9 @@ export const formsTapMock: {
   { type: 'bl', name: 'Чёрный список', icons: icons.Ban },
   { type: 'priv', name: 'Приват', icons: icons.Lock },
   { type: 'train', name: 'Обучение', icons: icons.GraduationCap },
+  {
+    type: 'blog',
+    name: 'Блог',
+    icons: icons.Newspaper,
+  },
 ];

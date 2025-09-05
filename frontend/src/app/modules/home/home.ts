@@ -1,37 +1,22 @@
-import { Component, OnInit } from '@angular/core';
-import { HomeSlide, TabContent } from './components';
-import {
-  ActivatedRoute,
-  RouterLink,
-  RouterLinkActive,
-  RouterOutlet,
-} from '@angular/router';
-import { LucideAngularModule } from 'lucide-angular';
-import { NgFor } from '@angular/common';
-import { formsTapMock } from './mocks';
-import { NgxTooltip } from '@ngx-popovers/tooltip';
+import { Component } from '@angular/core';
+import { HomeSlide, TabContent, TabSlide } from './components';
+import { ActivatedRoute, Router } from '@angular/router';
 
 @Component({
   selector: 'app-home',
-  imports: [
-    TabContent,
-    HomeSlide,
-    RouterLink,
-    RouterOutlet,
-    LucideAngularModule,
-    NgFor,
-    RouterLinkActive,
-    NgxTooltip,
-  ],
+  imports: [TabContent, HomeSlide, TabSlide],
   templateUrl: './home.html',
   styleUrl: './home.scss',
 })
-export class Home implements OnInit {
-  protected formsTap = formsTapMock;
-  constructor(private route: ActivatedRoute) {
-    this.route.queryParamMap.subscribe((params) => {
-      let param = params.get('form');
+export class Home {
+  constructor(private router: Router, private route: ActivatedRoute) {
+    route.queryParamMap.subscribe((params) => {
+      const param = params.get('forms');
+      if (!param) {
+        router.navigate([], {
+          queryParams: { forms: 'proc' },
+        });
+      }
     });
   }
-  ngOnInit(): void {}
 }

@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { forumRoutes } from './modules/forum/forum.routes';
 
 export const routes: Routes = [
   {
@@ -14,10 +15,7 @@ export const routes: Routes = [
         path: 'home',
         loadComponent: () => import('./modules').then((m) => m.Home),
       },
-      {
-        path: 'forum',
-        loadComponent: () => import('./modules').then((m) => m.Forum),
-      },
+      ...forumRoutes,
       {
         path: 'search',
         loadComponent: () => import('./modules').then((m) => m.Search),
@@ -33,7 +31,7 @@ export const routes: Routes = [
     ],
   },
   {
-    path: '**',
-    redirectTo: 'home',
+    path: 'comments/:id',
+    loadComponent: () => import('./modules').then((p) => p.Comments),
   },
 ];

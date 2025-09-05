@@ -1,13 +1,5 @@
 <div class="grid grid-cols-1 gap-y-[15px]">
-	<app-home-slide class="px-[15px] max-w-[768px] mx-auto"></app-home-slide>
-	<div class="flex items-bottom gap-x-[20px] px-[15px] w-full max-w-[768px] mx-auto overflow-x-scroll">
-		<ng-container *ngFor="let item of formsTap">
-			<a routerLink="/home" [queryParams]="{forms: item.type}" routerLinkActive="active" [ngxTooltip]="item.name"
-				placement="top"
-				class="flex flex-col items-center justify-between shrink-[0] p-[10px] rounded-[6px] bg-[#F2F2F2] gap-y-[4px] forms-tab h-auto leading-[100%] text-[16px] font-[500]">
-				<lucide-icon [name]="item.icons" size="24"></lucide-icon>
-			</a>
-		</ng-container>
-	</div>
-	<app-tab-content class="px-[15px]" />
+	<app-home-slide class="px-[15px] max-w-[768px] w-full mx-auto"></app-home-slide>
+	<app-tab-slide></app-tab-slide>
+	<app-tab-content />
 </div>

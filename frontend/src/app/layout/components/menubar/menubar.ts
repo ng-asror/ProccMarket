@@ -1,13 +1,6 @@
 import { Component } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
-import {
-  House,
-  LucideAngularModule,
-  MessageCircle,
-  Search,
-  UserRound,
-  Wallet,
-} from 'lucide-angular';
+import { icons, LucideAngularModule } from 'lucide-angular';
 import { ICONS } from './icons';
 
 @Component({
@@ -17,5 +10,5 @@ import { ICONS } from './icons';
   styleUrl: './menubar.scss',
 })
 export class Menubar {
-  icons = ICONS;
+  protected icons = icons;
 }

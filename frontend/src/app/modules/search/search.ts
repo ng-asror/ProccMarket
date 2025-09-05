@@ -1,11 +1,13 @@
 import { Component } from '@angular/core';
+import { icons, LucideAngularModule } from 'lucide-angular';
+import { FormCard } from '../../components';
 
 @Component({
   selector: 'app-search',
-  imports: [],
+  imports: [LucideAngularModule, FormCard],
   templateUrl: './search.html',
-  styleUrl: './search.scss'
+  styleUrl: './search.scss',
 })
 export class Search {
-
+  protected ICONS = icons;
 }

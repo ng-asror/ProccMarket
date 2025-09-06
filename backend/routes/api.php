@@ -14,6 +14,8 @@ use App\Http\Controllers\API\V1\UploadController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function () {    
+    // IMPORTANT: CryptoBot Webhook must be outside auth middleware
+    Route::post('/pay/crypto-bot/webhook', [CryptoBotController::class, 'webhook']);
 
     /* AUTH ENDPOINTS */
     Route::prefix('auth')->group(function () {
@@ -93,7 +95,17 @@ Route::prefix('v1')->group(function () {
         
         // Views tracking
         Route::post('/topics/{topic}/view', [TopicController::class, 'incrementView']);
+
+        // CryptoBot Payment Endpoints
+        Route::prefix('pay/crypto-bot')->group(function () {
+            Route::get('/get-me', [CryptoBotController::class, 'getMe']);
+            Route::get('/balance', [CryptoBotController::class, 'balance']);
+            Route::post('/create-invoice', [CryptoBotController::class, 'createInvoice']);
+            Route::get('/invoices', [CryptoBotController::class, 'getInvoices']);
+            Route::get('/exchange-rates', [CryptoBotController::class, 'getExchangeRates']);
+            Route::get('/currencies', [CryptoBotController::class, 'getCurrencies']);
+            // Route::post('/transfer', [CryptoBotController::class, 'transfer']);
+        });
     });
 
-    Route::get('/pay/crypto-bot/get-me', [CryptoBotController::class, 'getMe']);
 });

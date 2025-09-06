@@ -51,7 +51,7 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
-            'balance' => 'float',
+            'balance' => 'decimal:2',
             'banned' => 'boolean',
             'last_deposit_at' => 'datetime',
         ];

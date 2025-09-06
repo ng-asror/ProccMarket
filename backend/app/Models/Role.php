@@ -11,7 +11,7 @@ class Role extends Model {
     ];
 
     protected $casts = [
-        'min_deposit' => 'float',
+        'min_deposit' => 'decimal:2',
     ];
 
     protected $appends = ['users_count'];

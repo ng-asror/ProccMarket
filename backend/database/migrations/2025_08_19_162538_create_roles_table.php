@@ -9,7 +9,7 @@ return new class extends Migration {
         Schema::create('roles', function (Blueprint $table) {
             $table->id();
             $table->string('name'); // Referer, Trader, etc.
-            $table->decimal('min_deposit', 10, 0);
+            $table->decimal('min_deposit', 10, 2);
             $table->timestamps();
         });
     }

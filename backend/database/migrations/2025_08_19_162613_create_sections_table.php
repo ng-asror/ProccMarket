@@ -10,7 +10,7 @@ return new class extends Migration {
             $table->id();
             $table->string('name');
             $table->text('description')->nullable();
-            $table->decimal('access_price', 10, 0)->default(0);
+            $table->decimal('access_price', 10, 2)->default(0);
             $table->json('default_roles')->nullable(); // Array of role_ids for free access
             $table->string('image')->nullable(); // Add image column
             $table->timestamps();

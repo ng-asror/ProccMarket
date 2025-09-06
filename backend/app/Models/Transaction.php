@@ -14,12 +14,17 @@ class Transaction extends Model {
     ];
 
     protected $casts = [
-        'amount' => 'float',
+        'amount' => 'decimal:8',
         'type' => 'string', // deposit, withdrawal, access_purchase
         'status' => 'string', // pending, completed, rejected
     ];
 
     public function user() {
         return $this->belongsTo(User::class);
+    }
+
+    public function payable()
+    {
+        return $this->morphTo();
     }
 }

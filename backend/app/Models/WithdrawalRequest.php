@@ -14,7 +14,7 @@ class WithdrawalRequest extends Model {
     ];
 
     protected $casts = [
-        'amount' => 'float',
+        'amount' => 'decimal:2',
         'status' => 'string', // pending, approved, rejected
     ];
 

@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('telegram_id')->unique()->nullable();
             $table->string('email')->unique();
             $table->foreignId('role_id')->nullable()->constrained('roles');
-            $table->decimal('balance', 10, 0)->default(0);
+            $table->decimal('balance', 10, 2)->default(0);
             $table->string('name')->nullable();
             $table->string('avatar')->nullable();
             $table->boolean('banned')->default(false);

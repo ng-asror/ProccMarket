@@ -336,7 +336,7 @@ function BalanceUpdateDialog({ user, onUpdate }: { user: z.infer<typeof userSche
         <DropdownMenuItem
           onSelect={(e) => {
             e.preventDefault()
-            router.visit(route('admin.transactions.user.show', user.id))
+            router.visit('/dashboard')
           }}
         >
           <IconHistory className="mr-2 h-4 w-4" />
@@ -665,7 +665,7 @@ const columns = (roles: any[], refreshData: () => void): ColumnDef<z.infer<typeo
             <>
               <IconCircleCheckFilled className="mr-1 h-3 w-3 fill-green-500" />
               Active 
-              {!!user.is_admin && (
+              {user.is_admin && (
                 <span className="ml-1 text-xs font-semibold text-yellow-500">(Admin)</span>
               )}
             </>

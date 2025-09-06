@@ -11,7 +11,7 @@ import { useInitials } from '@/hooks/use-initials';
 import { cn } from '@/lib/utils';
 import { type BreadcrumbItem, type NavItem, type SharedData } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
-import { LetterText, UserRoundCog, NotepadText, Cog, Users, LayoutGrid, Menu, Search } from 'lucide-react';
+import { LetterText, UserRoundCog, NotepadText, Cog, Users, LayoutGrid, Menu, Search, Coins} from 'lucide-react';
 import AppLogo from './app-logo';
 import AppLogoIcon from './app-logo-icon';
 
@@ -35,6 +35,11 @@ const mainNavItems: NavItem[] = [
         title: 'Topicss',
         href: '/topics',
         icon: NotepadText,
+    },
+    {
+        title: 'Transactions',
+        href: '/transactions',
+        icon: Coins,
     },
 ];
 

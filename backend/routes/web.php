@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\SectionController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\SettingController;
 use App\Http\Controllers\Admin\TopicController;
+use App\Http\Controllers\Admin\TransactionController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -45,11 +46,20 @@ Route::middleware(['auth', 'verified', 'admin'])->group(function () {
     });
 
     Route::resource('sections', SectionController::class)->names('admin.sections')->middleware(['auth', 'admin']);
-    
     Route::resource('topics', TopicController::class)->names('admin.topics');
     Route::patch('topics/{topic}/toggle-status', [TopicController::class, 'toggleStatus'])->name('admin.topics.toggle-status');
     Route::post('topics/bulk-delete', [TopicController::class, 'bulkDelete'])->name('admin.topics.bulk-delete');
     Route::post('topics/bulk-toggle-status', [TopicController::class, 'bulkToggleStatus'])->name('admin.topics.bulk-toggle-status');
+
+    Route::group(['prefix' => 'transactions'], function () {
+        Route::get('/', [TransactionController::class, 'adminIndex'])->name('admin.transactions.index');
+        Route::get('/{transaction}', [TransactionController::class, 'show'])->name('admin.transactions.show');
+        Route::patch('/{transaction}/status', [TransactionController::class, 'updateStatus'])->name('admin.transactions.updateStatus');
+        Route::get('/user/{user}', [TransactionController::class, 'index'])->name('admin.transactions.user.show');
+    });
+    Route::get('/export-csv', [TransactionController::class, 'export'])->name('admin.transactions.export');
+    
+
 });
 
 require __DIR__.'/settings.php';

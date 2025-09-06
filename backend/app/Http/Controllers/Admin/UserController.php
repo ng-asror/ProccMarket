@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\Role;
+use App\Models\Transaction;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Inertia\Inertia;
@@ -128,8 +129,22 @@ class UserController extends Controller
                 return back()->with('error', 'Insufficient balance');
             }
             $user->decrement('balance', $amount);
+            Transaction::create([
+                'user_id' => $user->id,
+                'amount' => -$amount,
+                'status' => 'completed',
+                'type' => 'admin_adjustment',
+                'description' => 'Balance subtracted by admin! Admin ID: ' . $request->user()->id
+            ]);
         } else {
             $user->increment('balance', $amount);
+            Transaction::create([
+                'user_id' => $user->id,
+                'amount' => $amount,
+                'status' => 'completed',
+                'type' => 'admin_adjustment',
+                'description' => 'Balance added by admin! Admin ID: ' . $request->user()->id
+            ]);
         }
 
         return back()->with('success', 'Balance updated successfully');

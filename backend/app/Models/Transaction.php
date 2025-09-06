@@ -11,10 +11,12 @@ class Transaction extends Model {
         'amount',
         'status',
         'transaction_id',
+        'description',
+        'paid_at',
     ];
 
     protected $casts = [
-        'amount' => 'decimal:8',
+        'amount' => 'decimal:2',
         'type' => 'string', // deposit, withdrawal, access_purchase
         'status' => 'string', // pending, completed, rejected
     ];

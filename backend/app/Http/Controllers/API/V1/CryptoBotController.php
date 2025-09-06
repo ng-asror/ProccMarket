@@ -98,7 +98,7 @@ class CryptoBotController extends Controller
 
             $data->allow_anonymous = $validated['allow_anonymous'] ?? false;
             $data->allow_comments = $validated['allow_comments'] ?? false;
-            $data->description = $validated['description'] ?? 'Payment invoice';
+            $data->description = $validated['description'] ?? 'Payment invoice UID: ' . uniqid();
             $data->hidden_message = $validated['hidden_message'] ?? null;
 
             $createdInvoice = $this->api->createInvoice($data);
@@ -330,6 +330,8 @@ class CryptoBotController extends Controller
                 'amount' => $amountUSDT,
                 'status' => 'completed',
                 'transaction_id' => $cyptoPayment->hash,
+                'paid_at' => Carbon::parse(Arr::get($payload, 'paid_at')),
+                'description' => 'Deposit made via CryptoBot: ' . $cyptoPayment->description
             ]);
             User::where('id', $cyptoPayment->user_id)->update([
                 'balance' => DB::raw("balance + {$amountUSDT}")

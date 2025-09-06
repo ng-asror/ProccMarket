@@ -227,7 +227,7 @@ export function SettingsPage({ settings }: { settings: Record<string, z.infer<ty
                       <Download className="w-5 h-5" />
                     </a>
 
-                  </span> ) : (setting.value || 'Not set')}
+                  </span> ) : (<span className="block max-w-full truncate">{setting.value || 'Not set'}</span>)}
               </div>
               <p className="text-xs text-muted-foreground">
                 Key: {setting.key}

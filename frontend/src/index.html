@@ -1,13 +1,72 @@
 <!doctype html>
-<html lang="en">
+<html lang="ru">
+
 <head>
-  <meta charset="utf-8">
-  <title>Frontend</title>
-  <base href="/">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="icon" type="image/x-icon" href="favicon.ico">
+	<meta charset="utf-8">
+	<title>Форум по криптовалютам и финансам</title>
+	<base href="/">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+
+	<!-- Favicon -->
+	<link rel="icon" type="image/x-icon" href="favicon.ico">
+
+	<!-- SEO Meta -->
+	<meta name="description"
+		content="Мини-приложение для обсуждения криптовалют, NFT, арбитража, обменников и P2P сделок. Присоединяйтесь к форуму и находите ответы на финансовые вопросы.">
+	<meta name="keywords" content="форум, криптовалюта, NFT, P2P, арбитраж, обменник, финансы, инвестиции">
+	<meta name="author" content="smartCoder">
+
+	<!-- Open Graph / Social Media -->
+	<meta property="og:title" content="Форум по криптовалютам и финансам">
+	<meta property="og:description"
+		content="Форум для обсуждения криптовалют, NFT, P2P сделок и арбитража. Будьте в курсе последних новостей и делитесь опытом.">
+	<!-- <meta property="og:image" content="/assets/social-preview.png"> -->
+	<meta property="og:type" content="website">
+	<meta property="og:url" content="https://proccmarket.com">
+
+	<!-- Twitter Card -->
+	<meta name="twitter:card" content="summary_large_image">
+	<meta name="twitter:title" content="Форум по криптовалютам и финансам">
+	<meta name="twitter:description" content="Мини-приложение для обсуждения криптовалют и финансов.">
+	<!-- <meta name="twitter:image" content="/assets/social-preview.png"> -->
 </head>
+<style>
+	#app-loader {
+		position: fixed;
+		top: 0;
+		left: 0;
+		width: 100%;
+		z-index: 2;
+		background-color: #fff;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		height: 100vh;
+	}
+
+	.loader {
+		width: 40px;
+		height: 40px;
+		border: 4px solid #ccc;
+		border-top-color: #030300;
+		border-radius: 50%;
+		animation: spin 1s linear infinite;
+	}
+
+	@keyframes spin {
+		to {
+			transform: rotate(360deg);
+		}
+	}
+</style>
+</head>
+
 <body>
-  <app-root></app-root>
+	<div id="app-loader">
+		<div class="loader"></div>
+	</div>
+	<app-root>
+	</app-root>
 </body>
+
 </html>

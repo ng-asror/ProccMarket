@@ -22,7 +22,19 @@ export const serverRoutes: ServerRoute[] = [
     renderMode: RenderMode.Server,
   },
   {
+    path: 'comments/:id',
+    renderMode: RenderMode.Server,
+  },
+  {
+    path: 'section/:id',
+    renderMode: RenderMode.Server,
+  },
+  {
     path: '**',
     renderMode: RenderMode.Prerender,
+  },
+  {
+    path: '',
+    renderMode: RenderMode.Server,
   },
 ];

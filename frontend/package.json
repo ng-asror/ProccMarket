@@ -31,6 +31,7 @@
     "@angular/router": "^20.1.0",
     "@angular/ssr": "^20.1.3",
     "@ngx-popovers/tooltip": "^19.0.0",
+    "@syncfusion/ej2-angular-calendars": "31.1.17-ngcc",
     "@tailwindcss/postcss": "^4.1.12",
     "express": "^5.1.0",
     "lucide-angular": "^0.542.0",

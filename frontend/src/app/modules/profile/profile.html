@@ -1,1 +1,63 @@
-<p>profile works!</p>
+<div class="px-[15px] pb-[15px] flex flex-col space-y-[20px]">
+	<h1 class="text-[22px] text-[#030303] font-[500]">Профил</h1>
+	<div class="border-1 border-[#E1E1E1] p-[10px] rounded-[12px] flex flex-col space-y-[10px]">
+		<div>
+			<div
+				class="w-[90px] h-[90px] bg-[#6155F5] rounded-full flex items-center justify-center text-[50px] text-[#fff] mx-auto">
+				A
+			</div>
+			<h1 class="text-[#3D3D3D] text-[20px] font-[400] opacity-[0.7] text-center">W_339A</h1>
+		</div>
+		<div class="grid grid-cols-1 gap-y-[15px]">
+			<div>
+				<label for="name" class="block mb-[5px] text-[14px] text-[#818181] font-[400] leading-[100%]">Имя</label>
+				<input type="text" disabled value="Александр"
+					class="bg-white border-1 border-[#E1E1E1] w-full rounded-[6px] px-[10px] h-[46px] text-[#818181] text-[16px] font-[400]">
+			</div>
+			<div>
+				<label for="name" class="block mb-[5px] text-[14px] text-[#818181] font-[400] leading-[100%]">Электронная
+					почта</label>
+				<input type="text" disabled value="email@gmail.com"
+					class="bg-white border-1 border-[#E1E1E1] w-full rounded-[6px] px-[10px] h-[46px] text-[#818181] text-[16px] font-[400]">
+			</div>
+			<div>
+				<label for="name" class="block mb-[5px] text-[14px] text-[#818181] font-[400] leading-[100%]">Роль</label>
+				<input type="text" disabled value="Реферрер"
+					class="bg-white border-1 border-[#E1E1E1] w-full rounded-[6px] px-[10px] h-[46px] text-[#818181] text-[16px] font-[400]">
+			</div>
+			<div>
+				<label for="name" class="block mb-[5px] text-[14px] text-[#818181] font-[400] leading-[100%]">Дата
+					регистраци</label>
+				<input type="text" disabled value="31.07.2025"
+					class="bg-white border-1 border-[#E1E1E1] w-full rounded-[6px] px-[10px] h-[46px] text-[#818181] text-[16px] font-[400]">
+			</div>
+			<button type="button"
+				class="bg-[#030303] rounded-[6px] text-[#fff] flex items-center justify-center h-[40px] gap-x-[5px] text-[16px] font-[400]">
+				<lucide-icon [name]="ICONS.Pencil" size="20"></lucide-icon>
+				Редактировать
+			</button>
+		</div>
+	</div>
+	<a routerLink="/"
+		class="w-full h-[46px] flex items-center justify-between border-1 border-[#E1E1E1] rounded-[6px] px-[10px] text-[#030303] font-[500] text-[16px]">
+		Мои темы
+		<lucide-icon [name]="ICONS.ChevronRight"></lucide-icon>
+	</a>
+	<div class="bg-white border-1 border-[#E1E1E1] p-[10px] rounded-[12px]">
+		<h1 class="text-[#030303] text-[18px] font-[500] mb-[10px] leading-[100%]">Статистика</h1>
+		<div class="bg-[#F2F2F2] p-[10px] grid grid-cols-1 gap-y-[10px] rounded">
+			<div class="flex items-center justify-between">
+				<h4 class="text-[16px] text-[#3D3D3D] font-[500] leading-[100%]">Сообщений:</h4>
+				<h4 class="text-[16px] text-[#3D3D3D] font-[500] leading-[100%]">0</h4>
+			</div>
+			<div class="flex items-center justify-between">
+				<h4 class="text-[16px] text-[#3D3D3D] font-[500] leading-[100%]">Тем создано:</h4>
+				<h4 class="text-[16px] text-[#3D3D3D] font-[500] leading-[100%]">0</h4>
+			</div>
+			<div class="flex items-center justify-between">
+				<h4 class="text-[16px] text-[#3D3D3D] font-[500] leading-[100%]">Последний визит:</h4>
+				<h4 class="text-[16px] text-[#3D3D3D] font-[500] leading-[100%]">23 january, 09:53</h4>
+			</div>
+		</div>
+	</div>
+</div>

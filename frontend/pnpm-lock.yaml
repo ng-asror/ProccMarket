@@ -38,6 +38,9 @@ importers:
       '@ngx-popovers/tooltip':
         specifier: ^19.0.0
         version: 19.0.0(@angular/common@20.2.3(@angular/core@20.2.3(@angular/compiler@20.2.3)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@20.2.3(@angular/compiler@20.2.3)(rxjs@7.8.2))(@ngx-popovers/core@19.0.0(@angular/common@20.2.3(@angular/core@20.2.3(@angular/compiler@20.2.3)(rxjs@7.8.2))(rxjs@7.8.2))(@angular/core@20.2.3(@angular/compiler@20.2.3)(rxjs@7.8.2))(@floating-ui/dom@1.7.4))
+      '@syncfusion/ej2-angular-calendars':
+        specifier: 31.1.17-ngcc
+        version: 31.1.17-ngcc
       '@tailwindcss/postcss':
         specifier: ^4.1.12
         version: 4.1.12
@@ -1285,6 +1288,40 @@ packages:
 
   '@socket.io/component-emitter@3.1.2':
     resolution: {integrity: sha512-9BCxFwvbGg/RsZK9tjXd8s4UcwR0MWeFQ1XEKIQVVvAGJyINdrqKMcTRyLoK8Rse1GjzLV9cwjWV1olXRWEXVA==}
+
+  '@syncfusion/ej2-angular-base@31.1.17':
+    resolution: {integrity: sha512-8l5ZHGig/kVhCiXaZstSoOCQ0snezTJZYUpRtzVhATNA56gMxFM9pmSk4oPZjgLoG7+za/2IAJAruutJ5uoAXA==}
+
+  '@syncfusion/ej2-angular-calendars@31.1.17-ngcc':
+    resolution: {integrity: sha512-B5oVeYWHLyD6RiAhJ3rx7HpsBCnFcgq7Wv52KXQbmz+7hzYXu0y5mspNHzG1p1k/sl1t6L982CwNYPC06XJJUg==}
+
+  '@syncfusion/ej2-base@31.1.17':
+    resolution: {integrity: sha512-Jl2Ls77kMfX13VwrAEow/kdDrefX3gh76Uwh943NUtEuChOXzvoe+CHecxJ+49VFRCrLYhB4Hj/7R9UOh65VCg==}
+    hasBin: true
+
+  '@syncfusion/ej2-buttons@31.1.17':
+    resolution: {integrity: sha512-unX92EnCLtRbczrCRsqGC1/tPgkHYlnQQFCv+c11wptp7KzZF+V5se7Rc+yEFs8d0OLyrT1qk0MAYJUOKezYZw==}
+
+  '@syncfusion/ej2-calendars@31.1.17':
+    resolution: {integrity: sha512-NQJAblGjISQWI77MTkDOfHIWknINV37qz6r+NQstgancN+ZqvUsAFdeLHV5jFf+W9jYnxY3319cJB/J77mOTew==}
+
+  '@syncfusion/ej2-data@31.1.17':
+    resolution: {integrity: sha512-jytTgUnRqGoXfzOcvRJ0p+KAPFOD53He3+y3AX8zrej/oPcMtt5iHNc44AvJ7XhpYUHLVvcSFYTd0395q/VPLA==}
+
+  '@syncfusion/ej2-icons@31.1.17':
+    resolution: {integrity: sha512-5IkOJyoUL7MoOjRE+hf2jC/dCjS+Q1Z34oz49mSvK1vKc2kcYR5Wa7o49uwjAgmJUSZK8O2cGE0M3HHSBFIKSw==}
+
+  '@syncfusion/ej2-inputs@31.1.17':
+    resolution: {integrity: sha512-qlCnlu7eA5ECLEH5egHAjnhpLRBu/PsxFYNJntpsQHFFfQi2hPtlbZrLZVidy2FBgG+Q1EATOpgTy3mMiQ94Jw==}
+
+  '@syncfusion/ej2-lists@31.1.17':
+    resolution: {integrity: sha512-EyU/yUflRQ2hsGvOiguCdqdAeyUmojwllVgnx89MZyJ4zuCSU+OhbETJZ7BB2+8uhleq1cJ3wTY2PtHpBrPErw==}
+
+  '@syncfusion/ej2-popups@31.1.17':
+    resolution: {integrity: sha512-JnFn2aoKSC7CY8z4iTm+00gFXs9Helzkk860q52ykZxrI7/H2euVNabHZ7BOYYgYBQbOnWjfIvESQdtT2IVKgA==}
+
+  '@syncfusion/ej2-splitbuttons@31.1.17':
+    resolution: {integrity: sha512-8XA9t2wVtSonGnpblqS3FgEoS8sYy6GOh3p99gDKyPI55UYwUcvuHsBaTA/+w4tGwZ5wiNQMKXWaanHXIGvovw==}
 
   '@tailwindcss/node@4.1.12':
     resolution: {integrity: sha512-3hm9brwvQkZFe++SBt+oLjo4OLDtkvlE8q2WalaD/7QWaeM7KEJbAiY/LJZUaCs7Xa8aUu4xy3uoyX4q54UVdQ==}
@@ -4267,6 +4304,63 @@ snapshots:
       '@sigstore/protobuf-specs': 0.4.3
 
   '@socket.io/component-emitter@3.1.2': {}
+
+  '@syncfusion/ej2-angular-base@31.1.17':
+    dependencies:
+      '@syncfusion/ej2-base': 31.1.17
+      '@syncfusion/ej2-icons': 31.1.17
+
+  '@syncfusion/ej2-angular-calendars@31.1.17-ngcc':
+    dependencies:
+      '@syncfusion/ej2-angular-base': 31.1.17
+      '@syncfusion/ej2-base': 31.1.17
+      '@syncfusion/ej2-calendars': 31.1.17
+
+  '@syncfusion/ej2-base@31.1.17':
+    dependencies:
+      '@syncfusion/ej2-icons': 31.1.17
+
+  '@syncfusion/ej2-buttons@31.1.17':
+    dependencies:
+      '@syncfusion/ej2-base': 31.1.17
+
+  '@syncfusion/ej2-calendars@31.1.17':
+    dependencies:
+      '@syncfusion/ej2-base': 31.1.17
+      '@syncfusion/ej2-buttons': 31.1.17
+      '@syncfusion/ej2-inputs': 31.1.17
+      '@syncfusion/ej2-lists': 31.1.17
+      '@syncfusion/ej2-popups': 31.1.17
+
+  '@syncfusion/ej2-data@31.1.17':
+    dependencies:
+      '@syncfusion/ej2-base': 31.1.17
+
+  '@syncfusion/ej2-icons@31.1.17': {}
+
+  '@syncfusion/ej2-inputs@31.1.17':
+    dependencies:
+      '@syncfusion/ej2-base': 31.1.17
+      '@syncfusion/ej2-buttons': 31.1.17
+      '@syncfusion/ej2-popups': 31.1.17
+      '@syncfusion/ej2-splitbuttons': 31.1.17
+
+  '@syncfusion/ej2-lists@31.1.17':
+    dependencies:
+      '@syncfusion/ej2-base': 31.1.17
+      '@syncfusion/ej2-buttons': 31.1.17
+      '@syncfusion/ej2-data': 31.1.17
+      '@syncfusion/ej2-popups': 31.1.17
+
+  '@syncfusion/ej2-popups@31.1.17':
+    dependencies:
+      '@syncfusion/ej2-base': 31.1.17
+      '@syncfusion/ej2-buttons': 31.1.17
+
+  '@syncfusion/ej2-splitbuttons@31.1.17':
+    dependencies:
+      '@syncfusion/ej2-base': 31.1.17
+      '@syncfusion/ej2-popups': 31.1.17
 
   '@tailwindcss/node@4.1.12':
     dependencies:

@@ -1,1 +1,84 @@
-<p>balance works!</p>
+<div class="px-[15px] pb-[15px] flex flex-col space-y-[20px]">
+	<h1 class="text-[22px] text-[#030303] font-[500]">Баланс</h1>
+	<div class="border-1 border-[#E1E1E1] p-[15px] rounded-[12px] mb-[20px]">
+		<h1 class="text-[40px] text-[#00C853] font-[800] price leading-[100%] mb-[10px]">$46</h1>
+		<div class="flex gap-x-[10px]">
+			<button type="button" class="flex-1 h-[40px] bg-[#030303] rounded-[6px] text-white font-[400] text-[16px]">
+				Пополнить баланс
+			</button>
+			<button type="button"
+				class="flex-1 h-[40px] bg-transparent border-1 border-[#030303] rounded-[6px] text-[#030303] font-[400] text-[16px]">
+				Запросить вывод
+			</button>
+		</div>
+	</div>
+	<div>
+		<div class="border-1 border-[#E1E1E1] p-[15px] rounded-[12px] rounded-b-none flex flex-col gap-y-[10px]">
+			<div class="flex gap-x-[10px]">
+				<div
+					class="flex flex-1 items-center px-[10px] justify-between border-1 border-[#E1E1E1] rounded-[6px] h-[36px]">
+					<p class="text-[16px] text-[#030303] leading-[100%]">От</p>
+					<lucide-icon [name]="ICONS.CalendarDays" size="18"></lucide-icon>
+				</div>
+				<div
+					class="flex flex-1 items-center px-[10px] justify-between border-1 border-[#E1E1E1] rounded-[6px] h-[36px]">
+					<p class="text-[16px] text-[#030303] leading-[100%]">До</p>
+					<lucide-icon [name]="ICONS.CalendarDays" size="18"></lucide-icon>
+				</div>
+			</div>
+			<div class="flex items-center px-[10px] justify-between border-1 border-[#E1E1E1] rounded-[6px] h-[36px]">
+				<p class="text-[16px] text-[#030303] leading-[100%]">Все операции</p>
+				<lucide-icon [name]="ICONS.ChevronRight" size="18"></lucide-icon>
+			</div>
+			<div class="relative">
+				<div
+					class="flex items-center px-[10px] justify-between border-1 border-[#E1E1E1] rounded-b-none rounded-[6px] h-[36px]">
+					<p class="text-[16px] text-[#030303] leading-[100%]">Название формы</p>
+					<lucide-icon class="rotate-45" [name]="ICONS.ChevronRight" size="18"></lucide-icon>
+				</div>
+				<ul class="border-1 border-t-0 border-[#E1E1E1] py-[10px] rounded-t-none rounded-[12px]">
+					<li class="text-[16px] font-[400] leading-[100%] p-[7px] hover:bg-[#f2f2f285]">Test</li>
+					<li class="text-[16px] font-[400] leading-[100%] p-[7px] hover:bg-[#f2f2f285]">Test</li>
+					<li class="text-[16px] font-[400] leading-[100%] p-[7px] hover:bg-[#f2f2f285]">Test</li>
+					<li class="text-[16px] font-[400] leading-[100%] p-[7px] hover:bg-[#f2f2f285]">Test</li>
+				</ul>
+			</div>
+		</div>
+		<div class="border-1 border-t-0 border-[#E1E1E1] p-[15px]">
+			<div class="pb-[10px] mb-[15px] border-b-1 border-[#E1E1E1]">
+				<p class="text-end block text-[14px] text-[#030303] leading-[100%] opacity-50">20 марта, 18:44</p>
+				<b class="text-[16px] leading-[120%] text-[#030303] font-[500]">Вывод на карту</b>
+				<h3 class="price text-[22px] font-bold text-end my-[5px] leading-[100%]">-$500</h3>
+				<p class="p-[4px] block bg-[#04B70A] leading-[100%] text-center rounded text-[16px] text-[#fff]">Выполнено</p>
+			</div>
+			<div class="pb-[10px] mb-[15px] border-b-1 border-[#E1E1E1]">
+				<p class="text-end block text-[14px] text-[#030303] leading-[100%] opacity-50">20 марта, 18:44</p>
+				<b class="text-[16px] leading-[120%] text-[#030303] font-[500]">Вывод на карту</b>
+				<h3 class="price text-[22px] font-bold text-end my-[5px] leading-[100%]">-$500</h3>
+				<p class="p-[4px] block bg-[#F15B5B] leading-[100%] text-center rounded text-[16px] text-[#fff]">Отменено</p>
+			</div>
+			<div class="pb-[10px] mb-[15px] border-b-1 border-[#E1E1E1]">
+				<p class="text-end block text-[14px] text-[#030303] leading-[100%] opacity-50">20 марта, 18:44</p>
+				<b class="text-[16px] leading-[120%] text-[#030303] font-[500]">Вывод на карту</b>
+				<h3 class="price text-[22px] font-bold text-end my-[5px] leading-[100%]">-$500</h3>
+				<p class="p-[4px] block bg-[#04B70A] leading-[100%] text-center rounded text-[16px] text-[#fff]">Выполнено</p>
+			</div>
+			<div class="flex items-center justify-between">
+				<div class="grid [grid-template-columns:repeat(5,32px)] grid-rows-[32px] gap-x-[4px]">
+					<button type="button" class="rounded bg-[#F2F2F2] text-[16px] leading-[100%] font-[400]">1</button>
+					<button type="button" class="rounded bg-[#F2F2F2] text-[16px] leading-[100%] font-[400]">2</button>
+					<button type="button" class="rounded bg-[#F2F2F2] text-[16px] leading-[100%] font-[400]">...</button>
+					<button type="button" class="rounded bg-[#F2F2F2] text-[16px] leading-[100%] font-[400]">4</button>
+					<button type="button"
+						class="rounded bg-[#F2F2F2] text-[16px] leading-[100%] font-[400] flex items-center justify-center"><lucide-icon
+							[name]="ICONS.ChevronRight" size="20"></lucide-icon></button>
+				</div>
+				<button type="button"
+					class="flex items-center justify-center gap-x-[5px] text-[16px] text-[#fff] font-[500] bg-[#FFA800] h-[32px] rounded px-[10px]">
+					<lucide-icon [name]="ICONS.FileDown" size="20" strokeWidth="2"></lucide-icon>
+					Экспорт
+				</button>
+			</div>
+		</div>
+	</div>
+</div>

@@ -16,3 +16,26 @@ body {
   font-family: "Red Hat Display";
   color: #00c853;
 }
+
+.border-story {
+  background: linear-gradient(
+    90deg,
+    rgba(0, 0, 0, 0.8),
+    rgba(255, 255, 255, 0.9),
+    rgba(0, 0, 0, 0.8)
+  );
+  background-size: 300% 300%;
+  animation: flowingGradient 6s ease-in-out infinite;
+}
+
+@keyframes flowingGradient {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}

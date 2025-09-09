@@ -1,12 +1,11 @@
 import { Component } from '@angular/core';
-import { RouterLink } from '@angular/router';
 import { icons, LucideAngularModule } from 'lucide-angular';
 import { AccordionItem } from '../../components';
 import { NgForOf } from '@angular/common';
 
 @Component({
   selector: 'app-main',
-  imports: [RouterLink, LucideAngularModule, AccordionItem, NgForOf],
+  imports: [LucideAngularModule, AccordionItem, NgForOf],
   templateUrl: './main.html',
   styleUrl: './main.scss',
 })

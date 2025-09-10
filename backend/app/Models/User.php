@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -10,14 +9,7 @@ use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasApiTokens, HasFactory, Notifiable;
-
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var list<string>
-     */
 
     protected $fillable = [
         'telegram_id',
@@ -32,20 +24,10 @@ class User extends Authenticatable
         'is_admin',
     ];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var list<string>
-     */
     protected $hidden = [
         'password'
     ];
 
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
     protected function casts(): array
     {
         return [
@@ -86,5 +68,108 @@ class User extends Authenticatable
 
     public function withdrawalRequests() {
         return $this->hasMany(WithdrawalRequest::class);
+    }
+
+    /**
+     * Check if user is eligible for withdrawal
+     */
+    public function isEligibleForWithdrawal(): array
+    {
+        $result = [
+            'eligible' => false,
+            'message' => '',
+            'days_remaining' => null,
+            'next_withdrawal_date' => null
+        ];
+
+        // Check if user has made a deposit
+        if (!$this->last_deposit_at) {
+            $result['message'] = 'You must make at least one deposit before requesting withdrawal.';
+            return $result;
+        }
+
+        // Check 30 days rule
+        $daysSinceLastDeposit = $this->last_deposit_at->diffInDays(now());
+        if ($daysSinceLastDeposit < 30) {
+            $nextWithdrawalDate = $this->last_deposit_at->addDays(30);
+            
+            $result['message'] = 'Withdrawal is only available 30 days after your last deposit.';
+            $result['days_remaining'] = 30 - $daysSinceLastDeposit;
+            $result['next_withdrawal_date'] = $nextWithdrawalDate;
+            return $result;
+        }
+
+        // Check for pending requests
+        $pendingWithdrawal = $this->withdrawalRequests()
+            ->where('status', 'pending')
+            ->first();
+
+        if ($pendingWithdrawal) {
+            $result['message'] = 'You already have a pending withdrawal request.';
+            $result['pending_request'] = $pendingWithdrawal;
+            return $result;
+        }
+
+        // Check balance
+        if ($this->balance <= 0) {
+            $result['message'] = 'Insufficient balance for withdrawal.';
+            return $result;
+        }
+
+        // All checks passed
+        $result['eligible'] = true;
+        $result['message'] = 'You are eligible for withdrawal.';
+        
+        return $result;
+    }
+
+    /**
+     * Get user's pending withdrawal request
+     */
+    public function getPendingWithdrawalRequest()
+    {
+        return $this->withdrawalRequests()
+            ->where('status', WithdrawalRequest::STATUS_PENDING)
+            ->first();
+    }
+
+    /**
+     * Check if user has sufficient balance for withdrawal
+     */
+    public function hasSufficientBalance(float $amount): bool
+    {
+        return $this->balance >= $amount;
+    }
+
+    /**
+     * Get days since last deposit
+     */
+    public function getDaysSinceLastDeposit(): ?int
+    {
+        if (!$this->last_deposit_at) {
+            return null;
+        }
+
+        return $this->last_deposit_at->diffInDays(now());
+    }
+
+    /**
+     * Get next withdrawal available date
+     */
+    public function getNextWithdrawalDate(): ?\Carbon\Carbon
+    {
+        if (!$this->last_deposit_at) {
+            return null;
+        }
+
+        return $this->last_deposit_at->addDays(30);
+    }
+
+    /**
+     * Update last deposit date (call this when user makes a deposit)
+     */
+    public function updateLastDepositDate(): void
+    {
+        $this->update(['last_deposit_at' => now()]);
     }
 }

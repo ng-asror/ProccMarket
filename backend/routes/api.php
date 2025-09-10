@@ -11,6 +11,7 @@ use App\Http\Controllers\API\V1\SearchController;
 use App\Http\Controllers\API\V1\ShareController;
 use App\Http\Controllers\API\V1\TopicController;
 use App\Http\Controllers\API\V1\UploadController;
+use App\Http\Controllers\API\V1\WithdrawalController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function () {    
@@ -105,6 +106,15 @@ Route::prefix('v1')->group(function () {
             Route::get('/exchange-rates', [CryptoBotController::class, 'getExchangeRates']);
             Route::get('/currencies', [CryptoBotController::class, 'getCurrencies']);
             // Route::post('/transfer', [CryptoBotController::class, 'transfer']);
+        });
+
+        // Withdrawal Endpoints
+        Route::prefix('withdrawals')->group(function () {
+            Route::get('/', [WithdrawalController::class, 'index']);
+            Route::post('/', [WithdrawalController::class, 'store']);
+            Route::get('/check-eligibility', [WithdrawalController::class, 'checkEligibility']);
+            Route::get('/{withdrawal}', [WithdrawalController::class, 'show']);
+            Route::patch('/{withdrawal}/cancel', [WithdrawalController::class, 'cancel']);
         });
     });
 

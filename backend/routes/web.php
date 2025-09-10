@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\SettingController;
 use App\Http\Controllers\Admin\TopicController;
 use App\Http\Controllers\Admin\TransactionController;
+use App\Http\Controllers\Admin\WithdrawalController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -58,6 +59,15 @@ Route::middleware(['auth', 'verified', 'admin'])->group(function () {
         Route::get('/user/{user}', [TransactionController::class, 'index'])->name('admin.transactions.user.show');
     });
     Route::get('/export-csv', [TransactionController::class, 'export'])->name('admin.transactions.export');
+
+    /* WITHDRAWAL MANAGEMENT */
+    Route::prefix('withdrawals')->name('admin.withdrawals.')->group(function () {
+        Route::get('/', [WithdrawalController::class, 'index'])->name('index');
+        Route::get('/export', [WithdrawalController::class, 'export'])->name('export');
+        Route::get('/{withdrawal}', [WithdrawalController::class, 'show'])->name('show');
+        Route::post('/{withdrawal}/approve', [WithdrawalController::class, 'approve'])->name('approve');
+        Route::post('/{withdrawal}/reject', [WithdrawalController::class, 'reject'])->name('reject');
+    });
     
 
 });

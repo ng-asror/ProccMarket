@@ -334,7 +334,8 @@ class CryptoBotController extends Controller
                 'description' => 'Deposit made via CryptoBot: ' . $cyptoPayment->description
             ]);
             User::where('id', $cyptoPayment->user_id)->update([
-                'balance' => DB::raw("balance + {$amountUSDT}")
+                'balance' => DB::raw("balance + {$amountUSDT}"),
+                'last_deposit_at' => Carbon::now(),
             ]);
 
             Log::info('Webhook processed: ' . json_encode($data));

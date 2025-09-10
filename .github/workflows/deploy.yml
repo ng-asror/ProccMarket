@@ -61,6 +61,7 @@ jobs:
           "
 
   backend:
+    if: false
     name: Deploy Backend
     runs-on: ubuntu-latest
     needs: frontend-ssr

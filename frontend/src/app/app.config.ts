@@ -11,6 +11,7 @@ import {
   withEventReplay,
   withIncrementalHydration,
 } from '@angular/platform-browser';
+import { provideServerRendering } from '@angular/ssr';
 
 export const appConfig: ApplicationConfig = {
   providers: [

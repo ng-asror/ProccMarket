@@ -1,0 +1,54 @@
+<div class="w-full h-[255]">
+	<img src="img/user-bg.png" alt="user bg img" class="w-full h-full block">
+</div>
+<div class="px-[15px] pb-[15px] relative z-2 mt-[-120px]">
+	<div
+		class="rounded-[12px] border-1 border-[#E1E1E1] p-[15px] bg-white min-h-[245px] flex flex-col justify-between mb-[15px]">
+		<div>
+			<div class="rounded-full w-[100px] h-[100px] overflow-hidden p-[5px] mx-auto mt-[-60px] border-story">
+				<img src="img/user-face.jpg" alt="user face" class="w-full h-full block rounded-full">
+			</div>
+			<h1 class="text-[20px] text-[#030300] font-[500] leading-[100%] text-center">Александр</h1>
+			<p class="text-[16px] text-black/50 leading-[120%] font-[400] block my-[10px]">Lorem ipsum dolor, sit amet
+				consectetur adipisicing elit.</p>
+		</div>
+		<div class="flex content-center divide-x-1 divide-[#F2F2F2] mb-[10px]">
+			<div class="flex-1">
+				<h1 class="text-[16px] text-[#030300] leading-[100%] font-[400] mb-[4px]">10k</h1>
+				<p class="text-[14px] text-[#030300] leading-[100%] font-[400]">Лайки</p>
+			</div>
+			<div class="flex-1 px-[10px]">
+				<h1 class="text-[16px] text-[#030300] leading-[100%] font-[400] mb-[4px]">1k</h1>
+				<p class="text-[14px] text-[#030300] leading-[100%] font-[400]">Комменты</p>
+			</div>
+			<div class="flex-1 px-[10px]">
+				<h1 class="text-[16px] text-[#030300] leading-[100%] font-[400] mb-[4px]">14</h1>
+				<p class="text-[14px] text-[#030300] leading-[100%] font-[400]">Посты</p>
+			</div>
+		</div>
+		<div class="flex items-center gap-x-[10px]">
+			<button type="button"
+				class="bg-[#030300] rounded-[6px] h-[44px] flex-1 text-white text-[16px] leading-[100%]">Подписаться</button>
+			<a routerLink="/"
+				class="rounded-[6px] w-[44px] h-[44px] bg-[#F2F2F2] flex items-center justify-center leading-[1]">
+				<lucide-icon [name]="ICONS.MessageCircle" color="#030300"></lucide-icon>
+			</a>
+			<a routerLink="/"
+				class="rounded-[6px] w-[44px] h-[44px] bg-[#F2F2F2] flex items-center justify-center leading-[1]">
+				<lucide-icon [name]="ICONS.UserPlus" color="#030300"></lucide-icon>
+			</a>
+		</div>
+	</div>
+	<div class="flex items-center justify-between mb-[15px]">
+		<h1 class="text-[20px] text-[#030300] font-[500] leading-[100%]">Темы</h1>
+		<div class="flex items-center gap-x-[4px] text-black/70">
+			<lucide-icon [name]="ICONS.Funnel" size="20"></lucide-icon>
+			<p class="text-[16px] font-[500] leading-[100%]">Фильтр</p>
+		</div>
+	</div>
+	<div class="flex flex-col gap-y-[10px]">
+		<app-form-card [navigate]="'/comments/1'"></app-form-card>
+		<app-form-card [navigate]="'/comments/1'"></app-form-card>
+		<app-form-card [navigate]="'/comments/1'"></app-form-card>
+	</div>
+</div>

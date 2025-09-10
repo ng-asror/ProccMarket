@@ -1,3 +1,4 @@
+// app.routes.ts
 import { Routes } from '@angular/router';
 import { forumRoutes } from './modules/forum/forum.routes';
 
@@ -6,11 +7,7 @@ export const routes: Routes = [
     path: '',
     loadComponent: () => import('./layout/layout').then((p) => p.Layout),
     children: [
-      {
-        path: '',
-        redirectTo: 'home',
-        pathMatch: 'full',
-      },
+      { path: '', redirectTo: 'home', pathMatch: 'full' },
       {
         path: 'home',
         loadComponent: () => import('./modules').then((m) => m.Home),
@@ -33,5 +30,9 @@ export const routes: Routes = [
   {
     path: 'comments/:id',
     loadComponent: () => import('./modules').then((p) => p.Comments),
+  },
+  {
+    path: 'user/:username',
+    loadComponent: () => import('./modules').then((p) => p.User),
   },
 ];

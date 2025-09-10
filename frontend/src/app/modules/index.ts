@@ -5,3 +5,4 @@ export * from './profile/profile';
 export * from './search/search';
 export * from './balance/balance';
 export * from './comments/comments';
+export * from './user/user';

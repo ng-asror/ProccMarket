@@ -1,3 +1,4 @@
+// forum.routes.ts
 import { Routes } from '@angular/router';
 
 export const forumRoutes: Routes = [

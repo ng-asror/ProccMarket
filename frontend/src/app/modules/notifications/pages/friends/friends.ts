@@ -1,11 +1,12 @@
 import { Component } from '@angular/core';
+import { icons, LucideAngularModule } from 'lucide-angular';
 
 @Component({
   selector: 'app-friends',
-  imports: [],
+  imports: [LucideAngularModule],
   templateUrl: './friends.html',
-  styleUrl: './friends.scss'
+  styleUrl: './friends.scss',
 })
 export class Friends {
-
+  protected ICONS = icons;
 }

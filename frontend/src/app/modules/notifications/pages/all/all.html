@@ -1,6 +1,6 @@
 <div class="divide-y divide-[#E1E1E1]">
 	<!-- Баланс пополнен -->
-	<div class="flex items-start gap-3 py-[10px] hover:bg-[#F2F2F2]/30 relative cursor-pointer">
+	<div class="flex items-start gap-3 p-[10px_15px] bg-[#F2F2F2]/30 relative">
 		<div class="rounded-full w-[40px] h-[40px] flex items-center justify-center border-1 border-green-600 bg-green-200">
 			<lucide-icon [name]="ICONS.Wallet" class="w-5 h-5 text-green-700"></lucide-icon>
 		</div>
@@ -10,12 +10,38 @@
 		</div>
 		<div class="flex flex-col items-end gap-1">
 			<span class="text-[11px] text-gray-400">12:45</span>
-			<span class="block w-2 h-2 rounded-full bg-red-600"></span>
 		</div>
 	</div>
-
+	<!-- Comment -->
+	<div class="flex items-start gap-3 p-[10px_15px] cursor-pointer hover:bg-[#F2F2F2]/30">
+		<div class="rounded-full w-[40px] h-[40px] flex items-center justify-center border-1 border-[#E1E1E1] bg-[#F2F2F2]">
+			<lucide-icon [name]="ICONS.MessagesSquare" class="w-5 h-5" color="#030300"></lucide-icon>
+		</div>
+		<div class="flex-1">
+			<p class="text-[14px] font-medium text-gray-900 truncate">Статистика и доступность по странам</p>
+			<p class="text-[12px] text-gray-500 truncate">Добро пожаловать на форум!</p>
+		</div>
+		<div class="flex flex-col items-end gap-1">
+			<span class="text-[11px] text-gray-400">12:45</span>
+			<span class="block leading-[100%] text-white text-[12px] rounded bg-[#030300] p-[4px]">10</span>
+		</div>
+	</div>
+	<!-- User -->
+	<div class="flex items-start gap-3 p-[10px_15px] bg-white hover:bg-[#F2F2F2]/30 cursor-pointer">
+		<div class="rounded-full w-[40px] h-[40px] flex items-center justify-center overflow-hidden">
+			<img src="/img/user-face.jpg" alt="user-face" class="w-full h-full">
+		</div>
+		<div class="flex-1">
+			<p class="text-[14px] font-medium text-gray-900 truncate">Asror Shodiyev</p>
+			<p class="text-[12px] text-gray-500 truncate">Здравствуйте, добрый день. Как дела?</p>
+		</div>
+		<div class="flex flex-col items-end gap-1">
+			<span class="text-[11px] text-gray-400">12:50</span>
+			<span class="block leading-[100%] text-white text-[12px] rounded bg-[#030300] p-[4px]">10</span>
+		</div>
+	</div>
 	<!-- Запросить вывод -->
-	<div class="flex items-start gap-3 py-[10px] hover:bg-[#F2F2F2]/30 cursor-pointer">
+	<div class="flex items-start gap-3 p-[10px_15px] bg-[#F2F2F2]/30">
 		<div
 			class="rounded-full w-[40px] h-[40px] flex items-center justify-center border-1 border-yellow-600 bg-yellow-200">
 			<lucide-icon [name]="ICONS.BanknoteArrowDown" class="w-5 h-5 text-yellow-700"></lucide-icon>
@@ -28,4 +54,37 @@
 			<span class="text-[11px] text-gray-400">12:50</span>
 		</div>
 	</div>
+	<!-- User -->
+	<div class="flex items-start gap-3 p-[10px_15px] bg-white hover:bg-[#F2F2F2]/30 cursor-pointer">
+		<div class="rounded-full w-[40px] h-[40px] flex items-center justify-center overflow-hidden">
+			<img src="/img/user-face.jpg" alt="user-face" class="w-full h-full">
+		</div>
+		<div class="flex-1">
+			<p class="text-[14px] font-medium text-gray-900 truncate">Asror Shodiyev</p>
+			<p class="text-[12px] text-gray-500 truncate">Вы: Здравствуйте, добрый день. Как дела?</p>
+		</div>
+		<div class="flex flex-col items-end gap-1">
+			<span class="text-[11px] text-gray-400">12:50</span>
+			<lucide-icon [name]="ICONS.CheckCheck" size="20" class="text-[#030300]/30"></lucide-icon>
+		</div>
+	</div>
+	<!-- User -->
+	<div class="flex items-start gap-3 p-[10px_15px] bg-white hover:bg-[#F2F2F2]/30 cursor-pointer">
+		<div class="rounded-full w-[40px] h-[40px] flex items-center justify-center overflow-hidden">
+			<img src="/img/user-face.jpg" alt="user-face" class="w-full h-full">
+		</div>
+		<div class="flex-1">
+			<p class="text-[14px] font-medium text-gray-900 truncate">Asror Shodiyev</p>
+			<p class="text-[12px] text-gray-500 truncate">Вы: Здравствуйте, добрый день. Как дела?</p>
+		</div>
+		<div class="flex flex-col items-end gap-1">
+			<span class="text-[11px] text-gray-400">12:50</span>
+			<lucide-icon [name]="ICONS.Check" size="20" class="text-[#030300]/30"></lucide-icon>
+		</div>
+	</div>
+</div>
+<div class="p-[15px]">
+	<button type="button" class="w-full h-[44px] bg-[#030300] rounded text-white cursor-pointer"
+		(click)="playSound()">Test
+		sound</button>
 </div>

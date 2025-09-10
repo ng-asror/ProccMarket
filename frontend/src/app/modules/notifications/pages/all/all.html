@@ -1,0 +1,31 @@
+<div class="divide-y divide-[#E1E1E1]">
+	<!-- Баланс пополнен -->
+	<div class="flex items-start gap-3 py-[10px] hover:bg-[#F2F2F2]/30 relative cursor-pointer">
+		<div class="rounded-full w-[40px] h-[40px] flex items-center justify-center border-1 border-green-600 bg-green-200">
+			<lucide-icon [name]="ICONS.Wallet" class="w-5 h-5 text-green-700"></lucide-icon>
+		</div>
+		<div class="flex-1">
+			<p class="text-[14px] font-medium text-gray-900 truncate">Баланс успешно пополнен</p>
+			<p class="text-[12px] text-gray-500 truncate">Средства зачислены на ваш аккаунт</p>
+		</div>
+		<div class="flex flex-col items-end gap-1">
+			<span class="text-[11px] text-gray-400">12:45</span>
+			<span class="block w-2 h-2 rounded-full bg-red-600"></span>
+		</div>
+	</div>
+
+	<!-- Запросить вывод -->
+	<div class="flex items-start gap-3 py-[10px] hover:bg-[#F2F2F2]/30 cursor-pointer">
+		<div
+			class="rounded-full w-[40px] h-[40px] flex items-center justify-center border-1 border-yellow-600 bg-yellow-200">
+			<lucide-icon [name]="ICONS.BanknoteArrowDown" class="w-5 h-5 text-yellow-700"></lucide-icon>
+		</div>
+		<div class="flex-1">
+			<p class="text-[14px] font-medium text-gray-900 truncate">Запрос на вывод создан</p>
+			<p class="text-[12px] text-gray-500 truncate">Заявка отправлена и ожидает обработки</p>
+		</div>
+		<div class="flex flex-col items-end gap-1">
+			<span class="text-[11px] text-gray-400">12:50</span>
+		</div>
+	</div>
+</div>

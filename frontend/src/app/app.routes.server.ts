@@ -10,5 +10,9 @@ export const serverRoutes: ServerRoute[] = [
   { path: 'balance', renderMode: RenderMode.Server },
   { path: 'comments/:id', renderMode: RenderMode.Server },
   { path: 'user/:username', renderMode: RenderMode.Server },
+  { path: 'notifications', renderMode: RenderMode.Server },
+  { path: 'notifications/all', renderMode: RenderMode.Server },
+  { path: 'notifications/comments', renderMode: RenderMode.Server },
+  { path: 'notifications/friends', renderMode: RenderMode.Server },
   { path: '**', renderMode: RenderMode.Prerender },
 ];

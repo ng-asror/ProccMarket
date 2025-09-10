@@ -1,6 +1,7 @@
 // app.routes.ts
 import { Routes } from '@angular/router';
 import { forumRoutes } from './modules/forum/forum.routes';
+import { notificationRoutes } from './modules/notifications/notifications.routes';
 
 export const routes: Routes = [
   {
@@ -13,6 +14,7 @@ export const routes: Routes = [
         loadComponent: () => import('./modules').then((m) => m.Home),
       },
       ...forumRoutes,
+      ...notificationRoutes,
       {
         path: 'search',
         loadComponent: () => import('./modules').then((m) => m.Search),

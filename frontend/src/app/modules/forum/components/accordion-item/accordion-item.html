@@ -1,9 +1,8 @@
-<div class="transition-all duration-500 ease-in-out overflow-hidden h-[47px] rounded-[12px]"
-	[ngClass]="{'h-auto': openIndex() === item().index}">
-	<button type="button" (click)="toggle(item().index)"
-		class="px-[15px] border-b-1 border-[#E1E1E1] text-start w-full py-[10px] cursor-pointer bg-[#f2f2f285] rounded-[12px]">
-		<h4 class="text-[16px] font-[500] text-[#3D3D3D]">{{item().title}}</h4>
-	</button>
-	<a [routerLink]="'section/' + item().index"
-		class="text-[14px] text-[#818181] font-[400] leading-[120%] underline block p-[10px_15px]">{{item().content}}</a>
+<div class="collapse bg-base-100 border-base-300 border">
+	<input type="checkbox" checked="true">
+	<div class="collapse-title font-semibold">{{item().title}}</div>
+	<div class="collapse-content space-y-[10px]">
+		<a *ngFor="let item of item().items" [routerLink]="'/news/' + item.id"
+			class="link block text-sm text-black/60 hover:text-black">{{item.title}}</a>
+	</div>
 </div>

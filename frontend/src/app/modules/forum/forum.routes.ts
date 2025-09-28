@@ -10,10 +10,6 @@ export const forumRoutes: Routes = [
         path: '',
         loadComponent: () => import('./pages').then((p) => p.Main),
       },
-      {
-        path: 'section/:id',
-        loadComponent: () => import('./pages').then((p) => p.Section),
-      },
     ],
   },
 ];

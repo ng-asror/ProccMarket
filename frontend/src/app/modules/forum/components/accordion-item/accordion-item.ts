@@ -1,26 +1,19 @@
-import { NgClass } from '@angular/common';
-import { Component, input, signal } from '@angular/core';
+import { NgForOf } from '@angular/common';
+import { Component, input } from '@angular/core';
 import { RouterLink } from '@angular/router';
+export interface INews {
+  title: string;
+  items: { id: number; title: string }[];
+}
 
 @Component({
   selector: 'app-accordion-item',
-  imports: [RouterLink, NgClass],
+  imports: [RouterLink, NgForOf],
   templateUrl: './accordion-item.html',
   styleUrl: './accordion-item.scss',
 })
 export class AccordionItem {
-  item = input.required<{ index: number; title: string; content: string }>({
+  item = input.required<INews>({
     alias: 'item',
   });
-
-  openIndex = signal<number | null>(null);
-
-  ngOnInit() {
-    if (this.item()) {
-      this.openIndex.set(this.item().index);
-    }
-  }
-  toggle(index: number) {
-    this.openIndex.set(this.openIndex() === index ? null : index);
-  }
 }

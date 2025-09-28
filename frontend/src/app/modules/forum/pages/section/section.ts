@@ -1,10 +1,9 @@
 import { Component } from '@angular/core';
 import { icons, LucideAngularModule } from 'lucide-angular';
-import { FormCard } from '../../../../components';
 
 @Component({
   selector: 'app-section',
-  imports: [LucideAngularModule, FormCard],
+  imports: [LucideAngularModule],
   templateUrl: './section.html',
   styleUrl: './section.scss',
 })

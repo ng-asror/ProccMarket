@@ -1,0 +1,7 @@
+.truncate-text-2 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2; /* Sets the maximum number of lines to 4 */
+  text-overflow: ellipsis; /* Ensures the ellipsis is displayed */
+}

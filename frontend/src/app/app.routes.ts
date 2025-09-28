@@ -20,6 +20,11 @@ export const routes: Routes = [
         loadComponent: () => import('./modules').then((m) => m.Search),
       },
       {
+        path: 'news/:id',
+        loadComponent: () =>
+          import('./modules/forum/pages').then((p) => p.Section),
+      },
+      {
         path: 'balance',
         loadComponent: () => import('./modules').then((m) => m.Balance),
       },

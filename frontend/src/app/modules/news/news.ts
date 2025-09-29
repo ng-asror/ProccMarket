@@ -2,9 +2,9 @@ import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 
 @Component({
-  selector: 'app-forum',
+  selector: 'app-news',
   imports: [RouterOutlet],
-  templateUrl: './forum.html',
-  styleUrl: './forum.scss',
+  templateUrl: './news.html',
+  styleUrl: './news.scss',
 })
-export class Forum {}
+export class News {}

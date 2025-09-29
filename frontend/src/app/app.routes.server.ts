@@ -4,7 +4,7 @@ export const serverRoutes: ServerRoute[] = [
   { path: '', renderMode: RenderMode.Server },
   { path: 'home', renderMode: RenderMode.Server },
   { path: 'search', renderMode: RenderMode.Server },
-  { path: 'forum', renderMode: RenderMode.Server },
+  { path: 'news', renderMode: RenderMode.Server },
   { path: 'news/:id', renderMode: RenderMode.Server },
   { path: 'profile', renderMode: RenderMode.Server },
   { path: 'balance', renderMode: RenderMode.Server },

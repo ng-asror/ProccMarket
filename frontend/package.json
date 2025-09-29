@@ -33,6 +33,7 @@
     "@ngx-popovers/tooltip": "^19.0.0",
     "@syncfusion/ej2-angular-calendars": "31.1.17-ngcc",
     "@tailwindcss/postcss": "^4.1.13",
+    "cally": "^0.8.0",
     "daisyui": "^5.1.25",
     "express": "^5.1.0",
     "lucide-angular": "^0.542.0",

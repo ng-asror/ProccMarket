@@ -42,3 +42,19 @@ body {
     background-position: 0% 50%;
   }
 }
+/* Chrome, Safari, Edge */
+input[type="date"]::-webkit-inner-spin-button,
+input[type="date"]::-webkit-calendar-picker-indicator {
+  -webkit-appearance: none;
+  -moz-appearance: textfield;
+  appearance: none;
+  display: none;
+}
+
+/* Firefox */
+input[type="date"]::-moz-calendar-picker-indicator {
+  display: none;
+}
+input[type="date"]::-webkit-datetime-edit {
+  display: none;
+}

@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Http;
 
 class AuthController extends Controller
 {
@@ -195,6 +196,68 @@ class AuthController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Logged out successfully'
+        ], 200);
+    }
+
+
+    public function googleLogin(Request $request): JsonResponse
+    {
+        $validator = Validator::make($request->all(), [
+            'id_token' => 'required|string',
+            'telegram_id' => 'required|string',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        // Google’dan tokenni verify qilish
+        $response = Http::get("https://oauth2.googleapis.com/tokeninfo", [
+            'id_token' => $request->id_token
+        ]);
+
+        if ($response->failed()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Invalid Google token'
+            ], 401);
+        }
+
+        $googleUser = $response->json();
+
+        // Google qaytargan foydalanuvchi ma'lumotlari
+        $email = $googleUser['email'] ?? null;
+        $name = $googleUser['name'] ?? null;
+        $avatar = $googleUser['picture'] ?? null;
+
+        if (!$email) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Google account does not have a valid email'
+            ], 400);
+        }
+
+        // User mavjudligini tekshirish yoki yaratish
+        $user = User::firstOrCreate(
+            ['email' => $email],
+            [
+                'name' => $name,
+                'password' => Hash::make(uniqid()), // random password
+                'avatar' => $avatar ?? null,
+            ]
+        )->fresh();
+
+        // Token yaratish
+        $token = $user->createToken('auth_token')->plainTextToken;
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Login successful',
+            'user' => $user->load('role'),
+            'token' => $token,
         ], 200);
     }
 }

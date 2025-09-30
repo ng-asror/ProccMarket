@@ -563,7 +563,7 @@ const columns = (roles: any[], refreshData: () => void): ColumnDef<z.infer<typeo
               className="h-10 w-10 rounded-full"
             />
           ) : (
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-200">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted">
               {user.name ? user.name.charAt(0).toUpperCase() : user.email.charAt(0).toUpperCase()}
             </div>
           )}

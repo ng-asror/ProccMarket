@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('users', function (Blueprint $table) {
             $table->id();
-            $table->string('telegram_id')->unique()->nullable();
+            $table->string('telegram_id')->nullable();
             $table->string('email')->unique();
             $table->foreignId('role_id')->nullable()->constrained('roles');
             $table->decimal('balance', 10, 2)->default(0);

@@ -18,13 +18,6 @@ return new class extends Migration
             $table->text('value')->nullable();
             $table->timestamps();
         });
-
-        // Seed default settings
-        DB::table('settings')->insert([
-            ['key' => 'site_title', 'name' => 'Site Title', 'value' => 'My Forum'],
-            ['key' => 'logo_img', 'name' => 'Logo URL', 'value' => null],
-            ['key' => 'support_link', 'name' => 'Support Link', 'value' => 'https://support.example.com'],
-        ]);
     }
 
     /**

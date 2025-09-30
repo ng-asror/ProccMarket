@@ -12,6 +12,7 @@ use App\Http\Controllers\API\V1\ShareController;
 use App\Http\Controllers\API\V1\TopicController;
 use App\Http\Controllers\API\V1\UploadController;
 use App\Http\Controllers\API\V1\WithdrawalController;
+use App\Http\Controllers\GoogleController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function () {    
@@ -23,6 +24,7 @@ Route::prefix('v1')->group(function () {
         Route::post('/exist-user', [AuthController::class, 'existUser']);
         Route::post('/register', [AuthController::class, 'register']);
         Route::post('/login', [AuthController::class, 'login']);
+        Route::post('/google', [AuthController::class, 'googleLogin']);
     
         Route::middleware('auth:sanctum')->group(function () {
             Route::get('/me', [AuthController::class, 'me']);

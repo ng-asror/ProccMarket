@@ -47,6 +47,6 @@ class Topic extends Model {
 
     public function views()
     {
-        return $this->hasMany(TopicView::class);
+        return $this->morphMany(View::class, 'viewable');
     }
 }

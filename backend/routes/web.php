@@ -7,6 +7,9 @@ use App\Http\Controllers\Admin\SettingController;
 use App\Http\Controllers\Admin\TopicController;
 use App\Http\Controllers\Admin\TransactionController;
 use App\Http\Controllers\Admin\WithdrawalController;
+use App\Http\Controllers\Admin\CategoryController;
+use App\Http\Controllers\Admin\NewsController;
+use App\Http\Controllers\GoogleController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -14,6 +17,9 @@ Route::get('/', function () {
     // redirect to login page
     return redirect()->route('dashboard');
 })->name('home');
+
+Route::get('auth/google', [GoogleController::class, 'redirectToGoogle']);
+Route::get('auth/google/callback', [GoogleController::class, 'handleGoogleCallback']);
 
 Route::middleware(['auth', 'verified', 'admin'])->group(function () {
     Route::get('dashboard', function () {
@@ -68,6 +74,20 @@ Route::middleware(['auth', 'verified', 'admin'])->group(function () {
         Route::post('/{withdrawal}/approve', [WithdrawalController::class, 'approve'])->name('approve');
         Route::post('/{withdrawal}/reject', [WithdrawalController::class, 'reject'])->name('reject');
     });
+
+    // News Routes
+    Route::get('/news', [NewsController::class, 'index'])->name('news.index');
+    Route::get('/news/create', [NewsController::class, 'create'])->name('news.create');
+    Route::post('/news', [NewsController::class, 'store'])->name('news.store');
+    Route::get('/news/{news}/edit', [NewsController::class, 'edit'])->name('news.edit');
+    Route::put('/news/{news}', [NewsController::class, 'update'])->name('news.update');
+    Route::delete('/news/{news}', [NewsController::class, 'destroy'])->name('news.destroy');
+
+    // Category Routes
+    Route::post('/categories', [CategoryController::class, 'store'])->name('categories.store');
+    Route::put('/categories/{category}', [CategoryController::class, 'update'])->name('categories.update');
+    Route::delete('/categories/{category}', [CategoryController::class, 'destroy'])->name('categories.destroy');
+
     
 
 });

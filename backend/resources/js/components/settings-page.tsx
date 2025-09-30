@@ -206,7 +206,7 @@ export function SettingsPage({ settings }: { settings: Record<string, z.infer<ty
               </CardTitle>
               <div className="flex items-center gap-1">
                 <SettingDialog setting={setting} onUpdate={refreshData} isEdit={true} />
-                {!['site_title', 'logo_img', 'support_link'].includes(setting.key) && (
+                {!['site_title', 'logo_img', 'support_link', 'bot_token', 'crypto_bot_token'].includes(setting.key) && (
                   <Button variant="ghost" size="icon" onClick={() => handleDelete(setting.id)}>
                     <IconTrash className="h-4 w-4 text-red-500" />
                   </Button>

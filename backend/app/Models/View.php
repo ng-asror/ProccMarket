@@ -5,23 +5,23 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class TopicView extends Model
+class View extends Model
 {
     use HasFactory;
 
     protected $fillable = [
-        'topic_id',
+        'viewable_id',
+        'viewable_type',
         'user_id',
         'ip_address',
         'user_agent',
     ];
 
     /**
-     * Topic bilan bog'lanish
+     * View qilingan model bilan bog'lanish
      */
-    public function topic()
-    {
-        return $this->belongsTo(Topic::class);
+    public function shareable() {
+        return $this->morphTo();
     }
 
     /**

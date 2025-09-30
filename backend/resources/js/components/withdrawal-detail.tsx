@@ -124,7 +124,7 @@ function WithdrawalDetailDialog({ withdrawal, onUpdate }: {
                       className="h-8 w-8 rounded-full"
                     />
                   ) : (
-                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-200">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-muted">
                       {withdrawal.user.name ? withdrawal.user.name.charAt(0).toUpperCase() : withdrawal.user.email.charAt(0).toUpperCase()}
                     </div>
                   )}
@@ -410,7 +410,7 @@ const columns = (refreshData: () => void): ColumnDef<z.infer<typeof withdrawalSc
               className="h-10 w-10 rounded-full"
             />
           ) : (
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-200">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted">
               {user.name ? user.name.charAt(0).toUpperCase() : user.email.charAt(0).toUpperCase()}
             </div>
           )}
@@ -813,9 +813,9 @@ export function WithdrawalsDataTable({ data, stats, filters }: {
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
                   className={
-                    row.original.status === 'pending' ? 'bg-yellow-50 hover:bg-yellow-100' :
-                    row.original.status === 'approved' ? 'bg-green-50 hover:bg-green-100' :
-                    row.original.status === 'rejected' ? 'bg-red-50 hover:bg-red-100' :
+                    row.original.status === 'pending' ? 'hover:bg-yellow-100 dark:hover:bg-yellow-900' :
+                    row.original.status === 'approved' ? 'hover:bg-green-100 dark:hover:bg-green-900' :
+                    row.original.status === 'rejected' ? 'hover:bg-red-100 dark:hover:bg-red-900' :
                     ''
                   }
                 >

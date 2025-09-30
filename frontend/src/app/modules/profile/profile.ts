@@ -1,10 +1,9 @@
 import { Component } from '@angular/core';
-import { RouterLink } from '@angular/router';
 import { icons, LucideAngularModule } from 'lucide-angular';
 
 @Component({
   selector: 'app-profile',
-  imports: [LucideAngularModule, RouterLink],
+  imports: [LucideAngularModule],
   templateUrl: './profile.html',
   styleUrl: './profile.scss',
 })

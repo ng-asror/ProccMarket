@@ -7,4 +7,5 @@ export type TFormsTap =
   | 'bl'
   | 'priv'
   | 'train'
-  | 'blog';
+  | 'blog'
+  | 'countries';

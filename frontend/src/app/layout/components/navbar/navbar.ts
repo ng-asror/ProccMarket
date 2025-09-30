@@ -2,10 +2,11 @@ import { Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { icons, LucideAngularModule } from 'lucide-angular';
 import { formsTapMock } from '../../../modules/home/mocks';
-import { NgFor } from '@angular/common';
+import { NgFor, NgIf } from '@angular/common';
+
 @Component({
   selector: 'app-navbar',
-  imports: [RouterLink, LucideAngularModule, NgFor],
+  imports: [RouterLink, LucideAngularModule, NgFor, NgIf],
   templateUrl: './navbar.html',
   styleUrl: './navbar.scss',
 })

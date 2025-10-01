@@ -2,40 +2,34 @@ import {
   AfterViewInit,
   Component,
   ElementRef,
+  NgZone,
   Renderer2,
-  ViewChild,
 } from '@angular/core';
 
 @Component({
   selector: 'app-tradingview-widget',
   templateUrl: './tradingview-widget.html',
   styleUrls: ['./tradingview-widget.scss'],
+  host: { ngSkipHydration: 'true' },
 })
-export class TradingviewWidgetComponent implements AfterViewInit {
-  @ViewChild('container', { static: true }) container!: ElementRef;
+export class TradingviewWidgetComponent {
+  constructor(
+    private ngZone: NgZone,
+    private renderer: Renderer2,
+    private el: ElementRef
+  ) {}
 
-  constructor(private renderer: Renderer2) {}
-
-  ngAfterViewInit(): void {
-    const script = this.renderer.createElement('script');
-    script.type = 'text/javascript';
-    script.src =
-      'https://s3.tradingview.com/external-embedding/embed-widget-mini-symbol-overview.js';
-    script.async = true;
-
-    script.innerHTML = JSON.stringify({
-      symbol: 'BINANCE:BTCUSDT',
-      chartOnly: false,
-      dateRange: '1D',
-      noTimeScale: false,
-      colorTheme: 'light',
-      isTransparent: false,
-      locale: 'ru',
-      width: '100%',
-      autosize: true,
-      height: '100%',
+  ngOnInit(): void {
+    this.ngZone.runOutsideAngular(() => {
+      const script = this.renderer.createElement('script');
+      script.src =
+        'https://s3.tradingview.com/external-embedding/embed-widget-mini-symbol-overview.js';
+      script.async = true;
+      script.innerHTML = `{ "symbol": "BINANCE:BTCUSDT", "locale": "ru" }`;
+      this.renderer.appendChild(
+        this.el.nativeElement.querySelector('.tradingview-widget-container'),
+        script
+      );
     });
-
-    this.renderer.appendChild(this.container.nativeElement, script);
   }
 }

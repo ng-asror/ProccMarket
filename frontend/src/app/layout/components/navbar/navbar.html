@@ -19,25 +19,29 @@
 	</div>
 	<div class="drawer-side">
 		<label for="my-drawer" aria-label="close sidebar" class="drawer-overlay"></label>
-		<div class="h-dvh w-10 bg-white max-w-xs w-full flex flex-column row-gap-2 rounded-r-box">
-			<ul class="menu menu-md max-w-xs w-full">
-				<ng-container *ngFor="let item of items">
-					<li *ngIf="item.submenu.length">
-						<details [open]="false">
-							<summary>
-								<lucide-icon [name]="item.icon"></lucide-icon>
-								{{item.name}}
-							</summary>
-							<ul *ngIf="item.submenu.length">
-								<li *ngFor="let item of item.submenu">
-									<a>
-										{{item}}
-									</a>
-								</li>
-							</ul>
-						</details>
-					</li>
-				</ng-container>
+		<div class="h-dvh w-10 bg-white max-w-xs w-full flex flex-col justify-between row-gap-2 rounded-r-box">
+			<div class="space-y-[15px]">
+				<ul class="menu menu-md max-w-xs w-full">
+					<ng-container *ngFor="let item of items">
+						<li *ngIf="item.submenu.length">
+							<details>
+								<summary>
+									<lucide-icon [name]="item.icon"></lucide-icon>
+									{{item.name}}
+								</summary>
+								<ul *ngIf="item.submenu.length">
+									<li *ngFor="let sub of item.submenu">
+										<a>{{ sub }}</a>
+									</li>
+								</ul>
+							</details>
+						</li>
+					</ng-container>
+				</ul>
+
+			</div>
+
+			<ul class="menu menu-md w-full">
 				<li><a>Сотрудничество</a></li>
 				<li><a>Правила</a></li>
 				<li><a>О нас</a></li>

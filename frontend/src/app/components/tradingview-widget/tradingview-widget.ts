@@ -25,7 +25,18 @@ export class TradingviewWidgetComponent {
       script.src =
         'https://s3.tradingview.com/external-embedding/embed-widget-mini-symbol-overview.js';
       script.async = true;
-      script.innerHTML = `{ "symbol": "BINANCE:BTCUSDT", "locale": "ru" }`;
+      script.innerHTML = `{
+      "symbol": "BINANCE:BTCUSDT",
+      "chartOnly": false,
+      "dateRange": "1D",
+      "noTimeScale": false,
+      "colorTheme": "light",
+      "isTransparent": false,
+      "locale": "ru",
+      "width": "100%",
+      "autosize": true,
+      "height": "auto"
+    }`;
       this.renderer.appendChild(
         this.el.nativeElement.querySelector('.tradingview-widget-container'),
         script

@@ -15,8 +15,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 export default function TopicsIndex() {
-  const { topics, filters, sections, users } = usePage().props;  
-  
+  const { topics, filters, sections, allSections, users } = usePage().props;
   return (
     <AppLayout breadcrumbs={breadcrumbs}>
       <Head title="Forum Topics Management" />
@@ -24,6 +23,7 @@ export default function TopicsIndex() {
         <TopicsDataTable 
           data={topics}
           filters={filters}
+          allSections={allSections}
           sections={sections}
           users={users}
         />

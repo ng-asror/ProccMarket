@@ -24,12 +24,12 @@ const mainNavItems: NavItem[] = [
         icon: Newspaper,
     },
     {
-        title: 'Forums',
+        title: 'Sections',
         href: '/sections',
         icon: LetterText,
     },
     {
-        title: 'Topicss',
+        title: 'Topics',
         href: '/topics',
         icon: NotepadText,
     },

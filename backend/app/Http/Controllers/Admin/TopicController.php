@@ -104,14 +104,22 @@ class TopicController extends Controller
         $topics = $query->paginate(perPage: 15)->withQueryString();
 
         // Get filter options
-        $sections = Section::all(['id', 'name']);
-        $users = User::whereHas('topics')
-                    ->select('id', 'name', 'avatar')
+        $query = Section::with(['parent', 'children'])
+            ->withCount(['topics', 'users']);
+
+        // Get sections in tree structure
+        $sections = Section::buildTree($query->get());
+        $users = User::select('id', 'name', 'avatar')
                     ->get();
+
+        $allSections = Section::select('id', 'name', 'parent_id')
+            ->orderBy('name')
+            ->get();
 
         return Inertia::render('admin/topics/index', [
             'topics' => $topics,
             'sections' => $sections,
+            'allSections' => $allSections,
             'users' => $users,
             'filters' => $request->only(['search', 'sort_by', 'sort_direction', 'section_filter', 'user_filter', 'status_filter'])
         ]);

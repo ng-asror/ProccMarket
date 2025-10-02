@@ -56,6 +56,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Switch } from '@/components/ui/switch';
+import { ParentSectionSelector } from './parent-section-selector';
 
 // Schema for topic data validation
 export const topicSchema = z.object({
@@ -101,29 +102,31 @@ function TopicDialog({
   onUpdate,
   isEdit = false,
   sections,
+  allSections,
   users
 }: {
   topic?: z.infer<typeof topicSchema>;
   onUpdate: () => void;
   isEdit?: boolean;
-  sections: Section[];
+  sections: any[];
+  allSections: any[];
   users: User[];
 }) {
   const [open, setOpen] = React.useState(false);
   const [formData, setFormData] = React.useState({
-    section_id: topic?.section?.id?.toString() || '',
+    section_id: topic?.section?.id || null,
     user_id: topic?.user?.id?.toString() || '',
     title: topic?.title || '',
     content: topic?.content || '',
     closed: topic?.closed || false,
   });
-  const [imageFile, setImageFile] = React.useState<File | null>(null);
+  const [imageFile, setImageFile] = React.useState<File | null>(null);  
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
     const formDataToSend = new FormData();
-    formDataToSend.append('section_id', formData.section_id);
+    formDataToSend.append('section_id', formData.section_id?.toString() || '');
     formDataToSend.append('user_id', formData.user_id);
     formDataToSend.append('title', formData.title);
     formDataToSend.append('content', formData.content);
@@ -196,8 +199,13 @@ function TopicDialog({
           <div className="grid gap-4 py-4">
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="section_id">Section</Label>
-                <Select value={formData.section_id} onValueChange={(value) => setFormData({ ...formData, section_id: value })}>
+                <ParentSectionSelector
+                  value={formData.section_id}
+                  onChange={(val) => setFormData({ ...formData, section_id: val })}
+                  allSections={allSections}
+                  excludeId={topic?.section?.id}
+                />
+                {/* <Select value={formData.section_id} onValueChange={(value) => setFormData({ ...formData, section_id: value })}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select section" />
                   </SelectTrigger>
@@ -208,7 +216,7 @@ function TopicDialog({
                       </SelectItem>
                     ))}
                   </SelectContent>
-                </Select>
+                </Select> */}
               </div>
               <div>
                 <Label htmlFor="user_id">User</Label>
@@ -294,7 +302,7 @@ function TopicDialog({
   );
 }
 
-const columns = (refreshData: () => void, sections: Section[], users: User[]): ColumnDef<z.infer<typeof topicSchema>>[] => [
+const columns = (refreshData: () => void, sections: any[], allSections: any[], users: User[]): ColumnDef<z.infer<typeof topicSchema>>[] => [
   {
     id: 'select',
     header: ({ table }) => (
@@ -489,7 +497,7 @@ const columns = (refreshData: () => void, sections: Section[], users: User[]): C
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-48">
-            <TopicDialog topic={topic} onUpdate={refreshData} isEdit={true} sections={sections} users={users} />
+            <TopicDialog topic={topic} onUpdate={refreshData} isEdit={true} sections={sections} allSections={allSections} users={users} />
             <DropdownMenuItem onClick={handleToggleStatus}>
               {topic.closed ? (
                 <>
@@ -519,12 +527,14 @@ export function TopicsDataTable({
   data, 
   filters, 
   sections, 
+  allSections,
   users 
 }: { 
   data: any; 
   filters: any; 
-  sections: Section[]; 
+  sections: any[]; 
   users: User[];
+  allSections: any[];
 }) {
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = React.useState({});
@@ -587,7 +597,7 @@ export function TopicsDataTable({
 
   const table = useReactTable({
     data: tableData,
-    columns: columns(refreshData, sections, users),
+    columns: columns(refreshData, sections, allSections, users),
     state: {
       sorting,
       columnVisibility,
@@ -781,7 +791,7 @@ export function TopicsDataTable({
             </DropdownMenuContent>
           </DropdownMenu>
 
-          <TopicDialog onUpdate={refreshData} sections={sections} users={users} />
+          <TopicDialog onUpdate={refreshData} sections={sections} allSections={allSections} users={users} />
         </div>
       </div>
 
@@ -837,7 +847,7 @@ export function TopicsDataTable({
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={columns(refreshData, sections, users).length} className="h-24 text-center">
+                  <TableCell colSpan={columns(refreshData, sections, allSections, users).length} className="h-24 text-center">
                     No topics found.
                   </TableCell>
                 </TableRow>

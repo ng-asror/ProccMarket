@@ -42,6 +42,9 @@ Route::prefix('v1')->group(function () {
         Route::get('/settings/{key}', [PublicApiController::class, 'getSettingByKey']);
     });
 
+    Route::get('/pay/crypto-bot/exchange-rates', [CryptoBotController::class, 'getExchangeRates']);
+    Route::get('/pay/crypto-bot/currencies', [CryptoBotController::class, 'getCurrencies']);
+
     /* FORUM ENDPOINTS */
     Route::middleware('auth:sanctum')->group(function () {
 
@@ -105,8 +108,6 @@ Route::prefix('v1')->group(function () {
             Route::get('/balance', [CryptoBotController::class, 'balance']);
             Route::post('/create-invoice', [CryptoBotController::class, 'createInvoice']);
             Route::get('/invoices', [CryptoBotController::class, 'getInvoices']);
-            Route::get('/exchange-rates', [CryptoBotController::class, 'getExchangeRates']);
-            Route::get('/currencies', [CryptoBotController::class, 'getCurrencies']);
             // Route::post('/transfer', [CryptoBotController::class, 'transfer']);
         });
 

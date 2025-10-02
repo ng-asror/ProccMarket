@@ -53,6 +53,9 @@ Route::middleware(['auth', 'verified', 'admin'])->group(function () {
     });
 
     Route::resource('sections', SectionController::class)->names('admin.sections')->middleware(['auth', 'admin']);
+    Route::post('sections/update-positions', [SectionController::class, 'updatePositions'])->name('admin.sections.update-positions');
+    Route::get('sections-search', [SectionController::class, 'search'])->name('admin.sections.search');
+
     Route::resource('topics', TopicController::class)->names('admin.topics');
     Route::patch('topics/{topic}/toggle-status', [TopicController::class, 'toggleStatus'])->name('admin.topics.toggle-status');
     Route::post('topics/bulk-delete', [TopicController::class, 'bulkDelete'])->name('admin.topics.bulk-delete');

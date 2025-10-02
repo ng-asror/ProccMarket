@@ -14,5 +14,7 @@ export const serverRoutes: ServerRoute[] = [
   { path: 'notifications/all', renderMode: RenderMode.Server },
   { path: 'notifications/comments', renderMode: RenderMode.Server },
   { path: 'notifications/friends', renderMode: RenderMode.Server },
+  { path: 'auth/login', renderMode: RenderMode.Prerender },
+  { path: 'auth/register', renderMode: RenderMode.Prerender },
   { path: '**', renderMode: RenderMode.Prerender },
 ];

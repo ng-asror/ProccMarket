@@ -37,4 +37,24 @@ export const routes: Routes = [
     path: 'user/:username',
     loadComponent: () => import('./modules').then((p) => p.User),
   },
+  {
+    path: 'auth',
+    loadComponent: () => import('./auth/auth').then((p) => p.Auth),
+    children: [
+      {
+        path: 'login',
+        loadComponent: () => import('./auth/components').then((c) => c.Login),
+      },
+      {
+        path: 'register',
+        loadComponent: () =>
+          import('./auth/components').then((c) => c.Register),
+      },
+      {
+        path: '',
+        redirectTo: 'login',
+        pathMatch: 'full',
+      },
+    ],
+  },
 ];

@@ -3,10 +3,16 @@ import { RouterLink } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
 import { formsTapMock } from '../../../modules/home/mocks';
 import { CommonModule } from '@angular/common';
+import { TradingviewWidgetComponent } from '../../../components';
 
 @Component({
   selector: 'app-navbar',
-  imports: [RouterLink, LucideAngularModule, CommonModule],
+  imports: [
+    RouterLink,
+    LucideAngularModule,
+    CommonModule,
+    TradingviewWidgetComponent,
+  ],
   templateUrl: './navbar.html',
   styleUrl: './navbar.scss',
 })

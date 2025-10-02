@@ -1,14 +1,17 @@
-<form class="card space-y-[15px]">
+<form class="card space-y-[15px]" [formGroup]="loginForm" (ngSubmit)="login()">
 	<div>
 		<label for="email" class="text-black text-[14px] leading-[100%] mb-[5px] block">Электронная почта</label>
-		<input type="text" placeholder="example@gmail.com" class="input placeholder:text-black/50 w-full" id="email" />
+		<input type="email" placeholder="example@gmail.com" class="input placeholder:text-black/50 w-full" id="email"
+			formControlName="email" />
 	</div>
 	<div>
 		<label for="email" class="text-black text-[14px] leading-[100%] mb-[5px] block">Пароль</label>
-		<label class="input w-full">
-			<input type="password" placeholder="пароль" class="placeholder:text-black/50 w-full" id="email" />
-			<lucide-icon [name]="ICONS.Eye" size="18" class="cursor-pointer"></lucide-icon>
-		</label>
+		<div class="input w-full">
+			<input [type]="passwordToggle()? 'text': 'password'" placeholder="пароль" #passEl formControlName="password"
+				class="placeholder:text-black/50 w-full" id="password" />
+			<lucide-icon [name]="passwordToggle()? ICONS.Eye: ICONS.EyeClosed" size="18" class="cursor-pointer"
+				(click)="showPass(passEl)"></lucide-icon>
+		</div>
 	</div>
 	<button type="submit" class="btn btn-primary">Войти</button>
 	<div class="flex items-center gap-x-[5px] justify-center opacity-50">

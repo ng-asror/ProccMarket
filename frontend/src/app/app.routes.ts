@@ -2,11 +2,13 @@
 import { Routes } from '@angular/router';
 import { newsRoutes } from './modules/news/news.routes';
 import { notificationRoutes } from './modules/notifications/notifications.routes';
+import { authGuard } from './core';
 
 export const routes: Routes = [
   {
     path: '',
     loadComponent: () => import('./layout/layout').then((p) => p.Layout),
+    canActivate: [authGuard],
     children: [
       { path: '', redirectTo: 'home', pathMatch: 'full' },
       {
@@ -27,15 +29,15 @@ export const routes: Routes = [
         path: 'profile',
         loadComponent: () => import('./modules').then((m) => m.Profile),
       },
+      {
+        path: 'comments/:id',
+        loadComponent: () => import('./modules').then((p) => p.Comments),
+      },
+      {
+        path: 'user/:username',
+        loadComponent: () => import('./modules').then((p) => p.User),
+      },
     ],
-  },
-  {
-    path: 'comments/:id',
-    loadComponent: () => import('./modules').then((p) => p.Comments),
-  },
-  {
-    path: 'user/:username',
-    loadComponent: () => import('./modules').then((p) => p.User),
   },
   {
     path: 'auth',

@@ -26,25 +26,20 @@
                 "input": "public"
               }
             ],
-            "styles": ["src/styles/_theme.scss", "src/styles.scss"],
-            "server": "src/main.server.ts",
-            "outputMode": "server",
-            "ssr": {
-              "entry": "src/server.ts"
-            }
+            "styles": ["src/styles.scss"]
           },
           "configurations": {
             "production": {
               "budgets": [
                 {
                   "type": "initial",
-                  "maximumWarning": "10mb",
-                  "maximumError": "10mb"
+                  "maximumWarning": "500kB",
+                  "maximumError": "1MB"
                 },
                 {
                   "type": "anyComponentStyle",
-                  "maximumWarning": "10mb",
-                  "maximumError": "10mb"
+                  "maximumWarning": "4kB",
+                  "maximumError": "8kB"
                 }
               ],
               "outputHashing": "all"
@@ -86,7 +81,7 @@
                 "input": "public"
               }
             ],
-            "styles": ["src/styles/_theme.scss", "src/styles.scss"]
+            "styles": ["src/styles.scss"]
           }
         }
       }

@@ -1,3 +1,5 @@
+import { ResultData } from './result-data';
+
 export interface INewsRes {
   success: boolean;
   data: INewBlog[];
@@ -20,4 +22,27 @@ export interface INews {
   category_id: number;
   api_url: string;
   image_url?: string;
+}
+
+export interface INewsInfoRes extends ResultData {
+  data: INewsInfo;
+}
+
+export interface INewsInfo {
+  id: number;
+  title: string;
+  description: string;
+  image: string;
+  user_id: number;
+  category_id: number;
+  status: string;
+  created_at: string;
+  updated_at: string;
+  comments_count: number;
+  likes_count: number;
+  views_count: number;
+  shares_count: number;
+  image_url: string;
+  category: { id: number; name: string };
+  comments: string;
 }

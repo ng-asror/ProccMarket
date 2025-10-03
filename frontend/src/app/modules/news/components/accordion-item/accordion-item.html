@@ -1,8 +1,8 @@
-<div class="collapse bg-base-100 border-base-300 border">
+<div class="collapse bg-base-100 border-base-300 border" *ngIf="newsBlog().news_count !== 0">
 	<input type="checkbox" checked="true">
-	<div class="collapse-title font-semibold">{{item().title}}</div>
+	<div class="collapse-title font-semibold">{{newsBlog().name}}</div>
 	<div class="collapse-content space-y-[10px]">
-		<a *ngFor="let item of item().items" [routerLink]="'/news/' + item.id"
+		<a *ngFor="let item of newsBlog().news" [routerLink]="'/news/' + item.id"
 			class="link block text-sm text-black/60 hover:text-black">{{item.title}}</a>
 	</div>
 </div>

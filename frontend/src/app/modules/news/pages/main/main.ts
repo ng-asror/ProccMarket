@@ -1,16 +1,23 @@
-import { Component } from '@angular/core';
+import { Component, inject, OnInit, resource } from '@angular/core';
 import { icons, LucideAngularModule } from 'lucide-angular';
 import { AccordionItem } from '../../components';
-import { NgForOf } from '@angular/common';
+import { News } from '../../../../core';
+import { firstValueFrom } from 'rxjs';
+import { NgFor, NgIf } from '@angular/common';
 
 @Component({
   selector: 'app-main',
-  imports: [LucideAngularModule, AccordionItem, NgForOf],
+  imports: [LucideAngularModule, AccordionItem, NgFor, NgIf],
   templateUrl: './main.html',
   styleUrl: './main.scss',
 })
-export class Main {
+export class Main implements OnInit {
+  private newsService = inject(News);
   protected ICONS = icons;
+
+  news = resource({
+    loader: () => firstValueFrom(this.newsService.getAllNews()),
+  });
 
   newsSections = [
     {
@@ -27,8 +34,7 @@ export class Main {
           id: 2,
         },
         {
-          title:
-            'Добавлены новые отчёты для более детального анализа пользовательской активности',
+          title: 'Добавлены новые отчёты для более детального анализа пользовательской активности',
           id: 3,
         },
       ],
@@ -62,8 +68,7 @@ export class Main {
           id: 7,
         },
         {
-          title:
-            'Добавлена возможность переключения интерфейса на несколько языков',
+          title: 'Добавлена возможность переключения интерфейса на несколько языков',
           id: 8,
         },
         {
@@ -72,8 +77,7 @@ export class Main {
           id: 9,
         },
         {
-          title:
-            'Поддержка тёмной темы оформления для комфортной работы в ночное время',
+          title: 'Поддержка тёмной темы оформления для комфортной работы в ночное время',
           id: 10,
         },
       ],
@@ -82,18 +86,15 @@ export class Main {
       title: 'Интерфейс и удобство использования',
       items: [
         {
-          title:
-            'Обновлён дизайн профиля пользователя с акцентом на удобство и читаемость',
+          title: 'Обновлён дизайн профиля пользователя с акцентом на удобство и читаемость',
           id: 11,
         },
         {
-          title:
-            'Оптимизирована скорость загрузки страниц и сокращено время отклика интерфейса',
+          title: 'Оптимизирована скорость загрузки страниц и сокращено время отклика интерфейса',
           id: 12,
         },
         {
-          title:
-            'Улучшена структура меню и навигации для более быстрого доступа к разделам',
+          title: 'Улучшена структура меню и навигации для более быстрого доступа к разделам',
           id: 13,
         },
         {
@@ -111,16 +112,16 @@ export class Main {
           id: 15,
         },
         {
-          title:
-            'Добавлены персонализированные уведомления на основе поведения пользователя',
+          title: 'Добавлены персонализированные уведомления на основе поведения пользователя',
           id: 16,
         },
         {
-          title:
-            'Внедрена функция еженедельных дайджестов с подборкой наиболее важных новостей',
+          title: 'Внедрена функция еженедельных дайджестов с подборкой наиболее важных новостей',
           id: 17,
         },
       ],
     },
   ];
+
+  ngOnInit(): void {}
 }

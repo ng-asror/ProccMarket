@@ -2,5 +2,15 @@
 	<h2 class="text-[22px] font-[600] text-[#030303] leading-[100%]">Что случилось?</h2>
 </div>
 <div class="mt-[20px] px-[15px] flex flex-col space-y-[10px]">
-	<app-accordion-item *ngFor="let item of newsSections" [item]="item"></app-accordion-item>
+	<ng-container *ngIf="news.value() as news; else noNews">
+		<app-accordion-item *ngFor="let item of news.data" [news-blog]="item"></app-accordion-item>
+	</ng-container>
+	<ng-template #noNews>
+		<div class="flex w-full flex-col gap-4" *ngFor="let item of [1,2,3]">
+			<div class="skeleton h-32 w-full"></div>
+			<div class="skeleton h-4 w-28"></div>
+			<div class="skeleton h-4 w-full"></div>
+			<div class="skeleton h-4 w-full"></div>
+		</div>
+	</ng-template>
 </div>

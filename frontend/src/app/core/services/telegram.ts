@@ -1,7 +1,14 @@
 import { Inject, Injectable, PLATFORM_ID } from '@angular/core';
 import { ITgUser } from '../interfaces';
 import { isPlatformBrowser } from '@angular/common';
+import { Router } from '@angular/router';
 
+interface TgButton {
+  show(): void;
+  hide(): void;
+  onClick(fn: Function): void;
+  offClick(fn: Function): void;
+}
 @Injectable({
   providedIn: 'root',
 })
@@ -9,7 +16,7 @@ export class Telegram {
   private tg: any;
   private isBrowser: boolean;
 
-  constructor(@Inject(PLATFORM_ID) private platformId: Object) {
+  constructor(@Inject(PLATFORM_ID) private platformId: Object, private router: Router) {
     this.isBrowser = isPlatformBrowser(this.platformId);
     if (this.isBrowser) {
       this.tg = (window as any).Telegram?.WebApp;
@@ -24,6 +31,10 @@ export class Telegram {
 
   async getUserLocalId(): Promise<string | null> {
     return await this.getCloudStorage('tg_id');
+  }
+
+  get BackButton(): TgButton {
+    return this.tg.BackButton;
   }
 
   init(headerColor: string): void {
@@ -42,14 +53,10 @@ export class Telegram {
   async setCloudItem(key: string, value: string): Promise<void> {
     if (!this.isBrowser || !this.tg?.CloudStorage) return;
     return new Promise((resolve, reject) => {
-      this.tg.CloudStorage.setItem(
-        key,
-        value,
-        (error: any, success: boolean) => {
-          if (error) reject(error);
-          else resolve();
-        }
-      );
+      this.tg.CloudStorage.setItem(key, value, (error: any, success: boolean) => {
+        if (error) reject(error);
+        else resolve();
+      });
     });
   }
 
@@ -76,5 +83,22 @@ export class Telegram {
   showAlert(message: string): void {
     if (!this.isBrowser || !this.tg) return;
     this.tg.showAlert(message);
+  }
+
+  // back button events
+  showBackButton(url: string): void {
+    if (!this.BackButton) {
+      return;
+    }
+    this.BackButton.show();
+    this.BackButton.onClick(() => this.router.navigateByUrl(url));
+  }
+  hiddeBackButton(url: string): void {
+    if (!this.BackButton) {
+      return;
+    }
+
+    this.BackButton.offClick(() => this.router.navigateByUrl(url));
+    this.BackButton.hide();
   }
 }

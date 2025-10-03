@@ -1,19 +1,16 @@
-import { NgForOf } from '@angular/common';
+import { NgForOf, NgIf } from '@angular/common';
 import { Component, input } from '@angular/core';
 import { RouterLink } from '@angular/router';
-export interface INews {
-  title: string;
-  items: { id: number; title: string }[];
-}
+import { INewBlog } from '../../../../core';
 
 @Component({
   selector: 'app-accordion-item',
-  imports: [RouterLink, NgForOf],
+  imports: [RouterLink, NgForOf, NgIf],
   templateUrl: './accordion-item.html',
   styleUrl: './accordion-item.scss',
 })
 export class AccordionItem {
-  item = input.required<INews>({
-    alias: 'item',
+  newsBlog = input.required<INewBlog>({
+    alias: 'news-blog',
   });
 }

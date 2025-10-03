@@ -44,5 +44,19 @@ export interface INewsInfo {
   shares_count: number;
   image_url: string;
   category: { id: number; name: string };
-  comments: string;
+  comments: {
+    id: number;
+    replay_id: string;
+    news_id: number;
+    user_id: number;
+    content: string;
+    created_at: string;
+    updated_at: string;
+    user: {
+      id: number;
+      name: string;
+      role_name: string;
+      role: string;
+    };
+  }[];
 }

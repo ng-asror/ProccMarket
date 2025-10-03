@@ -17,4 +17,8 @@ export class News {
   getNews(id: string): Observable<INewsInfoRes> {
     return this.http.get<INewsInfoRes>(`${environment.apiUrl}/news/${id}`);
   }
+
+  getComments(id: string): Observable<any> {
+    return this.http.get<any>(`${environment.apiUrl}/news/${id}/comments`);
+  }
 }

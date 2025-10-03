@@ -3,11 +3,13 @@ import { icons, LucideAngularModule } from 'lucide-angular';
 import { News, Telegram } from '../../../../core';
 import { ActivatedRoute } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
-import { NgIf } from '@angular/common';
+import { MomentModule } from 'ngx-moment';
+import { NgForOf, NgIf } from '@angular/common';
+import moment from 'moment';
 
 @Component({
   selector: 'app-section',
-  imports: [LucideAngularModule, NgIf],
+  imports: [LucideAngularModule, NgIf, NgForOf, MomentModule],
   templateUrl: './section.html',
   styleUrl: './section.scss',
 })

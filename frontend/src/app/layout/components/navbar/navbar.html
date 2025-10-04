@@ -22,12 +22,12 @@
 		<div class="min-h-dvh w-10 bg-white max-w-xs w-full flex flex-col justify-between row-gap-2 rounded-r-box">
 			<div class="space-y-[15px]" *ngIf="items?.length">
 				<app-tradingview-widget></app-tradingview-widget>
-				<ul class="menu menu-md max-w-xs w-full">
+				<ul class="menu max-w-xs w-full">
 					<ng-container *ngFor="let item of items">
 						<li *ngIf="item.submenu.length">
 							<details>
 								<summary>
-									<lucide-icon [name]="item.icon"></lucide-icon>
+									<lucide-icon [name]="item.icon" [size]="20"></lucide-icon>
 									{{item.name}}
 								</summary>
 								<ul *ngIf="item.submenu.length">

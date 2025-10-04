@@ -5,11 +5,11 @@ import { ActivatedRoute } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { MomentModule } from 'ngx-moment';
 import { NgForOf, NgIf } from '@angular/common';
-import moment from 'moment';
+import { AmDateFormatPipe, NumeralPipe } from '../../../../core/pipes';
 
 @Component({
   selector: 'app-section',
-  imports: [LucideAngularModule, NgIf, NgForOf, MomentModule],
+  imports: [LucideAngularModule, NgIf, NgForOf, MomentModule, AmDateFormatPipe, NumeralPipe],
   templateUrl: './section.html',
   styleUrl: './section.scss',
 })

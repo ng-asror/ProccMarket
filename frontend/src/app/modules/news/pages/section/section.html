@@ -3,10 +3,10 @@
 		<ng-container *ngIf="news.value() as news">
 			<div class="space-y-[15px]">
 				<div class="flex text-black/50 text-sm gap-x-[10px] mb-[15px]">
-					<p>26 апреля 2024</p>
+					<p>{{news.data.created_at | dateFormat}}</p>
 					<div class="flex items-center gap-x-[3px]">
 						<lucide-icon [name]="ICONS.Eye" size="20"></lucide-icon>
-						<p>5k</p>
+						<p>{{news.data.views_count + 11000 | numeral}}</p>
 					</div>
 				</div>
 				<h1 class="text-2xl font-semibold">{{news.data.title}}</h1>

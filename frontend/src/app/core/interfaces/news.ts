@@ -36,8 +36,8 @@ export interface INewsInfo {
   user_id: number;
   category_id: number;
   status: string;
-  created_at: string;
-  updated_at: string;
+  created_at: Date;
+  updated_at: Date;
   comments_count: number;
   likes_count: number;
   views_count: number;

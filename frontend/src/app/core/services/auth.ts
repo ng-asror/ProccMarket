@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { ILoginRes } from '../interfaces';
-import { Observable, tap } from 'rxjs';
+import { Observable, tap, switchMap, from } from 'rxjs';
 import { environment } from '../../../environments/environment.development';
 import { Telegram } from './telegram';
 import { Router } from '@angular/router';
@@ -16,25 +16,34 @@ export class Auth {
 
   /** Oddiy email + password orqali ro'yxatdan o'tish */
   register(email: string, telegram_id: string, password: string, password_confirmation: string): Observable<ILoginRes> {
-  return this.http
-    .post<ILoginRes>(`${environment.apiUrl}/auth/register`, { email, telegram_id, password, password_confirmation })
-    .pipe(
-      tap((res: ILoginRes) => {
-        this.telegram.setCloudItem('email', res.user.email);
-        this.telegram.setCloudItem('token', res.token);
-      })
-    );
-}
-
+    return this.http
+      .post<ILoginRes>(`${environment.apiUrl}/auth/register`, { email, telegram_id, password, password_confirmation })
+      .pipe(
+        switchMap((res: ILoginRes) => {
+          // Telegram cloud storage'ga saqlash (async)
+          return from(
+            Promise.all([
+              this.telegram.setCloudItem('email', res.user.email),
+              this.telegram.setCloudItem('token', res.token)
+            ]).then(() => res)
+          );
+        })
+      );
+  }
 
   /** Oddiy email + password orqali login */
   login(email: string, password: string): Observable<ILoginRes> {
     return this.http
       .post<ILoginRes>(`${environment.apiUrl}/auth/login`, { email, password })
       .pipe(
-        tap((res: ILoginRes) => {
-          this.telegram.setCloudItem('email', res.user.email);
-          this.telegram.setCloudItem('token', res.token);
+        switchMap((res: ILoginRes) => {
+          // Telegram cloud storage'ga saqlash (async)
+          return from(
+            Promise.all([
+              this.telegram.setCloudItem('email', res.user.email),
+              this.telegram.setCloudItem('token', res.token)
+            ]).then(() => res)
+          );
         })
       );
   }
@@ -52,9 +61,14 @@ export class Auth {
     return this.http
       .post<ILoginRes>(`${environment.apiUrl}/auth/google`, { id_token: idToken, telegram_id })
       .pipe(
-        tap((res: ILoginRes) => {
-          this.telegram.setCloudItem('email', res.user.email);
-          this.telegram.setCloudItem('token', res.token);
+        switchMap((res: ILoginRes) => {
+          // Telegram cloud storage'ga saqlash (async)
+          return from(
+            Promise.all([
+              this.telegram.setCloudItem('email', res.user.email),
+              this.telegram.setCloudItem('token', res.token)
+            ]).then(() => res)
+          );
         })
       );
   }

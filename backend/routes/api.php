@@ -5,6 +5,7 @@ use App\Http\Controllers\API\V1\SectionController;
 use App\Http\Controllers\API\V1\AuthController;
 use App\Http\Controllers\API\V1\CryptoBotController;
 use App\Http\Controllers\API\V1\PublicApiController;
+use App\Http\Controllers\API\V1\TransactionApiController;
 use App\Http\Controllers\API\V1\WebSocketController;
 use App\Http\Controllers\API\V1\LikeController;
 use App\Http\Controllers\API\V1\NewsController;
@@ -139,6 +140,12 @@ Route::prefix('v1')->group(function () {
             Route::put('/{comment}', [CommentController::class, 'update']);
             Route::patch('/{comment}', [CommentController::class, 'update']);            
             Route::delete('/{comment}', [CommentController::class, 'destroy']);
+        });
+
+        Route::prefix('transactions')->group(function () {
+            Route::get('/', [TransactionApiController::class, 'index']);
+            Route::get('/export', [TransactionApiController::class, 'export']);
+            Route::get('/{transaction}', [TransactionApiController::class, 'show']);
         });
     });
 

@@ -7,6 +7,7 @@ import {
   Output,
   EventEmitter,
   OnDestroy,
+  NgZone,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Subscription } from 'rxjs';
@@ -30,11 +31,13 @@ export class GoogleButtonComponent implements AfterViewInit, OnDestroy {
   @Output() credential = new EventEmitter<any>();
 
   private sub?: Subscription;
+  private isProcessing = false;
 
   constructor(
     private gis: GoogleIdentityService,
     private auth: Auth,
-    private router: Router
+    private router: Router,
+    private ngZone: NgZone
   ) {}
 
   async ngAfterViewInit(): Promise<void> {
@@ -52,10 +55,7 @@ export class GoogleButtonComponent implements AfterViewInit, OnDestroy {
         this.handleCredentialResponse(res);
       });
     } catch (err) {
-      console.error(
-        '[GoogleButtonComponent] Google init or Render error:',
-        err
-      );
+      console.error('[GoogleButtonComponent] Google init or Render error:', err);
     }
   }
 
@@ -63,23 +63,41 @@ export class GoogleButtonComponent implements AfterViewInit, OnDestroy {
    * Google'dan qaytgan credential tokenni backendga yuborish
    */
   private handleCredentialResponse(response: any): void {
+    // Bir vaqtning o'zida bir nechta so'rov yuborilishini oldini olish
+    if (this.isProcessing) {
+      console.log('[GoogleButtonComponent] Already processing, ignoring duplicate request');
+      return;
+    }
+
     const idToken = response?.credential;
     const telegram_id = "12222512";
+    
     if (!idToken) {
       console.warn('[GoogleButtonComponent] Empty Google ID token.');
       return;
     }
 
+    this.isProcessing = true;
     console.info('[GoogleButtonComponent] Google ID token received, logging in...');
 
     this.auth.googleLogin(idToken, telegram_id).subscribe({
       next: (res) => {
         console.log('[GoogleButtonComponent] Google login success:', res);
-        // Login muvaffaqiyatli bo‘lgach, foydalanuvchini bosh sahifaga yo‘naltiramiz
-        window.location.href = '/';
+        
+        // NgZone ichida navigate qilish (Angular change detection uchun)
+        this.ngZone.run(() => {
+          this.router.navigate(['/home']).then(() => {
+            console.log('[GoogleButtonComponent] Navigation complete');
+            this.isProcessing = false;
+          }).catch(err => {
+            console.error('[GoogleButtonComponent] Navigation error:', err);
+            this.isProcessing = false;
+          });
+        });
       },
       error: (err) => {
         console.error('[GoogleButtonComponent] Google login error:', err);
+        this.isProcessing = false;
         alert('Возникла проблема с входом через Google. Пожалуйста, попробуйте ещё раз.');
       },
     });

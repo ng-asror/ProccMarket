@@ -23,27 +23,50 @@ export class Login implements OnInit {
   protected ICONS = icons;
   passwordToggle = signal(false);
   loginForm!: FormGroup;
+  isLoading = signal(false);
+
   constructor(private fb: NonNullableFormBuilder, private router: Router) {}
+
   ngOnInit(): void {
     this.loginForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
       password: ['', Validators.required],
     });
   }
+
   protected showPass(input: HTMLInputElement): void {
     if (input.type === 'password') {
+      input.type = 'text';
       this.passwordToggle.set(true);
     } else {
+      input.type = 'password';
       this.passwordToggle.set(false);
     }
   }
 
   async login(): Promise<void> {
-    if (this.loginForm.valid) {
+    if (this.loginForm.invalid || this.isLoading()) {
+      return;
+    }
+
+    try {
+      this.isLoading.set(true);
       const { email, password } = this.loginForm.getRawValue();
-      await firstValueFrom(this.authService.login(email, password)).then(() => {
-        this.router.navigate(['/home']);
-      });
+      
+      // await firstValueFrom storage'ga saqlashni kutadi
+      await firstValueFrom(this.authService.login(email, password));
+      
+      console.log('Login muvaffaqiyatli, redirect...');
+      
+      // NgZone ichida navigate qilish
+      await this.router.navigate(['/home']);
+      
+      console.log('Redirect bajarildi');
+    } catch (error) {
+      console.error('Login error:', error);
+      alert('Kirish muvaffaqiyatsiz. Iltimos, qaytadan urinib ko\'ring.');
+    } finally {
+      this.isLoading.set(false);
     }
   }
 }

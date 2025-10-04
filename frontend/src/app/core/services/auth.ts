@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { IGetMeRes, ILoginRes } from '../interfaces';
-import { Observable, tap } from 'rxjs';
+import { from, Observable, switchMap, tap } from 'rxjs';
 import { environment } from '../../../environments/environment.development';
 import { Telegram } from './telegram';
 import { Router } from '@angular/router';
@@ -30,8 +30,8 @@ export class Auth {
       })
       .pipe(
         tap((res: ILoginRes) => {
-          this.telegram.setCloudItem('email', res.user.email);
-          this.telegram.setCloudItem('token', res.token);
+          this.telegram.setCloudItem('email', res.user.email),
+            this.telegram.setCloudItem('token', res.token);
         })
       );
   }
@@ -59,9 +59,14 @@ export class Auth {
     return this.http
       .post<ILoginRes>(`${environment.apiUrl}/auth/google`, { id_token: idToken, telegram_id })
       .pipe(
-        tap((res: ILoginRes) => {
-          this.telegram.setCloudItem('email', res.user.email);
-          this.telegram.setCloudItem('token', res.token);
+        switchMap((res: ILoginRes) => {
+          // Telegram cloud storage'ga saqlash (async)
+          return from(
+            Promise.all([
+              this.telegram.setCloudItem('email', res.user.email),
+              this.telegram.setCloudItem('token', res.token),
+            ]).then(() => res)
+          );
         })
       );
   }

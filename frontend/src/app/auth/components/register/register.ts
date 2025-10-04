@@ -1,4 +1,4 @@
-import { Component, OnInit, AfterViewInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import {
   FormGroup,
   FormsModule,
@@ -11,7 +11,6 @@ import { Auth } from '../../../core';
 import { firstValueFrom } from 'rxjs';
 import { Router } from '@angular/router';
 import { GoogleButtonComponent } from '../google-button/google-button.component';
-
 
 @Component({
   selector: 'app-register',
@@ -26,6 +25,7 @@ export class Register implements OnInit {
 
   passwordToggle = signal(false);
   confirmPasswordToggle = signal(false);
+  isLoading = signal(false);
   registerForm!: FormGroup;
 
   constructor(private fb: NonNullableFormBuilder) {}
@@ -39,29 +39,57 @@ export class Register implements OnInit {
   }
 
   protected togglePass(input: HTMLInputElement): void {
-    this.passwordToggle.set(input.type === 'password');
+    if (input.type === 'password') {
+      input.type = 'text';
+      this.passwordToggle.set(true);
+    } else {
+      input.type = 'password';
+      this.passwordToggle.set(false);
+    }
   }
 
   protected toggleConfirmPass(input: HTMLInputElement): void {
-    this.confirmPasswordToggle.set(input.type === 'password');
+    if (input.type === 'password') {
+      input.type = 'text';
+      this.confirmPasswordToggle.set(true);
+    } else {
+      input.type = 'password';
+      this.confirmPasswordToggle.set(false);
+    }
   }
 
   async register(): Promise<void> {
-    if (this.registerForm.invalid) return;
-    const telegram_id = "12222";
-    
+    if (this.registerForm.invalid || this.isLoading()) {
+      return;
+    }
 
+    const telegram_id = "12222";
     const { email, password, confirmPassword } = this.registerForm.getRawValue();
+    
     if (password !== confirmPassword) {
       alert('Пароли не совпадают');
       return;
     }
 
     try {
-      await firstValueFrom(this.authService.register(email, telegram_id, password, confirmPassword));
-      this.router.navigate(['/home']);
+      this.isLoading.set(true);
+      
+      // await firstValueFrom storage'ga saqlashni kutadi
+      await firstValueFrom(
+        this.authService.register(email, telegram_id, password, confirmPassword)
+      );
+      
+      console.log('Registration muvaffaqiyatli, redirect...');
+      
+      // Navigate
+      await this.router.navigate(['/home']);
+      
+      console.log('Redirect bajarildi');
     } catch (err) {
       console.error('Registration error:', err);
+      alert('Регистрация не удалась. Пожалуйста, попробуйте ещё раз.');
+    } finally {
+      this.isLoading.set(false);
     }
   }
 }

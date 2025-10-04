@@ -56,7 +56,12 @@
     </div>
   </div>
 
-  <button type="submit" class="btn btn-primary w-full">Зарегистрироваться</button>
+  <button 
+    type="submit" 
+    class="btn btn-primary w-full"
+    [disabled]="isLoading() || registerForm.invalid">
+    {{ isLoading() ? 'Загрузка...' : 'Зарегистрироваться' }}
+  </button>
 
   <div class="flex items-center gap-x-[5px] justify-center opacity-50">
     <hr class="w-[64.07px]" />

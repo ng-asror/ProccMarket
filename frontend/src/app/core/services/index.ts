@@ -3,3 +3,4 @@ export * from './auth';
 export * from './telegram';
 export * from './message';
 export * from './news';
+export * from './balance';

@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
-import { ILoginRes } from '../interfaces';
+import { IGetMeRes, ILoginRes } from '../interfaces';
 import { Observable, tap } from 'rxjs';
 import { environment } from '../../../environments/environment.development';
 import { Telegram } from './telegram';
@@ -15,28 +15,35 @@ export class Auth {
   constructor(private http: HttpClient, private router: Router) {}
 
   /** Oddiy email + password orqali ro'yxatdan o'tish */
-  register(email: string, telegram_id: string, password: string, password_confirmation: string): Observable<ILoginRes> {
-  return this.http
-    .post<ILoginRes>(`${environment.apiUrl}/auth/register`, { email, telegram_id, password, password_confirmation })
-    .pipe(
-      tap((res: ILoginRes) => {
-        this.telegram.setCloudItem('email', res.user.email);
-        this.telegram.setCloudItem('token', res.token);
-      })
-    );
-}
-
-
-  /** Oddiy email + password orqali login */
-  login(email: string, password: string): Observable<ILoginRes> {
+  register(
+    email: string,
+    telegram_id: string,
+    password: string,
+    password_confirmation: string
+  ): Observable<ILoginRes> {
     return this.http
-      .post<ILoginRes>(`${environment.apiUrl}/auth/login`, { email, password })
+      .post<ILoginRes>(`${environment.apiUrl}/auth/register`, {
+        email,
+        telegram_id,
+        password,
+        password_confirmation,
+      })
       .pipe(
         tap((res: ILoginRes) => {
           this.telegram.setCloudItem('email', res.user.email);
           this.telegram.setCloudItem('token', res.token);
         })
       );
+  }
+
+  /** Oddiy email + password orqali login */
+  login(email: string, password: string): Observable<ILoginRes> {
+    return this.http.post<ILoginRes>(`${environment.apiUrl}/auth/login`, { email, password }).pipe(
+      tap((res: ILoginRes) => {
+        this.telegram.setCloudItem('email', res.user.email);
+        this.telegram.setCloudItem('token', res.token);
+      })
+    );
   }
 
   /** Foydalanuvchi mavjudligini tekshirish */
@@ -57,6 +64,10 @@ export class Auth {
           this.telegram.setCloudItem('token', res.token);
         })
       );
+  }
+
+  getMe(): Observable<IGetMeRes> {
+    return this.http.get<IGetMeRes>(`${environment.apiUrl}/auth/me`);
   }
 
   /** Chiqish (logout) */

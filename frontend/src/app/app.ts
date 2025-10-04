@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, HostListener, inject, OnInit, signal } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { Telegram } from './core/services';
 
@@ -14,5 +14,17 @@ export class App implements OnInit {
 
   ngOnInit(): void {
     this.telegram.init('#030303');
+  }
+
+  @HostListener('document:click', ['$event'])
+  onClick(event: MouseEvent) {
+    const target = event.target as HTMLElement;
+    if (target.tagName !== 'INPUT' && target.tagName !== 'TEXTAREA') {
+      const inputs = document.querySelectorAll('input, textarea');
+      inputs.forEach((input: Element) => {
+        const element = input as HTMLElement;
+        element.blur();
+      });
+    }
   }
 }

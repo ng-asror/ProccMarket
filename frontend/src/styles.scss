@@ -1,26 +1,13 @@
+@charset "UTF-8";
 @import 'tailwindcss';
 @plugin "daisyui" {
   themes: light --default, dark --prefersdark, lofi;
 }
-
 @import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Red+Hat+Display:ital,wght@0,300..900;1,300..900&display=swap');
-@media print {
-  body {
-    margin: 0 !important;
-  }
-}
 
-.main-container {
-  width: 100%;
-  margin-left: auto;
-  margin-right: auto;
-}
+@import 'flatpickr/dist/flatpickr.min.css';
 
-.editor-container_classic-editor .editor-container__editor {
-  width: 100%;
-  height: auto;
-}
 * {
   scrollbar-width: 0;
   &::-webkit-scrollbar {
@@ -74,4 +61,16 @@ input[type='date']::-moz-calendar-picker-indicator {
 }
 input[type='date']::-webkit-datetime-edit {
   display: none;
+}
+
+.flatpickr-day {
+  border-radius: 6px;
+  &.selected {
+    background-color: #030303;
+    border-color: #030303;
+    &:hover {
+      border-color: #030303;
+      background-color: #030303;
+    }
+  }
 }

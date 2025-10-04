@@ -1,6 +1,6 @@
-import { Component, inject, Inject, resource } from '@angular/core';
+import { Component, inject, resource } from '@angular/core';
 import { icons, LucideAngularModule } from 'lucide-angular';
-import { DateFocus } from '../../shared/directives/date-focus';
+import { DateFocus } from '../../shared';
 import { Auth, BalanceService } from '../../core';
 import { firstValueFrom } from 'rxjs';
 import { NgIf } from '@angular/common';

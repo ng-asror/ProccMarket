@@ -10,10 +10,11 @@ import {
 import { Auth } from '../../../core';
 import { firstValueFrom } from 'rxjs';
 import { Router } from '@angular/router';
+import { GoogleButtonComponent } from '../google-button/google-button.component';
 
 @Component({
   selector: 'app-login',
-  imports: [LucideAngularModule, ReactiveFormsModule, FormsModule],
+  imports: [LucideAngularModule, ReactiveFormsModule, FormsModule, GoogleButtonComponent],
   templateUrl: './login.html',
   styleUrl: './login.scss',
 })

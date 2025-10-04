@@ -11,14 +11,26 @@ import { Router } from '@angular/router';
 })
 export class Auth {
   private telegram = inject(Telegram);
+
   constructor(private http: HttpClient, private router: Router) {}
 
+  /** Oddiy email + password orqali ro'yxatdan o'tish */
+  register(email: string, telegram_id: string, password: string, password_confirmation: string): Observable<ILoginRes> {
+  return this.http
+    .post<ILoginRes>(`${environment.apiUrl}/auth/register`, { email, telegram_id, password, password_confirmation })
+    .pipe(
+      tap((res: ILoginRes) => {
+        this.telegram.setCloudItem('email', res.user.email);
+        this.telegram.setCloudItem('token', res.token);
+      })
+    );
+}
+
+
+  /** Oddiy email + password orqali login */
   login(email: string, password: string): Observable<ILoginRes> {
     return this.http
-      .post<ILoginRes>(`${environment.apiUrl}/auth/login`, {
-        email,
-        password,
-      })
+      .post<ILoginRes>(`${environment.apiUrl}/auth/login`, { email, password })
       .pipe(
         tap((res: ILoginRes) => {
           this.telegram.setCloudItem('email', res.user.email);
@@ -27,16 +39,27 @@ export class Auth {
       );
   }
 
-  existUser(email: string): Observable<{
-    success: boolean;
-    exist: boolean;
-  }> {
-    return this.http.post<{
-      success: boolean;
-      exist: boolean;
-    }>(`${environment.apiUrl}/auth/exist-user`, { email });
+  /** Foydalanuvchi mavjudligini tekshirish */
+  existUser(email: string): Observable<{ success: boolean; exist: boolean }> {
+    return this.http.post<{ success: boolean; exist: boolean }>(
+      `${environment.apiUrl}/auth/exist-user`,
+      { email }
+    );
   }
 
+  /** Google orqali kirish */
+  googleLogin(idToken: string, telegram_id: string): Observable<ILoginRes> {
+    return this.http
+      .post<ILoginRes>(`${environment.apiUrl}/auth/google`, { id_token: idToken, telegram_id })
+      .pipe(
+        tap((res: ILoginRes) => {
+          this.telegram.setCloudItem('email', res.user.email);
+          this.telegram.setCloudItem('token', res.token);
+        })
+      );
+  }
+
+  /** Chiqish (logout) */
   logout(): void {
     try {
       this.telegram.removeCloudItem('token').then(() => {
@@ -47,8 +70,9 @@ export class Auth {
     }
   }
 
+  /** Token mavjudligini tekshirish */
   async isLoggedIn(): Promise<boolean> {
-    const email: string | null = await this.telegram.getCloudStorage('token');
-    return email ? true : false;
+    const token: string | null = await this.telegram.getCloudStorage('token');
+    return !!token;
   }
 }

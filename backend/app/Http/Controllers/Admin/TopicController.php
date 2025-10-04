@@ -109,7 +109,7 @@ class TopicController extends Controller
 
         // Get sections in tree structure
         $sections = Section::buildTree($query->get());
-        $users = User::select('id', 'name', 'avatar')
+        $users = User::select('id', 'name', 'avatar', 'email', 'telegram_id')
                     ->get();
 
         $allSections = Section::select('id', 'name', 'parent_id')

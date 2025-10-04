@@ -1,11 +1,13 @@
 <?php
 
+use App\Http\Controllers\API\V1\CommentController;
 use App\Http\Controllers\API\V1\SectionController;
 use App\Http\Controllers\API\V1\AuthController;
 use App\Http\Controllers\API\V1\CryptoBotController;
 use App\Http\Controllers\API\V1\PublicApiController;
 use App\Http\Controllers\API\V1\WebSocketController;
 use App\Http\Controllers\API\V1\LikeController;
+use App\Http\Controllers\API\V1\NewsController;
 use App\Http\Controllers\API\V1\PostController;
 use App\Http\Controllers\API\V1\SearchController;
 use App\Http\Controllers\API\V1\ShareController;
@@ -118,6 +120,25 @@ Route::prefix('v1')->group(function () {
             Route::get('/check-eligibility', [WithdrawalController::class, 'checkEligibility']);
             Route::get('/{withdrawal}', [WithdrawalController::class, 'show']);
             Route::patch('/{withdrawal}/cancel', [WithdrawalController::class, 'cancel']);
+        });
+
+        Route::prefix('news')->group(function () {
+            Route::get('/', [NewsController::class, 'index']);
+            Route::get('/categories', [NewsController::class, 'categories']);
+            Route::get('/category/{categoryId}', [NewsController::class, 'byCategory']);            
+            Route::get('/{id}', [NewsController::class, 'show']);
+        });
+
+        Route::prefix('news/{news}/comments')->group(function () {
+            Route::get('/', [CommentController::class, 'index']);            
+            Route::post('/', [CommentController::class, 'store']);
+        });
+        
+        Route::prefix('comments')->group(function () {
+            Route::get('/{comment}', [CommentController::class, 'show']);            
+            Route::put('/{comment}', [CommentController::class, 'update']);
+            Route::patch('/{comment}', [CommentController::class, 'update']);            
+            Route::delete('/{comment}', [CommentController::class, 'destroy']);
         });
     });
 

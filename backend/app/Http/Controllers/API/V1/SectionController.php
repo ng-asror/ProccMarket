@@ -18,7 +18,7 @@ class SectionController extends Controller
     {
         $user = $request->user();
         
-        $sections = Section::withCount('topics')
+        $allSections = Section::withCount('topics')
             ->with('topics.posts')
             ->get()
             ->map(function ($section) use ($user) {
@@ -35,14 +35,32 @@ class SectionController extends Controller
                     'posts_count' => $section->topics->sum('posts_count'),
                     'has_access' => $hasAccess,
                     'is_purchased' => $user->sections()->where('section_id', $section->id)->exists(),
-                    'default_roles' => $section->default_roles
+                    'default_roles' => $section->default_roles,
+                    'parent_id' => $section->parent_id,
+                    'position' => $section->position
                 ];
             });
+
+        $transformedSections = Section::withCount('topics')
+            ->with('topics.posts')
+            ->get()
+            ->transform(function ($section) use ($user) {
+                $section->has_access = $this->userHasAccess($user, $section);
+                $section->is_purchased = $user->sections()->where('section_id', $section->id)->exists();
+                $section->posts_count = $section->topics->sum('posts_count');
+
+                unset($section->topics);
+                
+                return $section;
+            });
+
+        $sections = Section::buildTree($transformedSections);
 
         return response()->json([
             'success' => true,
             'message' => 'Sections retrieved successfully',
-            'sections' => $sections
+            'sections' => $sections,
+            'allSections' => $allSections
         ], 200);
     }
 
@@ -64,6 +82,22 @@ class SectionController extends Controller
 
         $section->load(['topics.user', 'topics.posts']);
         $hasAccess = $this->userHasAccess($user, $section);
+
+        $transformedSections = Section::where('parent_id', $section->id)
+            ->withCount('topics')
+            ->with('topics.posts')
+            ->get()
+            ->transform(function ($section) use ($user) {
+                $section->has_access = $this->userHasAccess($user, $section);
+                $section->is_purchased = $user->sections()->where('section_id', $section->id)->exists();
+                $section->posts_count = $section->topics->sum('posts_count');
+
+                unset($section->topics);
+                
+                return $section;
+            });
+
+        $child = Section::buildTree($transformedSections, $section->id);
         
         return response()->json([
             'success' => true,
@@ -80,6 +114,9 @@ class SectionController extends Controller
                 'access_price' => $section->access_price,
                 'has_access' => $hasAccess,
                 'is_purchased' => $user->sections()->where('section_id', $section->id)->exists(),
+                'parent_id' => $section->parent_id,
+                'position' => $section->position,
+                'children' => $child
             ]
         ], 200);
     }

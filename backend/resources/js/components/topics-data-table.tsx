@@ -1,10 +1,10 @@
-import { 
-  IconChevronDown, 
-  IconDotsVertical, 
-  IconEdit, 
-  IconLayoutColumns, 
-  IconPlus, 
-  IconSearch, 
+import {
+  IconChevronDown,
+  IconDotsVertical,
+  IconEdit,
+  IconLayoutColumns,
+  IconPlus,
+  IconSearch,
   IconTrash,
   IconLock,
   IconLockOpen,
@@ -57,6 +57,17 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Switch } from '@/components/ui/switch';
 import { ParentSectionSelector } from './parent-section-selector';
+import {
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
+} from "@/components/ui/popover";
+import {
+  Command,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
 
 // Schema for topic data validation
 export const topicSchema = z.object({
@@ -94,6 +105,8 @@ export type User = {
   id: number;
   name: string;
   avatar: string | null;
+  email: string | null;
+  telegram_id: string | null;
 };
 
 // Topic Edit/Add Dialog Component
@@ -120,7 +133,7 @@ function TopicDialog({
     content: topic?.content || '',
     closed: topic?.closed || false,
   });
-  const [imageFile, setImageFile] = React.useState<File | null>(null);  
+  const [imageFile, setImageFile] = React.useState<File | null>(null);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -220,27 +233,42 @@ function TopicDialog({
               </div>
               <div>
                 <Label htmlFor="user_id">User</Label>
-                <Select value={formData.user_id} onValueChange={(value) => setFormData({ ...formData, user_id: value })}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select user" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {users.map((user) => (
-                      <SelectItem key={user.id} value={user.id.toString()}>
-                        <div className="flex items-center">
-                          <Avatar className="h-6 w-6 mr-2">
-                            <AvatarImage src={user.avatar || undefined} />
-                            <AvatarFallback>{user.name.charAt(0).toUpperCase()}</AvatarFallback>
-                          </Avatar>
-                          {user.name}
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+
+
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" className="w-full justify-start">
+                      {formData.user_id
+                        ? users.find((u) => u.id.toString() === formData.user_id.toString())?.name
+                        : "Select user"}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-[300px] p-0">
+                    <Command>
+                      <CommandInput placeholder="Search user..." />
+                      <CommandList>
+                        {users.map((user) => (
+                          <CommandItem
+                            key={user.id}
+                            value={`${user.name?.toLowerCase()} ${user.email?.toLowerCase()} ${user.telegram_id}`}
+                            onSelect={() => setFormData({ ...formData, user_id: user.id.toString() })}
+                          >
+                            <div className="flex items-center">
+                              <Avatar className="h-6 w-6 mr-2">
+                                <AvatarImage src={user.avatar || undefined} />
+                                <AvatarFallback>{user.name?.charAt(0).toUpperCase() || user.email?.charAt(0).toUpperCase()}</AvatarFallback>
+                              </Avatar>
+                              {user.name || user.email || user.telegram_id}
+                            </div>
+                          </CommandItem>
+                        ))}
+                      </CommandList>
+                    </Command>
+                  </PopoverContent>
+                </Popover>
               </div>
             </div>
-            
+
             <div>
               <Label htmlFor="title">Title</Label>
               <Input
@@ -250,7 +278,7 @@ function TopicDialog({
                 required
               />
             </div>
-            
+
             <div>
               <Label htmlFor="content">Content</Label>
               <Textarea
@@ -261,7 +289,7 @@ function TopicDialog({
                 required
               />
             </div>
-            
+
             <div>
               <Label htmlFor="image">Image</Label>
               <Input
@@ -271,7 +299,7 @@ function TopicDialog({
                 accept="image/*"
               />
             </div>
-            
+
             {isEdit && topic?.image && (
               <div>
                 <Label>Current Image</Label>
@@ -282,7 +310,7 @@ function TopicDialog({
                 />
               </div>
             )}
-            
+
             <div className="flex items-center space-x-2">
               <Switch
                 id="closed"
@@ -292,7 +320,7 @@ function TopicDialog({
               <Label htmlFor="closed">Closed</Label>
             </div>
           </div>
-          
+
           <DialogFooter>
             <Button type="submit">{isEdit ? 'Save Changes' : 'Create Topic'}</Button>
           </DialogFooter>
@@ -313,10 +341,10 @@ const columns = (refreshData: () => void, sections: any[], allSections: any[], u
       />
     ),
     cell: ({ row }) => (
-      <Checkbox 
-        checked={row.getIsSelected()} 
-        onCheckedChange={(value) => row.toggleSelected(!!value)} 
-        aria-label="Select row" 
+      <Checkbox
+        checked={row.getIsSelected()}
+        onCheckedChange={(value) => row.toggleSelected(!!value)}
+        aria-label="Select row"
       />
     ),
     enableSorting: false,
@@ -360,7 +388,7 @@ const columns = (refreshData: () => void, sections: any[], allSections: any[], u
       <div className="flex items-center space-x-2">
         <Avatar className="h-8 w-8">
           <AvatarImage src={row.original.user.avatar || undefined} />
-          <AvatarFallback>{row.original.user.name.charAt(0).toUpperCase()}</AvatarFallback>
+          <AvatarFallback>{row.original.user.name?.charAt(0).toUpperCase() || 'U'}</AvatarFallback>
         </Avatar>
         <div className="text-sm font-medium">{row.original.user.name}</div>
       </div>
@@ -523,16 +551,16 @@ const columns = (refreshData: () => void, sections: any[], allSections: any[], u
   },
 ];
 
-export function TopicsDataTable({ 
-  data, 
-  filters, 
-  sections, 
+export function TopicsDataTable({
+  data,
+  filters,
+  sections,
   allSections,
-  users 
-}: { 
-  data: any; 
-  filters: any; 
-  sections: any[]; 
+  users
+}: {
+  data: any;
+  filters: any;
+  sections: any[];
   users: User[];
   allSections: any[];
 }) {
@@ -549,8 +577,8 @@ export function TopicsDataTable({
     const timeoutId = setTimeout(() => {
       router.get(
         route('admin.topics.index'),
-        { 
-          search, 
+        {
+          search,
           section_filter: sectionFilter || undefined,
           user_filter: userFilter || undefined,
           status_filter: statusFilter || undefined,
@@ -626,7 +654,7 @@ export function TopicsDataTable({
 
     if (confirm(`Are you sure you want to delete ${selectedTopics.length} topics? All related data will be permanently deleted.`)) {
       const topicIds = selectedTopics.map(topic => topic.id);
-      
+
       router.post(route('admin.topics.bulk-delete'), {
         topic_ids: topicIds
       }, {
@@ -650,7 +678,7 @@ export function TopicsDataTable({
 
     const topicIds = selectedTopics.map(topic => topic.id);
     const statusText = status ? 'close' : 'open';
-    
+
     router.post(route('admin.topics.bulk-toggle-status'), {
       topic_ids: topicIds,
       status: status
@@ -682,11 +710,11 @@ export function TopicsDataTable({
         <div className="flex items-center gap-2">
           <div className="relative">
             <IconSearch className="absolute top-2.5 left-2 h-4 w-4 text-muted-foreground" />
-            <Input 
-              placeholder="Search topics..." 
-              value={search} 
-              onChange={(e) => setSearch(e.target.value)} 
-              className="w-64 pl-8" 
+            <Input
+              placeholder="Search topics..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-64 pl-8"
             />
           </div>
 
@@ -730,7 +758,7 @@ export function TopicsDataTable({
                           <div className="flex items-center">
                             <Avatar className="h-6 w-6 mr-2">
                               <AvatarImage src={user.avatar || undefined} />
-                              <AvatarFallback>{user.name.charAt(0).toUpperCase()}</AvatarFallback>
+                              <AvatarFallback>{user.name?.charAt(0).toUpperCase() || user.email?.charAt(0).toUpperCase()}</AvatarFallback>
                             </Avatar>
                             {user.name}
                           </div>
@@ -871,13 +899,13 @@ export function TopicsDataTable({
                 onClick={() => {
                   router.get(
                     data.prev_page_url,
-                    { 
-                      search, 
+                    {
+                      search,
                       section_filter: sectionFilter || undefined,
                       user_filter: userFilter || undefined,
                       status_filter: statusFilter || undefined,
-                      sort_by: sorting[0]?.id, 
-                      sort_direction: sorting[0]?.desc ? 'desc' : 'asc' 
+                      sort_by: sorting[0]?.id,
+                      sort_direction: sorting[0]?.desc ? 'desc' : 'asc'
                     },
                     {
                       preserveState: true,
@@ -895,13 +923,13 @@ export function TopicsDataTable({
                 onClick={() => {
                   router.get(
                     data.next_page_url,
-                    { 
-                      search, 
+                    {
+                      search,
                       section_filter: sectionFilter || undefined,
                       user_filter: userFilter || undefined,
                       status_filter: statusFilter || undefined,
-                      sort_by: sorting[0]?.id, 
-                      sort_direction: sorting[0]?.desc ? 'desc' : 'asc' 
+                      sort_by: sorting[0]?.id,
+                      sort_direction: sorting[0]?.desc ? 'desc' : 'asc'
                     },
                     {
                       preserveState: true,

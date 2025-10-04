@@ -5,7 +5,7 @@ namespace App\Http\Controllers\API\V1;
 use App\Events\TopicCreated;
 use App\Models\Section;
 use App\Models\Topic;
-use App\Models\TopicView;
+use App\Models\View;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -52,13 +52,7 @@ class TopicController extends Controller
 
         $query = Topic::where('section_id', $section->id)
             ->with(['user', 'posts'])
-            ->withCount(['posts', 'likes', 'shares']);
-
-        // Views count qo'shish
-        $query->addSelect([
-            'views_count' => TopicView::selectRaw('count(*)')
-                ->whereColumn('topic_id', 'topics.id')
-        ]);
+            ->withCount(['posts', 'likes', 'shares', 'views']);
 
         // Date filter
         if ($request->filled('start_date')) {
@@ -70,7 +64,11 @@ class TopicController extends Controller
         }
 
         // Sorting
-        $query->orderBy($sortBy, $sortOrder);
+        if ($sortBy === 'views_count') {
+            $query->orderBy('views_count', $sortOrder);
+        } else {
+            $query->orderBy($sortBy, $sortOrder);
+        }
 
         $topics = $query->paginate($perPage);
 
@@ -89,7 +87,7 @@ class TopicController extends Controller
                 'posts_count' => $topic->posts_count,
                 'likes_count' => $topic->likes_count,
                 'shares_count' => $topic->shares_count,
-                'views_count' => $topic->views_count ?? 0,
+                'views_count' => $topic->views_count,
                 'user_reaction' => $userLike ? ($userLike->is_like ? 'like' : 'dislike') : null,
                 'last_post_at' => $topic->posts->max('created_at')
             ];
@@ -137,11 +135,11 @@ class TopicController extends Controller
 
         $imagePath = null;
 
-        // Fayl yuklangan bo‘lsa
+        // Fayl yuklangan bo'lsa
         if ($request->hasFile('image') && $request->file('image')->isValid()) {
             $imagePath = $request->file('image')->store('topics', 'public');
         }
-        // URL yuborilgan bo‘lsa
+        // URL yuborilgan bo'lsa
         elseif (is_string($request->image) && Str::startsWith($request->image, ['http://', 'https://'])) {
             $imagePath = $request->image;
         }
@@ -192,10 +190,8 @@ class TopicController extends Controller
         }
 
         $topic->load(['user', 'section:id,name'])
-            ->loadCount(['posts', 'likes', 'shares']);
+            ->loadCount(['posts', 'likes', 'shares', 'views']);
 
-        // Views count
-        $viewsCount = TopicView::where('topic_id', $topic->id)->count();
         $userLike = $topic->likes()->where('user_id', $user->id)->first();
 
         return response()->json([
@@ -213,7 +209,7 @@ class TopicController extends Controller
                 'posts_count' => $topic->posts_count,
                 'likes_count' => $topic->likes_count,
                 'shares_count' => $topic->shares_count,
-                'views_count' => $viewsCount,
+                'views_count' => $topic->views_count,
                 'user_reaction' => $userLike ? ($userLike->is_like ? 'like' : 'dislike') : null,
             ]
         ], 200);
@@ -234,21 +230,25 @@ class TopicController extends Controller
         }
 
         // Foydalanuvchi oxirgi 24 soat ichida bu topicni ko'rganmi tekshirish
-        $existingView = TopicView::where('topic_id', $topic->id)
+        $existingView = View::where('viewable_type', Topic::class)
+            ->where('viewable_id', $topic->id)
             ->where('user_id', $user->id)
             ->where('created_at', '>=', now()->subDay())
             ->first();
 
         if (!$existingView) {
-            TopicView::create([
-                'topic_id' => $topic->id,
+            View::create([
+                'viewable_type' => Topic::class,
+                'viewable_id' => $topic->id,
                 'user_id' => $user->id,
                 'ip_address' => $request->ip(),
                 'user_agent' => $request->userAgent()
             ]);
         }
 
-        $viewsCount = TopicView::where('topic_id', $topic->id)->count();
+        $viewsCount = View::where('viewable_type', Topic::class)
+            ->where('viewable_id', $topic->id)
+            ->count();
 
         return response()->json([
             'success' => true,
@@ -286,7 +286,7 @@ class TopicController extends Controller
 
         $topic->update($request->only(['title', 'image', 'closed']));
         $topic->load(['user', 'section:id,name'])
-            ->loadCount(['posts', 'likes', 'shares']);
+            ->loadCount(['posts', 'likes', 'shares', 'views']);
 
         return response()->json([
             'success' => true,

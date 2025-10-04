@@ -39,7 +39,8 @@ export function ParentSectionSelector({
 
   // Filter sections
   const filteredSections = React.useMemo(() => {
-    let sections = allSections.filter((s) => s.id !== excludeId);
+    // let sections = allSections.filter((s) => s.id !== excludeId);
+    let sections = allSections;
     
     if (searchQuery) {
       sections = sections.filter((s) =>

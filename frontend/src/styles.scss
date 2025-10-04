@@ -1,9 +1,26 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 @plugin "daisyui" {
   themes: light --default, dark --prefersdark, lofi;
 }
-@import url("https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap");
-@import url("https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Red+Hat+Display:ital,wght@0,300..900;1,300..900&display=swap");
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Red+Hat+Display:ital,wght@0,300..900;1,300..900&display=swap');
+@media print {
+  body {
+    margin: 0 !important;
+  }
+}
+
+.main-container {
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.editor-container_classic-editor .editor-container__editor {
+  width: 100%;
+  height: auto;
+}
 * {
   scrollbar-width: 0;
   &::-webkit-scrollbar {
@@ -12,11 +29,11 @@
 }
 
 body {
-  font-family: "Inter", sans-serif;
+  font-family: 'Inter', sans-serif;
 }
 
 .price {
-  font-family: "Red Hat Display";
+  font-family: 'Red Hat Display';
   color: #030303;
 }
 
@@ -43,8 +60,8 @@ body {
   }
 }
 /* Chrome, Safari, Edge */
-input[type="date"]::-webkit-inner-spin-button,
-input[type="date"]::-webkit-calendar-picker-indicator {
+input[type='date']::-webkit-inner-spin-button,
+input[type='date']::-webkit-calendar-picker-indicator {
   -webkit-appearance: none;
   -moz-appearance: textfield;
   appearance: none;
@@ -52,9 +69,9 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 }
 
 /* Firefox */
-input[type="date"]::-moz-calendar-picker-indicator {
+input[type='date']::-moz-calendar-picker-indicator {
   display: none;
 }
-input[type="date"]::-webkit-datetime-edit {
+input[type='date']::-webkit-datetime-edit {
   display: none;
 }

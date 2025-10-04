@@ -1,7 +1,6 @@
 import { Component } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { icons, LucideAngularModule } from 'lucide-angular';
-import { ICONS } from './icons';
 
 @Component({
   selector: 'app-menubar',

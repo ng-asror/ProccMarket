@@ -4,13 +4,14 @@ import { ILoginRes } from '../interfaces';
 import { Observable, tap } from 'rxjs';
 import { environment } from '../../../environments/environment.development';
 import { Telegram } from './telegram';
+import { Router } from '@angular/router';
 
 @Injectable({
   providedIn: 'root',
 })
 export class Auth {
   private telegram = inject(Telegram);
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private router: Router) {}
 
   login(email: string, password: string): Observable<ILoginRes> {
     return this.http
@@ -34,6 +35,16 @@ export class Auth {
       success: boolean;
       exist: boolean;
     }>(`${environment.apiUrl}/auth/exist-user`, { email });
+  }
+
+  logout(): void {
+    try {
+      this.telegram.removeCloudItem('token').then(() => {
+        this.router.navigate(['/auth']);
+      });
+    } catch (error) {
+      console.error(error);
+    }
   }
 
   async isLoggedIn(): Promise<boolean> {

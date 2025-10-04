@@ -5,11 +5,14 @@ import { from, switchMap } from 'rxjs';
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const telegram = inject(Telegram);
+  if (req.url.includes('/auth/login') || req.url.includes('/auth/register')) {
+    return next(req);
+  }
   return from(telegram.getCloudStorage('token')).pipe(
     switchMap((token) => {
       const newReq = token
         ? req.clone({
-            setHeaders: { Authorization: `Bearer ${token}` },
+            headers: req.headers.set('Authorization', `Bearer ${token}`),
           })
         : req;
       return next(newReq);

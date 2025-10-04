@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { Storys } from './storys';
+import { Ckeditor } from './ckeditor';
 
-describe('Storys', () => {
-  let component: Storys;
-  let fixture: ComponentFixture<Storys>;
+describe('Ckeditor', () => {
+  let component: Ckeditor;
+  let fixture: ComponentFixture<Ckeditor>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [Storys]
+      imports: [Ckeditor]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(Storys);
+    fixture = TestBed.createComponent(Ckeditor);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

@@ -6,7 +6,7 @@ import 'moment/locale/ru';
   name: 'dateFormat',
 })
 export class AmDateFormatPipe implements PipeTransform {
-  transform(value: Date): string {
-    return moment().locale('ru').format('LL');
+  transform(value: Date, arg: string): string {
+    return moment().locale('ru').format(arg);
   }
 }

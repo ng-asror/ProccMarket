@@ -6,7 +6,7 @@ export interface IGetMeRes extends ResultData {
     telegram_id: string;
     email: string;
     role_id: string;
-    balance: number;
+    balance: string;
     name: string;
     avatar: any;
     banned: boolean;

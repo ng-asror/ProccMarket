@@ -3,20 +3,20 @@ import { ResultData } from './result-data';
 export interface ITransactionRes extends ResultData {
   data: { transactions: ITransaction[]; pagination: pagination };
 }
-
+type TransactionTypes = 'pending' | 'completed' | 'rejected';
 export interface ITransaction {
   id: number;
   user_id: number;
   type: string;
   amount: string;
-  status: string;
+  status: TransactionTypes;
   transaction_id: any;
   payable_type: any;
   payable_id: any;
   paid_at: any;
   description: string;
-  created_at: string;
-  updated_at: string;
+  created_at: Date;
+  updated_at: Date;
 }
 
 interface pagination {

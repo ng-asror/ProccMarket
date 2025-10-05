@@ -1,10 +1,11 @@
 import { Component, inject, resource, signal } from '@angular/core';
 import { icons, LucideAngularModule } from 'lucide-angular';
 import { DateFocus } from '../../shared';
-import { AmDateFormatPipe, Auth, BalanceService, ITransactionRes } from '../../core';
+import { AmDateFormatPipe, Auth, BalanceService, TTransactionTypes } from '../../core';
 import { firstValueFrom } from 'rxjs';
 import { NgFor, NgIf } from '@angular/common';
 import { NumeralPipe } from '../../core';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-balance',
@@ -14,8 +15,8 @@ import { NumeralPipe } from '../../core';
     NgIf,
     NumeralPipe,
     NgFor,
+    FormsModule,
     AmDateFormatPipe,
-    NumeralPipe,
   ],
   templateUrl: './balance.html',
   styleUrl: './balance.scss',
@@ -25,12 +26,23 @@ export class Balance {
   private authService = inject(Auth);
   protected ICONS = icons;
   protected pagination = signal<{ current_page: number; last_page?: number }>({ current_page: 1 });
+  protected sortFilter: {
+    status: TTransactionTypes | 'all';
+    start_date: string;
+    end_date: string;
+  } = { status: 'all', start_date: '', end_date: '' };
   constructor() {}
 
   getAllTransactions = resource({
     loader: async () =>
       await firstValueFrom(
-        this.balanceService.getAllTransactions(this.pagination().current_page, 5)
+        this.balanceService.getAllTransactions(
+          this.pagination().current_page,
+          5,
+          this.sortFilter.status === 'all' ? undefined : this.sortFilter.status,
+          this.sortFilter.start_date,
+          this.sortFilter.end_date
+        )
       ).then((res) => {
         this.pagination.update((current) => ({
           ...current,
@@ -43,24 +55,4 @@ export class Balance {
   getMe = resource({
     loader: () => firstValueFrom(this.authService.getMe()),
   });
-
-  protected onDateChange(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    console.log(input);
-  }
-
-  async export(): Promise<void> {
-    try {
-      const blob = await firstValueFrom(this.balanceService.getExport());
-      const fileName = 'transactions.csv';
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = fileName;
-      a.click();
-      window.URL.revokeObjectURL(url);
-    } catch (error) {
-      console.error('Export error:', error);
-    }
-  }
 }

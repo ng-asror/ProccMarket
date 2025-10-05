@@ -16,9 +16,7 @@
 	<button 
 		type="submit" 
 		class="btn btn-primary"
-		[disabled]="isLoading() || loginForm.invalid">
-		{{ isLoading() ? 'Загрузка...' : 'Войти' }}
-		</button>
+		[disabled]="loginForm.invalid">Войти</button>
 	<div class="flex items-center gap-x-[5px] justify-center opacity-50">
 		<hr class="w-[64.07px]">
 		<span class="text-[14px]">или</span>

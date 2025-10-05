@@ -69,7 +69,7 @@ class WithdrawalController extends Controller
 
         $validator = Validator::make($request->all(), [
             'amount' => 'required|numeric|min:1|max:' . $user->balance,
-            'requisites' => 'required|string|max:500',
+            'requisites' => 'required|string|max:60',
         ]);
 
         if ($validator->fails()) {

@@ -47,7 +47,7 @@ class SectionController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:255|unique:sections,name',
+            'name' => 'required|string|max:255',
             'description' => 'nullable|string',
             'access_price' => 'required|numeric|min:0',
             'default_roles' => 'nullable|array',
@@ -102,6 +102,14 @@ class SectionController extends Controller
                 },
             ],
         ]);
+
+        if ($request->has('remove_image') && $request->remove_image == '1') {
+            // Delete old image if exists
+            if ($section->image) {
+                Storage::disk('public')->delete($section->image);
+            }
+            $section->image = null;
+        }
 
         // Handle image upload (SVG only)
         if ($request->hasFile('image')) {

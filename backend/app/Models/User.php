@@ -25,7 +25,8 @@ class User extends Authenticatable
     ];
 
     protected $hidden = [
-        'password'
+        'password',
+        'remember_token',
     ];
 
     protected function casts(): array
@@ -35,6 +36,7 @@ class User extends Authenticatable
             'password' => 'hashed',
             'balance' => 'decimal:2',
             'banned' => 'boolean',
+            'is_admin' => 'boolean',
             'last_deposit_at' => 'datetime',
         ];
     }

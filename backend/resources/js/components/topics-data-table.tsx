@@ -239,11 +239,11 @@ function TopicDialog({
                   <PopoverTrigger asChild>
                     <Button variant="outline" className="w-full justify-start">
                       {formData.user_id
-                        ? users.find((u) => u.id.toString() === formData.user_id.toString())?.name
+                        ? users.find((u) => u.id.toString() === formData.user_id.toString())?.name || users.find((u) => u.id.toString() === formData.user_id.toString())?.email
                         : "Select user"}
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent className="w-[300px] p-0">
+                  <PopoverContent className="w-[300px] p-0" onWheel={(e) => e.stopPropagation()}>
                     <Command>
                       <CommandInput placeholder="Search user..." />
                       <CommandList>

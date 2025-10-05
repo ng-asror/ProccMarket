@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\API\V1\CommentController;
+use App\Http\Controllers\API\V1\NewsLikeController;
+use App\Http\Controllers\API\V1\NewsShareController;
 use App\Http\Controllers\API\V1\SectionController;
 use App\Http\Controllers\API\V1\AuthController;
 use App\Http\Controllers\API\V1\CryptoBotController;
@@ -18,7 +20,7 @@ use App\Http\Controllers\API\V1\WithdrawalController;
 use App\Http\Controllers\GoogleController;
 use Illuminate\Support\Facades\Route;
 
-Route::prefix('v1')->group(function () {    
+Route::prefix('v1')->group(function () {
     // IMPORTANT: CryptoBot Webhook must be outside auth middleware
     Route::post('/pay/crypto-bot/webhook', [CryptoBotController::class, 'webhook']);
 
@@ -28,7 +30,7 @@ Route::prefix('v1')->group(function () {
         Route::post('/register', [AuthController::class, 'register']);
         Route::post('/login', [AuthController::class, 'login']);
         Route::post('/google', [AuthController::class, 'googleLogin']);
-    
+
         Route::middleware('auth:sanctum')->group(function () {
             Route::get('/me', [AuthController::class, 'me']);
             Route::put('/update', [AuthController::class, 'update']);
@@ -58,7 +60,7 @@ Route::prefix('v1')->group(function () {
             Route::post('/user-typing', [WebSocketController::class, 'userTyping']);
             Route::get('/online-users/{channelType}/{channelId}', [WebSocketController::class, 'getOnlineUsers']);
         });
-        
+
         // Sections (Forums)
         Route::prefix('sections')->group(function () {
             Route::get('/', [SectionController::class, 'index']); // Barcha sectionlar
@@ -101,7 +103,7 @@ Route::prefix('v1')->group(function () {
 
         // File uploads
         Route::post('/upload/image', [UploadController::class, 'uploadImage']);
-        
+
         // Views tracking
         Route::post('/topics/{topic}/view', [TopicController::class, 'incrementView']);
 
@@ -123,23 +125,47 @@ Route::prefix('v1')->group(function () {
             Route::patch('/{withdrawal}/cancel', [WithdrawalController::class, 'cancel']);
         });
 
+        // ==========================================
+        // NEWS ROUTES
+        // ==========================================
         Route::prefix('news')->group(function () {
             Route::get('/', [NewsController::class, 'index']);
             Route::get('/categories', [NewsController::class, 'categories']);
-            Route::get('/category/{categoryId}', [NewsController::class, 'byCategory']);            
+            Route::get('/category/{categoryId}', [NewsController::class, 'byCategory']);
             Route::get('/{id}', [NewsController::class, 'show']);
+            
+            // News Like/Dislike (Auth required)
+            Route::post('/{news}/like', [NewsLikeController::class, 'toggleNewsLike']);
+            Route::get('/{news}/likes', [NewsLikeController::class, 'getNewsLikes']);
+            Route::get('/{news}/dislikes', [NewsLikeController::class, 'getNewsDislikes']);
+            
+            // News Share (Auth required)
+            Route::post('/{news}/share', [NewsShareController::class, 'shareNews']);
+            Route::get('/{news}/shares', [NewsShareController::class, 'getNewsShares']);
         });
 
+        // ==========================================
+        // COMMENTS ROUTES
+        // ==========================================
         Route::prefix('news/{news}/comments')->group(function () {
-            Route::get('/', [CommentController::class, 'index']);            
+            Route::get('/', [CommentController::class, 'index']);
             Route::post('/', [CommentController::class, 'store']);
         });
         
         Route::prefix('comments')->group(function () {
-            Route::get('/{comment}', [CommentController::class, 'show']);            
+            Route::get('/{comment}', [CommentController::class, 'show']);
             Route::put('/{comment}', [CommentController::class, 'update']);
-            Route::patch('/{comment}', [CommentController::class, 'update']);            
+            Route::patch('/{comment}', [CommentController::class, 'update']);
             Route::delete('/{comment}', [CommentController::class, 'destroy']);
+            
+            // Comment Like/Dislike (Auth required)
+            Route::post('/{comment}/like', [NewsLikeController::class, 'toggleCommentLike']);
+            Route::get('/{comment}/likes', [NewsLikeController::class, 'getCommentLikes']);
+            Route::get('/{comment}/dislikes', [NewsLikeController::class, 'getCommentDislikes']);
+            
+            // Comment Share (Auth required)
+            Route::post('/{comment}/share', [NewsShareController::class, 'shareComment']);
+            Route::get('/{comment}/shares', [NewsShareController::class, 'getCommentShares']);
         });
 
         Route::prefix('transactions')->group(function () {

@@ -41,19 +41,46 @@ class CommentController extends Controller
                 'user',
                 'replies' => function ($query) use ($sortOrder) {
                     $query->with('user')
-                        ->withCount(['likes', 'shares'])
+                        ->withCount([
+                            'likes as likes_count' => function ($q) {
+                                $q->where('is_like', true);
+                            },
+                            'likes as dislikes_count' => function ($q) {
+                                $q->where('is_like', false);
+                            },
+                            'shares'
+                        ])
                         ->orderBy('created_at', $sortOrder);
                 },
                 'replies.replies' => function ($query) use ($sortOrder) {
                     $query->with('user')
-                        ->withCount(['likes', 'shares'])
+                        ->withCount([
+                            'likes as likes_count' => function ($q) {
+                                $q->where('is_like', true);
+                            },
+                            'likes as dislikes_count' => function ($q) {
+                                $q->where('is_like', false);
+                            },
+                            'shares'
+                        ])
                         ->orderBy('created_at', $sortOrder);
                 }
             ])
-            ->withCount(['likes', 'shares', 'replies']);
+            ->withCount([
+                'likes as likes_count' => function ($q) {
+                    $q->where('is_like', true);
+                },
+                'likes as dislikes_count' => function ($q) {
+                    $q->where('is_like', false);
+                },
+                'shares',
+                'replies'
+            ]);
 
         if ($sortBy === 'likes_count') {
-            $query->orderBy('likes_count', $sortOrder);
+            $query->withCount(['likes as likes_count' => function ($q) {
+                $q->where('is_like', true);
+            }])->orderBy('likes_count', $sortOrder);
         } else {
             $query->orderBy($sortBy, $sortOrder);
         }
@@ -65,6 +92,10 @@ class CommentController extends Controller
         if ($user) {
             $comments->getCollection()->transform(function ($comment) use ($user) {
                 return $this->formatCommentWithReaction($comment, $user);
+            });
+        } else {
+            $comments->getCollection()->transform(function ($comment) {
+                return $this->formatCommentWithoutAuth($comment);
             });
         }
 
@@ -154,6 +185,7 @@ class CommentController extends Controller
                 'user' => $comment->user,
                 'replay_id' => $comment->replay_id,
                 'likes_count' => 0,
+                'dislikes_count' => 0,
                 'shares_count' => 0,
                 'replies_count' => 0,
                 'user_reaction' => null,
@@ -172,10 +204,27 @@ class CommentController extends Controller
             'reply.user',
             'replies' => function ($query) {
                 $query->with('user')
-                    ->withCount(['likes', 'shares'])
+                    ->withCount([
+                        'likes as likes_count' => function ($q) {
+                            $q->where('is_like', true);
+                        },
+                        'likes as dislikes_count' => function ($q) {
+                            $q->where('is_like', false);
+                        },
+                        'shares'
+                    ])
                     ->orderBy('created_at', 'desc');
             }
-        ])->loadCount(['likes', 'shares', 'replies']);
+        ])->loadCount([
+            'likes as likes_count' => function ($q) {
+                $q->where('is_like', true);
+            },
+            'likes as dislikes_count' => function ($q) {
+                $q->where('is_like', false);
+            },
+            'shares',
+            'replies'
+        ]);
 
         $user = $request->user();
         $userReaction = null;
@@ -198,6 +247,7 @@ class CommentController extends Controller
                 'reply_to' => $comment->reply,
                 'replies' => $comment->replies,
                 'likes_count' => $comment->likes_count,
+                'dislikes_count' => $comment->dislikes_count,
                 'shares_count' => $comment->shares_count,
                 'replies_count' => $comment->replies_count,
                 'user_reaction' => $userReaction,
@@ -255,7 +305,16 @@ class CommentController extends Controller
         ]);
 
         $comment->load('user')
-            ->loadCount(['likes', 'shares', 'replies']);
+            ->loadCount([
+                'likes as likes_count' => function ($q) {
+                    $q->where('is_like', true);
+                },
+                'likes as dislikes_count' => function ($q) {
+                    $q->where('is_like', false);
+                },
+                'shares',
+                'replies'
+            ]);
 
         $userLike = $comment->likes()->where('user_id', $user->id)->first();
 
@@ -270,6 +329,7 @@ class CommentController extends Controller
                 'user' => $comment->user,
                 'replay_id' => $comment->replay_id,
                 'likes_count' => $comment->likes_count,
+                'dislikes_count' => $comment->dislikes_count,
                 'shares_count' => $comment->shares_count,
                 'replies_count' => $comment->replies_count,
                 'user_reaction' => $userLike ? ($userLike->is_like ? 'like' : 'dislike') : null,
@@ -292,7 +352,7 @@ class CommentController extends Controller
         }
 
         // Faqat o'z commentini yoki admin o'chirishi mumkin
-        if ($comment->user_id !== $user->id && !$user->is_admin) {
+        if ($comment->user_id !== $user->id && !$user->hasRole('admin')) {
             return response()->json([
                 'success' => false,
                 'message' => 'You can only delete your own comments'
@@ -311,7 +371,7 @@ class CommentController extends Controller
     }
 
     /**
-     * User reactionni qo'shish (helper method)
+     * User reactionni qo'shish (helper method - authenticated user)
      */
     private function formatCommentWithReaction($comment, $user)
     {
@@ -324,6 +384,7 @@ class CommentController extends Controller
             'updated_at' => $comment->updated_at,
             'user' => $comment->user,
             'likes_count' => $comment->likes_count,
+            'dislikes_count' => $comment->dislikes_count,
             'shares_count' => $comment->shares_count,
             'replies_count' => $comment->replies_count,
             'user_reaction' => $userLike ? ($userLike->is_like ? 'like' : 'dislike') : null,
@@ -333,6 +394,34 @@ class CommentController extends Controller
         if ($comment->replies && $comment->replies->isNotEmpty()) {
             $formattedComment['replies'] = $comment->replies->map(function ($reply) use ($user) {
                 return $this->formatCommentWithReaction($reply, $user);
+            });
+        }
+
+        return $formattedComment;
+    }
+
+    /**
+     * Format comment without authentication (guest user)
+     */
+    private function formatCommentWithoutAuth($comment)
+    {
+        $formattedComment = [
+            'id' => $comment->id,
+            'content' => $comment->content,
+            'created_at' => $comment->created_at,
+            'updated_at' => $comment->updated_at,
+            'user' => $comment->user,
+            'likes_count' => $comment->likes_count,
+            'dislikes_count' => $comment->dislikes_count,
+            'shares_count' => $comment->shares_count,
+            'replies_count' => $comment->replies_count,
+            'user_reaction' => null,
+        ];
+
+        // Nested replies uchun ham formatlaymiz
+        if ($comment->replies && $comment->replies->isNotEmpty()) {
+            $formattedComment['replies'] = $comment->replies->map(function ($reply) {
+                return $this->formatCommentWithoutAuth($reply);
             });
         }
 

@@ -40,4 +40,6 @@ return [
         'client_secret' => env('GOOGLE_CLIENT_SECRET'),
         'redirect' => env('GOOGLE_REDIRECT_URI'),
     ],
+
+    'cryptopay_testnet' => env('CRYPTO_PAY_TESTNET', false),
 ];

@@ -33,7 +33,7 @@ class CryptoBotController extends Controller
             abort(404, '`crypto_bot_token` is missing or empty in the settings.');
         }
 
-        $this->api = new CustomCryptoPay($crypto_bot_token, env('CRYPTO_PAY_TESTNET', false));
+        $this->api = new CustomCryptoPay($crypto_bot_token, config('services.cryptopay_testnet'));
     }
 
     /**
@@ -98,7 +98,7 @@ class CryptoBotController extends Controller
 
             $data->allow_anonymous = $validated['allow_anonymous'] ?? false;
             $data->allow_comments = $validated['allow_comments'] ?? false;
-            $data->description = $validated['description'] ?? 'Payment invoice UID: ' . uniqid();
+            $data->description = $validated['description'] ?? null;
             $data->hidden_message = $validated['hidden_message'] ?? null;
 
             $createdInvoice = $this->api->createInvoice($data);
@@ -331,7 +331,7 @@ class CryptoBotController extends Controller
                 'status' => 'completed',
                 'transaction_id' => $cyptoPayment->hash,
                 'paid_at' => Carbon::parse(Arr::get($payload, 'paid_at')),
-                'description' => 'Deposit made via CryptoBot: ' . $cyptoPayment->description
+                'description' => 'Депозит, внесенный через CryptoBot ' . $cyptoPayment->description
             ]);
             User::where('id', $cyptoPayment->user_id)->update([
                 'balance' => DB::raw("balance + {$amountUSDT}"),

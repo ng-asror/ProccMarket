@@ -18,31 +18,40 @@
 			</button>
 		</div>
 	</div>
-	<div *ngIf="!getAllTransactions.isLoading(); else loader">
+	<div>
 		<div class="border-1 border-[#E1E1E1] p-[15px] rounded-[12px] rounded-b-none flex flex-col gap-y-[10px]">
 			<div class="grid grid-cols-2 gap-x-[10px]">
-				<label for="ot" class="input w-full">
-					<input type="date" id="ot" autocomplete="off" class="w-full" placeholder="От" appDateFocus readonly />
-					<lucide-icon [name]="ICONS.Calendar" size="18"></lucide-icon>
-				</label>
-				<label for="do" class="input w-full">
-					<input type="date" autocomplete="off" class="w-full" placeholder="До" id="do" appDateFocus readonly />
-					<lucide-icon [name]="ICONS.Calendar" size="18"></lucide-icon>
-				</label>
+				<div class="input w-full cursor-pointer">
+					<input type="text" id="ot" autocomplete="off" class="w-full" (change)="getAllTransactions.reload()"
+						[(ngModel)]="sortFilter.start_date" placeholder="От" appDateFocus readonly />
+					<lucide-icon *ngIf="sortFilter.start_date === ''" [name]="ICONS.Calendar" size="18"></lucide-icon>
+					<lucide-icon *ngIf="sortFilter.start_date !== ''" [name]="ICONS.X" size="20"
+						(click)="sortFilter.start_date = ''; getAllTransactions.reload()"></lucide-icon>
+				</div>
+				<div class="input w-full cursor-pointer">
+					<input type="text" autocomplete="off" [(ngModel)]="sortFilter.end_date" (change)="getAllTransactions.reload()"
+						class="w-full" placeholder="До" id="do" appDateFocus readonly />
+					<lucide-icon *ngIf="sortFilter.end_date === ''" [name]="ICONS.Calendar" size="18"></lucide-icon>
+					<lucide-icon *ngIf="sortFilter.end_date !== ''" [name]="ICONS.X" size="20"
+						(click)="sortFilter.end_date = ''; getAllTransactions.reload()"></lucide-icon>
+				</div>
 			</div>
-			<select class="select w-full">
-				<option selected>Все операции</option>
-				<option>Выполнено</option>
-				<option>Отменено</option>
+			<select class="select w-full cursor-pointer" [(ngModel)]="sortFilter.status"
+				(change)="getAllTransactions.reload()">
+				<option selected value="all">Все операции</option>
+				<option value="completed">Выполнено</option>
+				<option value="pending">В обработке</option>
+				<option value="rejected">Отменено</option>
 			</select>
 		</div>
-		<div class="border-1 border-t-0 border-[#E1E1E1] p-[15px]" *ngIf="getAllTransactions.value() as transactions">
+		<div class="border-1 border-t-0 border-[#E1E1E1] p-[15px]"
+			*ngIf="getAllTransactions.value() as transactions; else loader">
 			<ng-container *ngFor="let item of transactions.data.transactions">
-				<div class="pb-[10px] mb-[15px] border-b-1 border-[#E1E1E1]">
+				<div class="pb-[10px] mb-[15px] border-b-1 border-[#E1E1E1] space-y-[10px]">
 					<p class="text-end block text-[14px] text-[#030303] capitalize leading-[100%] opacity-50">{{item.created_at |
-						dateFormat: 'MMMM DD, h:mm'}}</p>
+						dateFormat: 'MMMM DD, HH:MM'}}</p>
 					<b class="text-[16px] leading-[120%] text-[#030303] font-[500]">{{item.description}}</b>
-					<h3 class="price text-[22px] font-bold text-end my-[5px] leading-[100%]">{{item.amount | numeral:
+					<h3 class="price text-[22px] font-bold text-end leading-[100%]">{{item.amount | numeral:
 						'$0,0[.]00'}}</h3>
 					<p *ngIf="item.status === 'completed'"
 						class="p-[4px] block bg-[#04B70A] leading-[100%] text-center rounded text-[16px] text-[#fff]">
@@ -56,40 +65,57 @@
 						class="p-[4px] block bg-[#FFC107] leading-[100%] text-center rounded text-[16px] text-[#fff]">
 						В обработке
 					</p>
-
 				</div>
 			</ng-container>
-			<div class="flex items-center justify-between">
-				<div class="join">
-					<button class="join-item btn" title="Предыдущие транзакции" [disabled]="pagination().current_page === 1">
-						<lucide-icon [name]="ICONS.ChevronLeft"></lucide-icon>
-					</button>
+			<p class="text-[14px]" *ngIf="transactions.data.transactions.length === 0;else dataPagination">
+				Транзакции не найдены
+			</p>
+			<ng-template #dataPagination>
+				<div class="flex items-center">
+					<div class="join" *ngIf="pagination().last_page !== 1">
+						<button class="join-item btn" title="Предыдущие транзакции" [disabled]="pagination().current_page === 1">
+							<lucide-icon [name]="ICONS.ChevronLeft"></lucide-icon>
+						</button>
 
-					<button class="join-item btn">
-						{{pagination().current_page}} / {{pagination().last_page}}
-					</button>
+						<button class="join-item btn">
+							{{pagination().current_page}} / {{pagination().last_page}}
+						</button>
 
-					<button class="join-item btn" title="Следующие транзакции"
-						[disabled]="pagination().current_page === pagination().last_page">
-						<lucide-icon [name]="ICONS.ChevronRight"></lucide-icon>
+						<button class="join-item btn" title="Следующие транзакции"
+							[disabled]="pagination().current_page === pagination().last_page">
+							<lucide-icon [name]="ICONS.ChevronRight"></lucide-icon>
+						</button>
+					</div>
+
+					<button type="button"
+						class="flex items-center justify-center ml-auto gap-x-[5px] cursor-pointer text-[16px] text-[#fff] font-[500] bg-[#FFA800] h-[32px] rounded px-[10px]">
+						<lucide-icon [name]="ICONS.FileDown" size="20" strokeWidth="2"></lucide-icon>
+						Экспорт
 					</button>
 				</div>
-
-				<button type="button" (click)="export()"
-					class="flex items-center justify-center gap-x-[5px] cursor-pointer text-[16px] text-[#fff] font-[500] bg-[#FFA800] h-[32px] rounded px-[10px]">
-					<lucide-icon [name]="ICONS.FileDown" size="20" strokeWidth="2"></lucide-icon>
-					Экспорт
-				</button>
-			</div>
+			</ng-template>
 		</div>
 	</div>
 	<ng-template #loader>
-		<div class="border-1 border-[#E1E1E1] p-[15px] rounded-[12px] rounded-b-none">
-			<div class="flex gap-x-[10px] mb-[10px]">
-				<div class="skeleton flex-1 h-[40px] rounded-[0.25rem]"></div>
-				<div class="skeleton flex-1 h-[40px] rounded-[0.25rem]"></div>
+		<div class="border-1 border-t-0 border-[#E1E1E1] p-[15px] space-y-[15px]">
+			<div class="space-y-[5px] pb-[10px] border-b-1 border-[#E1E1E1]">
+				<div class="skeleton w-[50%] ml-auto h-[14px] rounded-[0]"></div>
+				<div class="skeleton w-full h-[19.5px] rounded-[0]"></div>
+				<div class="skeleton w-[40%] ml-auto h-[22px] rounded-[0]"></div>
+				<div class="skeleton w-full h-[24px] rounded-[0]"></div>
 			</div>
-			<div class="skeleton w-full h-[40px] rounded-[0.25rem]"></div>
+			<div class="space-y-[5px] pb-[10px] border-b-1 border-[#E1E1E1]">
+				<div class="skeleton w-[50%] ml-auto h-[14px] rounded-[0]"></div>
+				<div class="skeleton w-full h-[19.5px] rounded-[0]"></div>
+				<div class="skeleton w-[40%] ml-auto h-[22px] rounded-[0]"></div>
+				<div class="skeleton w-full h-[24px] rounded-[0]"></div>
+			</div>
+			<div class="space-y-[5px] pb-[10px] border-b-1 border-[#E1E1E1]">
+				<div class="skeleton w-[50%] ml-auto h-[14px] rounded-[0]"></div>
+				<div class="skeleton w-full h-[19.5px] rounded-[0]"></div>
+				<div class="skeleton w-[40%] ml-auto h-[22px] rounded-[0]"></div>
+				<div class="skeleton w-full h-[24px] rounded-[0]"></div>
+			</div>
 		</div>
 	</ng-template>
 </div>

@@ -5,11 +5,9 @@ namespace App\Http\Controllers\API\V1;
 use App\Events\TopicCreated;
 use App\Models\Section;
 use App\Models\Topic;
-use App\Models\View;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use App\Http\Controllers\Controller;
 
@@ -22,7 +20,6 @@ class TopicController extends Controller
     {
         $user = $request->user();
         
-        // Kirish huquqini tekshirish
         if (!$this->userHasAccess($user, $section)) {
             return response()->json([
                 'success' => false,
@@ -33,7 +30,7 @@ class TopicController extends Controller
         $validator = Validator::make($request->all(), [
             'page' => 'integer|min:1',
             'per_page' => 'integer|min:1|max:100',
-            'sort_by' => 'in:created_at,updated_at,views_count,posts_count',
+            'sort_by' => 'in:created_at,updated_at,views_count,posts_count,likes_count',
             'sort_order' => 'in:asc,desc',
             'start_date' => 'date',
             'end_date' => 'date|after_or_equal:start_date'
@@ -51,8 +48,20 @@ class TopicController extends Controller
         $sortOrder = $request->input('sort_order', 'desc');
 
         $query = Topic::where('section_id', $section->id)
-            ->with(['user', 'posts'])
-            ->withCount(['posts', 'likes', 'shares', 'views']);
+            ->with(['user', 'posts' => function ($q) {
+                $q->latest()->limit(1);
+            }])
+            ->withCount([
+                'posts',
+                'likes as likes_count' => function ($q) {
+                    $q->where('is_like', true);
+                },
+                'likes as dislikes_count' => function ($q) {
+                    $q->where('is_like', false);
+                },
+                'shares',
+                'views'
+            ]);
 
         // Date filter
         if ($request->filled('start_date')) {
@@ -64,8 +73,8 @@ class TopicController extends Controller
         }
 
         // Sorting
-        if ($sortBy === 'views_count') {
-            $query->orderBy('views_count', $sortOrder);
+        if (in_array($sortBy, ['views_count', 'likes_count'])) {
+            $query->orderBy($sortBy, $sortOrder);
         } else {
             $query->orderBy($sortBy, $sortOrder);
         }
@@ -80,16 +89,19 @@ class TopicController extends Controller
                 'id' => $topic->id,
                 'title' => $topic->title,
                 'image' => $topic->image,
+                'image_url' => $topic->image_url,
                 'closed' => $topic->closed,
                 'created_at' => $topic->created_at,
                 'updated_at' => $topic->updated_at,
                 'author' => $topic->user,
                 'posts_count' => $topic->posts_count,
                 'likes_count' => $topic->likes_count,
+                'dislikes_count' => $topic->dislikes_count,
                 'shares_count' => $topic->shares_count,
                 'views_count' => $topic->views_count,
                 'user_reaction' => $userLike ? ($userLike->is_like ? 'like' : 'dislike') : null,
-                'last_post_at' => $topic->posts->max('created_at')
+                'user_shared' => $topic->shares()->where('user_id', $user->id)->exists(),
+                'last_post' => $topic->posts->first(),
             ];
         });
 
@@ -123,7 +135,7 @@ class TopicController extends Controller
         $validator = Validator::make($request->all(), [
             'title' => 'required|string|max:255',
             'content' => 'required|string',
-            'image' => 'nullable' // Fayl yoki URL bo'lishi mumkin
+            'image' => 'nullable|string'
         ]);
 
         if ($validator->fails()) {
@@ -162,21 +174,25 @@ class TopicController extends Controller
             'topic' => [
                 'id' => $topic->id,
                 'title' => $topic->title,
+                'content' => $topic->content,
                 'image' => $topic->image,
+                'image_url' => $topic->image_url,
                 'closed' => $topic->closed,
                 'created_at' => $topic->created_at,
                 'author' => $topic->user,
                 'posts_count' => 0,
                 'likes_count' => 0,
+                'dislikes_count' => 0,
                 'shares_count' => 0,
                 'views_count' => 0,
                 'user_reaction' => null,
+                'user_shared' => false,
             ]
         ], 201);
     }
 
     /**
-     * Topic ko'rish
+     * Topic ko'rish (Avtomatik view tracking)
      */
     public function show(Request $request, Topic $topic): JsonResponse
     {
@@ -189,10 +205,24 @@ class TopicController extends Controller
             ], 403);
         }
 
+        // Avtomatik view tracking
+        $this->trackView($request, $topic, $user);
+
         $topic->load(['user', 'section:id,name'])
-            ->loadCount(['posts', 'likes', 'shares', 'views']);
+            ->loadCount([
+                'posts',
+                'likes as likes_count' => function ($q) {
+                    $q->where('is_like', true);
+                },
+                'likes as dislikes_count' => function ($q) {
+                    $q->where('is_like', false);
+                },
+                'shares',
+                'views'
+            ]);
 
         $userLike = $topic->likes()->where('user_id', $user->id)->first();
+        $userShared = $topic->shares()->where('user_id', $user->id)->exists();
 
         return response()->json([
             'success' => true,
@@ -200,7 +230,9 @@ class TopicController extends Controller
             'topic' => [
                 'id' => $topic->id,
                 'title' => $topic->title,
+                'content' => $topic->content,
                 'image' => $topic->image,
+                'image_url' => $topic->image_url,
                 'closed' => $topic->closed,
                 'created_at' => $topic->created_at,
                 'updated_at' => $topic->updated_at,
@@ -208,51 +240,12 @@ class TopicController extends Controller
                 'section' => $topic->section,
                 'posts_count' => $topic->posts_count,
                 'likes_count' => $topic->likes_count,
+                'dislikes_count' => $topic->dislikes_count,
                 'shares_count' => $topic->shares_count,
                 'views_count' => $topic->views_count,
                 'user_reaction' => $userLike ? ($userLike->is_like ? 'like' : 'dislike') : null,
+                'user_shared' => $userShared,
             ]
-        ], 200);
-    }
-
-    /**
-     * Topic view count oshirish
-     */
-    public function incrementView(Request $request, Topic $topic): JsonResponse
-    {
-        $user = $request->user();
-        
-        if (!$this->userHasAccess($user, $topic->section)) {
-            return response()->json([
-                'success' => false,
-                'message' => 'You do not have access to this section'
-            ], 403);
-        }
-
-        // Foydalanuvchi oxirgi 24 soat ichida bu topicni ko'rganmi tekshirish
-        $existingView = View::where('viewable_type', Topic::class)
-            ->where('viewable_id', $topic->id)
-            ->where('user_id', $user->id)
-            ->where('created_at', '>=', now()->subDay())
-            ->first();
-
-        if (!$existingView) {
-            View::create([
-                'viewable_type' => Topic::class,
-                'viewable_id' => $topic->id,
-                'user_id' => $user->id,
-                'ip_address' => $request->ip(),
-                'user_agent' => $request->userAgent()
-            ]);
-        }
-
-        $viewsCount = View::where('viewable_type', Topic::class)
-            ->where('viewable_id', $topic->id)
-            ->count();
-
-        return response()->json([
-            'success' => true,
-            'views_count' => $viewsCount
         ], 200);
     }
 
@@ -263,7 +256,6 @@ class TopicController extends Controller
     {
         $user = $request->user();
         
-        // Faqat muallif yoki admin tahrirlashi mumkin
         if ($topic->user_id !== $user->id && !$user->is_admin) {
             return response()->json([
                 'success' => false,
@@ -273,6 +265,7 @@ class TopicController extends Controller
 
         $validator = Validator::make($request->all(), [
             'title' => 'sometimes|string|max:255',
+            'content' => 'sometimes|string',
             'image' => 'nullable|string',
             'closed' => 'sometimes|boolean'
         ]);
@@ -284,9 +277,20 @@ class TopicController extends Controller
             ], 422);
         }
 
-        $topic->update($request->only(['title', 'image', 'closed']));
+        $topic->update($request->only(['title', 'content', 'image', 'closed']));
+        
         $topic->load(['user', 'section:id,name'])
-            ->loadCount(['posts', 'likes', 'shares', 'views']);
+            ->loadCount([
+                'posts',
+                'likes as likes_count' => function ($q) {
+                    $q->where('is_like', true);
+                },
+                'likes as dislikes_count' => function ($q) {
+                    $q->where('is_like', false);
+                },
+                'shares',
+                'views'
+            ]);
 
         return response()->json([
             'success' => true,
@@ -302,7 +306,6 @@ class TopicController extends Controller
     {
         $user = $request->user();
         
-        // Faqat muallif yoki admin o'chirishi mumkin
         if ($topic->user_id !== $user->id && !$user->is_admin) {
             return response()->json([
                 'success' => false,
@@ -316,6 +319,35 @@ class TopicController extends Controller
             'success' => true,
             'message' => 'Topic deleted successfully'
         ], 200);
+    }
+
+    /**
+     * View tracking (avtomatik)
+     */
+    private function trackView(Request $request, Topic $topic, $user)
+    {
+        $ipAddress = $request->ip();
+        $userAgent = $request->userAgent();
+
+        // 24 soat ichida bir xil user/IP qayta view qo'shmaydi
+        $existingView = $topic->views()
+            ->where(function ($query) use ($user, $ipAddress) {
+                if ($user) {
+                    $query->where('user_id', $user->id);
+                } else {
+                    $query->where('ip_address', $ipAddress);
+                }
+            })
+            ->where('created_at', '>=', now()->subDay())
+            ->first();
+
+        if (!$existingView) {
+            $topic->views()->create([
+                'user_id' => $user ? $user->id : null,
+                'ip_address' => $ipAddress,
+                'user_agent' => $userAgent,
+            ]);
+        }
     }
 
     /**

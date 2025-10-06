@@ -19,7 +19,7 @@ class PostCreated implements ShouldBroadcast
 
     public function __construct(Post $post)
     {
-        $this->post = $post->load(['user:id,name,avatar', 'topic.section']);
+        $this->post = $post->load(['user', 'topic.section']);
     }
 
     public function broadcastOn(): array

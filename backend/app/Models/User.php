@@ -41,7 +41,16 @@ class User extends Authenticatable
         ];
     }
 
-    protected $appends = ['role_name'];
+    protected $appends = ['role_name', 'image_url'];
+
+    public function getImageUrlAttribute()
+    {
+        if (filter_var($this->image, FILTER_VALIDATE_URL)) {
+            return $this->image;
+        }
+
+        return $this->image ? asset('storage/' . $this->image) : null;
+    }
 
     public function getRoleNameAttribute()
     {

@@ -94,8 +94,8 @@ Route::prefix('v1')->group(function () {
 
         // Shares
         Route::prefix('shares')->group(function () {
-            Route::post('/topic/{topic}', [ShareController::class, 'shareTopicCount']);
-            Route::post('/post/{post}', [ShareController::class, 'sharePostCount']);
+            Route::post('/topic/{topic}', [ShareController::class, 'shareTopic']);
+            Route::post('/post/{post}', [ShareController::class, 'sharePost']);
         });
 
         // Search

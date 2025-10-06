@@ -134,7 +134,7 @@ class UserController extends Controller
                 'amount' => -$amount,
                 'status' => 'completed',
                 'type' => 'admin_adjustment',
-                'description' => 'Balance subtracted by admin! Admin ID: ' . $request->user()->id
+                'description' => 'Баланс вычтен администратором! ID администратора: ' . $request->user()->id
             ]);
         } else {
             $user->increment('balance', $amount);
@@ -143,7 +143,7 @@ class UserController extends Controller
                 'amount' => $amount,
                 'status' => 'completed',
                 'type' => 'admin_adjustment',
-                'description' => 'Balance added by admin! Admin ID: ' . $request->user()->id
+                'description' => 'Баланс добавлен администратором! ID администратора: ' . $request->user()->id
             ]);
         }
 

@@ -74,7 +74,7 @@ class WebSocketController extends Controller
             'reply_id' => $request->reply_id,
         ]);
 
-        $post->load('user:id,name,avatar');
+        $post->load('user');
 
         // Topic ning updated_at ni yangilash
         $topic->touch();

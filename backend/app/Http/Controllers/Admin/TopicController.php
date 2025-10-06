@@ -22,7 +22,7 @@ class TopicController extends Controller
         $userFilter = $request->input('user_filter');
         $statusFilter = $request->input('status_filter');
 
-        $query = Topic::with(['user:id,name,avatar', 'section:id,name'])
+        $query = Topic::with(['user', 'section:id,name'])
             ->withCount([
                 'posts',
                 'views',

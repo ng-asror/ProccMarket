@@ -13,7 +13,8 @@
 			</div>
 			<div [innerHTML]="news.data.description"></div>
 			<div class="flex items-center gap-x-[20px]">
-				<button type="button" class="text-black/50 text-[18px] flex items-center gap-x-[5px] cursor-pointer">
+				<button type="button" class="text-black/50 text-[18px] flex items-center gap-x-[5px] cursor-pointer"
+					(click)="newToggleLike(news.data.id)" [ngClass]="news.data.user_reaction === 'like'?'text-[#030303]':''">
 					<lucide-icon [name]="ICONS.ThumbsUp"></lucide-icon>
 					<span class="block">{{news.data.likes_count}}</span>
 				</button>

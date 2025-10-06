@@ -21,4 +21,10 @@ export class News {
   getComments(id: string): Observable<INewsCommentsRes> {
     return this.http.get<INewsCommentsRes>(`${environment.apiUrl}/news/${id}/comments`);
   }
+
+  newsToggleLike(news_id: number): Observable<any> {
+    return this.http.post<any>(`${environment.apiUrl}/news/${news_id}/like`, {
+      is_like: true,
+    });
+  }
 }

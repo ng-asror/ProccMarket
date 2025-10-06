@@ -33,33 +33,20 @@ export interface INewsInfo {
   id: number;
   title: string;
   description: string;
-  image: string;
-  user_id: number;
-  category_id: number;
+  image: any;
+  image_url: any;
   status: string;
   created_at: Date;
   updated_at: Date;
-  comments_count: number;
+  author: IAuthorNewsInfo;
   likes_count: number;
-  views_count: string;
+  dislikes_count: number;
+  views_count: number;
   shares_count: number;
-  image_url: string;
+  comments_count: number;
+  user_reaction: any;
+  user_shared: boolean;
   category: { id: number; name: string };
-  comments: {
-    id: number;
-    replay_id: string;
-    news_id: number;
-    user_id: number;
-    content: string;
-    created_at: string;
-    updated_at: string;
-    user: {
-      id: number;
-      name: string;
-      role_name: string;
-      role: string;
-    };
-  }[];
 }
 
 export interface INewsCommentsRes extends Result {
@@ -94,5 +81,25 @@ export interface ICommentUser {
   updated_at: string;
   deleted_at: any;
   role_name: any;
+  role: any;
+}
+
+export interface IAuthorNewsInfo {
+  id: number;
+  telegram_id: any;
+  email: string;
+  role_id: any;
+  balance: string;
+  name: string;
+  avatar: any;
+  banned: boolean;
+  last_deposit_at: any;
+  is_admin: boolean;
+  email_verified_at: string;
+  created_at: string;
+  updated_at: string;
+  deleted_at: any;
+  role_name: any;
+  image_url: any;
   role: any;
 }

@@ -4,12 +4,19 @@ import { News, Telegram } from '../../../../core';
 import { ActivatedRoute } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { MomentModule } from 'ngx-moment';
-import { NgForOf, NgIf } from '@angular/common';
+import { NgClass, NgForOf, NgIf } from '@angular/common';
 import { AmDateFormatPipe, NumeralPipe } from '../../../../core/pipes';
-
 @Component({
   selector: 'app-section',
-  imports: [LucideAngularModule, NgIf, NgForOf, MomentModule, AmDateFormatPipe, NumeralPipe],
+  imports: [
+    LucideAngularModule,
+    NgIf,
+    NgForOf,
+    MomentModule,
+    AmDateFormatPipe,
+    NumeralPipe,
+    NgClass,
+  ],
   templateUrl: './section.html',
   styleUrl: './section.scss',
 })
@@ -38,5 +45,11 @@ export class Section implements OnInit, OnDestroy {
   }
   ngOnDestroy(): void {
     this.telegram.hiddeBackButton('/news');
+  }
+
+  async newToggleLike(id: number): Promise<void> {
+    await firstValueFrom(this.newsService.newsToggleLike(id)).then((res) => {
+      this.news.reload();
+    });
   }
 }

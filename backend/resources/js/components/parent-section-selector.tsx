@@ -8,7 +8,6 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
 
 type Section = {
@@ -39,9 +38,8 @@ export function ParentSectionSelector({
 
   // Filter sections
   const filteredSections = React.useMemo(() => {
-    // let sections = allSections.filter((s) => s.id !== excludeId);
     let sections = allSections;
-    
+
     if (searchQuery) {
       sections = sections.filter((s) =>
         s.name.toLowerCase().includes(searchQuery.toLowerCase())
@@ -72,10 +70,10 @@ export function ParentSectionSelector({
   // Get breadcrumb path
   const getBreadcrumbPath = (sectionId: number | null): string => {
     if (!sectionId) return 'None (Root Level)';
-    
+
     const path: string[] = [];
     let currentId: number | null = sectionId;
-    
+
     while (currentId) {
       const section = allSections.find((s) => s.id === currentId);
       if (section) {
@@ -85,7 +83,7 @@ export function ParentSectionSelector({
         break;
       }
     }
-    
+
     return path.join(' › ') || 'Unknown';
   };
 
@@ -148,7 +146,11 @@ export function ParentSectionSelector({
             )}
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-[400px] p-0" align="start">
+        <PopoverContent
+          className="w-[400px] p-0"
+          align="start"
+          onWheel={(e) => e.stopPropagation()}
+        >
           <div className="flex items-center border-b px-3">
             <IconSearch className="mr-2 h-4 w-4 shrink-0 opacity-50" />
             <Input
@@ -158,7 +160,8 @@ export function ParentSectionSelector({
               className="border-0 focus-visible:ring-0 focus-visible:ring-offset-0"
             />
           </div>
-          <ScrollArea className="h-[300px]">
+          {/* ScrollArea o'rniga oddiy div ishlatilgan */}
+          <div className="max-h-[300px] overflow-y-auto overflow-x-hidden">
             <div className="p-2">
               <button
                 type="button"
@@ -187,7 +190,7 @@ export function ParentSectionSelector({
                 ))
               )}
             </div>
-          </ScrollArea>
+          </div>
         </PopoverContent>
       </Popover>
       {value && (

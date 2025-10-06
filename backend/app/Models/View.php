@@ -18,9 +18,10 @@ class View extends Model
     ];
 
     /**
-     * View qilingan model bilan bog'lanish
+     * View qilingan model bilan bog'lanish (polymorphic)
      */
-    public function shareable() {
+    public function viewable()
+    {
         return $this->morphTo();
     }
 

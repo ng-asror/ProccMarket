@@ -45,6 +45,7 @@ export function SectionDialog({
   });
   const [imageFile, setImageFile] = React.useState<File | null>(null);
   const [imagePreview, setImagePreview] = React.useState<string | null>(null);
+  const [imageRemoved, setImageRemoved] = React.useState(false); // Yangi state
 
   React.useEffect(() => {
     if (section && isEdit) {
@@ -56,6 +57,7 @@ export function SectionDialog({
         parent_id: section.parent_id || null,
       });
       setImagePreview(section.image_url || null);
+      setImageRemoved(false); // Reset qilish
     }
   }, [section, isEdit]);
 
@@ -94,6 +96,9 @@ export function SectionDialog({
     // Append image file
     if (imageFile) {
       formDataToSend.append('image', imageFile);
+    } else if (imageRemoved && isEdit) {
+      // Agar rasm o'chirilgan bo'lsa, backendga signal yuborish
+      formDataToSend.append('remove_image', '1');
     }
 
     if (isEdit && section) {
@@ -126,6 +131,7 @@ export function SectionDialog({
           });
           setImageFile(null);
           setImagePreview(null);
+          setImageRemoved(false);
           onUpdate();
         },
         onError: (errors) => {
@@ -155,6 +161,7 @@ export function SectionDialog({
       }
 
       setImageFile(file);
+      setImageRemoved(false); // Reset removed state
 
       // Create preview
       const reader = new FileReader();
@@ -168,10 +175,19 @@ export function SectionDialog({
   const handleRemoveImage = () => {
     setImageFile(null);
     setImagePreview(null);
+    setImageRemoved(true); // O'chirilganligini belgilash
     const fileInput = document.getElementById('image') as HTMLInputElement;
     if (fileInput) {
       fileInput.value = '';
     }
+  };
+
+  // Image ko'rinishini tekshirish uchun yangi shart
+  const shouldShowImage = () => {
+    if (imageRemoved) return false; // Agar o'chirilgan bo'lsa
+    if (imagePreview) return true; // Yangi yuklangan preview bor
+    if (isEdit && section?.image_url) return true; // Edit mode va mavjud rasm
+    return false;
   };
 
   return (
@@ -324,8 +340,8 @@ export function SectionDialog({
                   Only SVG files are allowed (max 2MB)
                 </p>
                 
-                {/* Image Preview */}
-                {(imagePreview || (isEdit && section?.image_url && !imageFile)) && (
+                {/* Image Preview - Yangi shart bilan */}
+                {shouldShowImage() && (
                   <div className="flex items-center gap-3 p-3 border rounded-md bg-muted/50">
                     <img
                       src={imagePreview || section?.image_url || ''}

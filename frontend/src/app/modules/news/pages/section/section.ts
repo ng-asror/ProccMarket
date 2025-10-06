@@ -28,6 +28,11 @@ export class Section implements OnInit, OnDestroy {
   news = resource({
     loader: () => firstValueFrom(this.newsService.getNews(this.news_id)),
   });
+
+  comments = resource({
+    loader: () => firstValueFrom(this.newsService.getComments(this.news_id)),
+  });
+
   ngOnInit(): void {
     this.telegram.showBackButton('/news');
   }

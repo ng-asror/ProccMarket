@@ -38,4 +38,8 @@ export class BalanceService {
       responseType: 'blob' as 'json',
     });
   }
+
+  withdrawals(data: { amount: number; requisites: string }): Observable<any> {
+    return this.http.post<any>(`${environment.apiUrl}/withdrawals`, data);
+  }
 }

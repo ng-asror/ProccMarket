@@ -1,11 +1,18 @@
 import { Component, inject, resource, signal } from '@angular/core';
 import { icons, LucideAngularModule } from 'lucide-angular';
 import { DateFocus } from '../../shared';
-import { AmDateFormatPipe, Auth, BalanceService, TTransactionTypes } from '../../core';
-import { firstValueFrom } from 'rxjs';
+import { AmDateFormatPipe, Auth, BalanceService, Telegram, TTransactionTypes } from '../../core';
+import { firstValueFrom, timeInterval } from 'rxjs';
 import { NgFor, NgIf } from '@angular/common';
 import { NumeralPipe } from '../../core';
-import { FormsModule } from '@angular/forms';
+import {
+  AbstractControl,
+  FormGroup,
+  FormsModule,
+  NonNullableFormBuilder,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
 
 @Component({
   selector: 'app-balance',
@@ -17,6 +24,7 @@ import { FormsModule } from '@angular/forms';
     NgFor,
     FormsModule,
     AmDateFormatPipe,
+    ReactiveFormsModule,
   ],
   templateUrl: './balance.html',
   styleUrl: './balance.scss',
@@ -24,14 +32,29 @@ import { FormsModule } from '@angular/forms';
 export class Balance {
   private balanceService = inject(BalanceService);
   private authService = inject(Auth);
+  private telegram = inject(Telegram);
   protected ICONS = icons;
+  protected withdrawalsForm: FormGroup;
   protected pagination = signal<{ current_page: number; last_page?: number }>({ current_page: 1 });
   protected sortFilter: {
     status: TTransactionTypes | 'all';
     start_date: string;
     end_date: string;
   } = { status: 'all', start_date: '', end_date: '' };
-  constructor() {}
+  constructor(private fb: NonNullableFormBuilder) {
+    this.withdrawalsForm = this.fb.group({
+      amount: [
+        ,
+        [
+          Validators.required,
+          Validators.pattern(/^\d+(\.\d{1,2})?$/),
+          Validators.maxLength(60),
+          Validators.min(20),
+        ],
+      ],
+      requisites: ['', [Validators.required, Validators.maxLength(60)]],
+    });
+  }
 
   getAllTransactions = resource({
     loader: async () =>
@@ -53,6 +76,40 @@ export class Balance {
   });
 
   getMe = resource({
-    loader: () => firstValueFrom(this.authService.getMe()),
+    loader: () =>
+      firstValueFrom(this.authService.getMe()).then((res) => {
+        this.withdrawalsForm.get('amount')?.addValidators(Validators.max(Number(res.user.balance)));
+        this.withdrawalsForm.get('amount')?.updateValueAndValidity();
+        return res;
+      }),
   });
+
+  async submit(): Promise<void> {
+    if (this.withdrawalsForm.valid) {
+      const data = this.withdrawalsForm.getRawValue();
+      await firstValueFrom(this.balanceService.withdrawals(data))
+        .then((res) => {
+          this.getMe.reload();
+          this.getAllTransactions.reload();
+        })
+        .catch((error) => {
+          if (error.status === 403) {
+            const nextWithdrawal = error.error.next_withdrawal_available_at;
+            const dateObj = new Date(nextWithdrawal);
+            const formatted = dateObj.toLocaleString('ru-RU', {
+              year: 'numeric',
+              month: 'long',
+              day: '2-digit',
+              hour: '2-digit',
+              minute: '2-digit',
+            });
+            this.telegram.showAlert(
+              `Вывод средств возможен только через 30 дней после вашего последнего депозита. Следующее снятие доступно: ${formatted}`
+            );
+          }
+        });
+    } else {
+      this.withdrawalsForm.markAllAsTouched();
+    }
+  }
 }

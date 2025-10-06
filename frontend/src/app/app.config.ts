@@ -1,6 +1,5 @@
 import {
   ApplicationConfig,
-  LOCALE_ID,
   provideBrowserGlobalErrorListeners,
   provideZonelessChangeDetection,
 } from '@angular/core';

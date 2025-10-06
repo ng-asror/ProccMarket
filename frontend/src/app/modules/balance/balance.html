@@ -12,8 +12,8 @@
 			<button type="button" class="flex-1 h-[40px] bg-[#030303] rounded-[6px] text-white font-[400] text-[16px]">
 				Пополнить
 			</button>
-			<button type="button"
-				class="flex-1 h-[40px] bg-transparent border-1 border-[#030303] rounded-[6px] text-[#030303] font-[400] text-[16px]">
+			<button type="button" onclick="withdrawalsModal.showModal()"
+				class="flex-1 h-[40px] bg-transparent border-1 border-[#030303] cursor-pointer rounded-[6px] text-[#030303] font-[400] text-[16px]">
 				Запросить вывод
 			</button>
 		</div>
@@ -119,3 +119,46 @@
 		</div>
 	</ng-template>
 </div>
+
+<dialog id="withdrawalsModal" class="modal modal-bottom sm:modal-middle">
+	<div class="modal-box">
+		<h3 class="text-lg font-bold">Запрос на выплату</h3>
+		<p>Пожалуйста, заполните следующие данные и отправьте запрос на вывод средств.</p>
+		<div class="mt-[10px]">
+			<form method="dialog" [formGroup]="withdrawalsForm" class="w-full space-y-[10px]" (ngSubmit)="submit()">
+				<fieldset class="fieldset">
+					<legend class="fieldset-legend text-[14px] py-[2px]">Сумма</legend>
+					<input type="number" class="input w-full placeholder:text-black/50" required formControlName="amount"
+						[placeholder]="getMe.value()?.user?.balance" maxlength="60" min="1" />
+					<div *ngIf="withdrawalsForm.get('amount')?.dirty && withdrawalsForm.get('amount')?.invalid">
+						<p *ngIf="withdrawalsForm.get('amount')?.errors?.['required']" class="text-[#FF0000]">Сумма обязательна</p>
+						<p *ngIf="withdrawalsForm.get('amount')?.errors?.['max']" class="text-[#FF0000]">Сумма не может превышать
+							баланс
+						</p>
+						<p *ngIf="withdrawalsForm.get('amount')?.errors?.['min']" class="text-[#FF0000]">Сумма не может быть меньше
+							20$
+						</p>
+						<p *ngIf="withdrawalsForm.get('amount')?.errors?.['maxlength']" class="text-[#FF0000]">Слишком длинное
+							значение
+						</p>
+					</div>
+				</fieldset>
+
+				<fieldset class="fieldset">
+					<legend class="fieldset-legend text-[14px] py-[2px]">Крипто-токен(USDT):</legend>
+					<input type="text" class="input w-full placeholder:text-black/50" formControlName="requisites" required
+						maxlength="60" placeholder="токен" />
+					<div *ngIf="withdrawalsForm.get('requisites')?.dirty && withdrawalsForm.get('requisites')?.invalid">
+						<p *ngIf="withdrawalsForm.get('amount')?.errors?.['required']" class="text-[#FF0000]">Крипто-токен
+							обязателен
+						</p>
+					</div>
+				</fieldset>
+				<div class="flex justify-end gap-x-[10px]">
+					<button class="btn btn-primary" type="submit" [disabled]="withdrawalsForm.invalid">Отправить</button>
+					<button class="btn">Отмена</button>
+				</div>
+			</form>
+		</div>
+	</div>
+</dialog>

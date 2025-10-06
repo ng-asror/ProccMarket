@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\API\V1;
 
 use App\Events\LikeToggled;
-use App\Models\Like;
 use App\Models\Post;
 use App\Models\Topic;
 use Illuminate\Http\JsonResponse;
@@ -14,7 +13,7 @@ use App\Http\Controllers\Controller;
 class LikeController extends Controller
 {
     /**
-     * Topic ga like/dislike
+     * Topic ga like/dislike toggle
      */
     public function toggleTopicLike(Request $request, Topic $topic): JsonResponse
     {
@@ -38,30 +37,26 @@ class LikeController extends Controller
             ], 422);
         }
 
-        $existingLike = Like::where('user_id', $user->id)
-            ->where('likeable_type', Topic::class)
-            ->where('likeable_id', $topic->id)
-            ->first();
+        $isLike = $request->is_like;
+        $existingLike = $topic->likes()->where('user_id', $user->id)->first();
 
         $action = '';
 
         if ($existingLike) {
-            if ($existingLike->is_like == $request->is_like) {
-                // Bir xil reaction - o'chirish
+            // Bir xil reaction - o'chirish (toggle off)
+            if ($existingLike->is_like == $isLike) {
                 $existingLike->delete();
                 $action = 'removed';
             } else {
                 // Boshqa reaction - o'zgartirish
-                $existingLike->update(['is_like' => $request->is_like]);
+                $existingLike->update(['is_like' => $isLike]);
                 $action = 'changed';
             }
         } else {
             // Yangi reaction
-            Like::create([
+            $topic->likes()->create([
                 'user_id' => $user->id,
-                'likeable_type' => Topic::class,
-                'likeable_id' => $topic->id,
-                'is_like' => $request->is_like
+                'is_like' => $isLike
             ]);
             $action = 'added';
         }
@@ -70,21 +65,23 @@ class LikeController extends Controller
         $likesCount = $topic->likes()->where('is_like', true)->count();
         $dislikesCount = $topic->likes()->where('is_like', false)->count();
 
-        // WebSocket event yuborish
-        event(new LikeToggled($topic, $user, $request->is_like, $action, 'topic'));
+        // WebSocket event
+        event(new LikeToggled($topic, $user, $isLike, $action, 'topic'));
 
         return response()->json([
             'success' => true,
             'message' => 'Reaction updated successfully',
-            'action' => $action,
-            'likes_count' => $likesCount,
-            'dislikes_count' => $dislikesCount,
-            'user_reaction' => $action === 'removed' ? null : ($request->is_like ? 'like' : 'dislike')
+            'data' => [
+                'action' => $action,
+                'likes_count' => $likesCount,
+                'dislikes_count' => $dislikesCount,
+                'user_reaction' => $action == 'removed' ? null : ($isLike ? 'like' : 'dislike')
+            ]
         ], 200);
     }
 
     /**
-     * Post ga like/dislike
+     * Post ga like/dislike toggle
      */
     public function togglePostLike(Request $request, Post $post): JsonResponse
     {
@@ -108,30 +105,26 @@ class LikeController extends Controller
             ], 422);
         }
 
-        $existingLike = Like::where('user_id', $user->id)
-            ->where('likeable_type', Post::class)
-            ->where('likeable_id', $post->id)
-            ->first();
+        $isLike = $request->is_like;
+        $existingLike = $post->likes()->where('user_id', $user->id)->first();
 
         $action = '';
 
         if ($existingLike) {
-            if ($existingLike->is_like == $request->is_like) {
-                // Bir xil reaction - o'chirish
+            // Bir xil reaction - o'chirish (toggle off)
+            if ($existingLike->is_like == $isLike) {
                 $existingLike->delete();
                 $action = 'removed';
             } else {
                 // Boshqa reaction - o'zgartirish
-                $existingLike->update(['is_like' => $request->is_like]);
+                $existingLike->update(['is_like' => $isLike]);
                 $action = 'changed';
             }
         } else {
             // Yangi reaction
-            Like::create([
+            $post->likes()->create([
                 'user_id' => $user->id,
-                'likeable_type' => Post::class,
-                'likeable_id' => $post->id,
-                'is_like' => $request->is_like
+                'is_like' => $isLike
             ]);
             $action = 'added';
         }
@@ -140,16 +133,90 @@ class LikeController extends Controller
         $likesCount = $post->likes()->where('is_like', true)->count();
         $dislikesCount = $post->likes()->where('is_like', false)->count();
 
-        // WebSocket event yuborish
-        event(new LikeToggled($post->load('topic'), $user, $request->is_like, $action, 'post'));
+        // WebSocket event
+        event(new LikeToggled($post->load('topic'), $user, $isLike, $action, 'post'));
 
         return response()->json([
             'success' => true,
             'message' => 'Reaction updated successfully',
-            'action' => $action,
-            'likes_count' => $likesCount,
-            'dislikes_count' => $dislikesCount,
-            'user_reaction' => $action === 'removed' ? null : ($request->is_like ? 'like' : 'dislike')
+            'data' => [
+                'action' => $action,
+                'likes_count' => $likesCount,
+                'dislikes_count' => $dislikesCount,
+                'user_reaction' => $action == 'removed' ? null : ($isLike ? 'like' : 'dislike')
+            ]
+        ], 200);
+    }
+
+    /**
+     * Get Topic likes (faqat like bosganlar)
+     */
+    public function getTopicLikes(Topic $topic): JsonResponse
+    {
+        $likes = $topic->likes()
+            ->with('user:id,name,email,avatar')
+            ->where('is_like', true)
+            ->latest()
+            ->paginate(20);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Likes retrieved successfully',
+            'data' => $likes
+        ], 200);
+    }
+
+    /**
+     * Get Topic dislikes
+     */
+    public function getTopicDislikes(Topic $topic): JsonResponse
+    {
+        $dislikes = $topic->likes()
+            ->with('user:id,name,email,avatar')
+            ->where('is_like', false)
+            ->latest()
+            ->paginate(20);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Dislikes retrieved successfully',
+            'data' => $dislikes
+        ], 200);
+    }
+
+    /**
+     * Get Post likes
+     */
+    public function getPostLikes(Post $post): JsonResponse
+    {
+        $likes = $post->likes()
+            ->with('user:id,name,email,avatar')
+            ->where('is_like', true)
+            ->latest()
+            ->paginate(20);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Likes retrieved successfully',
+            'data' => $likes
+        ], 200);
+    }
+
+    /**
+     * Get Post dislikes
+     */
+    public function getPostDislikes(Post $post): JsonResponse
+    {
+        $dislikes = $post->likes()
+            ->with('user:id,name,email,avatar')
+            ->where('is_like', false)
+            ->latest()
+            ->paginate(20);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Dislikes retrieved successfully',
+            'data' => $dislikes
         ], 200);
     }
 

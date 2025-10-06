@@ -13,6 +13,16 @@ class Post extends Model {
         'reply_id',
     ];
 
+    public function reply()
+    {
+        return $this->belongsTo(Post::class, 'reply_id');
+    }
+
+    public function replies()
+    {
+        return $this->hasMany(Post::class, 'reply_id');
+    }
+
     public function topic() {
         return $this->belongsTo(Topic::class);
     }

@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\API\V1;
 
-
 use App\Events\PostCreated;
 use App\Models\Post;
 use App\Models\Topic;
@@ -14,14 +13,13 @@ use App\Http\Controllers\Controller;
 class PostController extends Controller
 {
     /**
-     * Topic ichidagi postlarni ko'rsatish
+     * Topic ichidagi postlarni ko'rsatish (nested structure bilan)
      */
     public function index(Request $request, Topic $topic): JsonResponse
     {
         $user = $request->user();
         
-        // Kirish huquqini tekshirish
-        if (!$this->userHasAccess($user, $topic->section)) {
+        if ($user && !$this->userHasAccess($user, $topic->section)) {
             return response()->json([
                 'success' => false,
                 'message' => 'You do not have access to this topic'
@@ -29,8 +27,8 @@ class PostController extends Controller
         }
 
         $validator = Validator::make($request->all(), [
-            'page' => 'integer|min:1',
             'per_page' => 'integer|min:1|max:100',
+            'sort_by' => 'in:created_at,likes_count',
             'sort_order' => 'in:asc,desc'
         ]);
 
@@ -42,52 +40,77 @@ class PostController extends Controller
         }
 
         $perPage = $request->input('per_page', 20);
-        $orderBy = $request->input('sort_order', 'asc'); // Eski xabarlar birinchi
+        $sortBy = $request->input('sort_by', 'created_at');
+        $sortOrder = $request->input('sort_order', 'asc');
 
+        // Faqat parent postlarni olish (reply emas)
         $query = Post::where('topic_id', $topic->id)
-            ->with(['user'])
-            ->withCount(['likes as likes_count' => function ($query) {
-                $query->where('is_like', true);
-            }])
-            ->withCount(['likes as dislikes_count' => function ($query) {
-                $query->where('is_like', false);
-            }]);
+            ->whereNull('reply_id')
+            ->with([
+                'user',
+                'replies' => function ($query) use ($sortOrder) {
+                    $query->with('user')
+                        ->withCount([
+                            'likes as likes_count' => function ($q) {
+                                $q->where('is_like', true);
+                            },
+                            'likes as dislikes_count' => function ($q) {
+                                $q->where('is_like', false);
+                            },
+                            'shares'
+                        ])
+                        ->orderBy('created_at', $sortOrder);
+                },
+                'replies.replies' => function ($query) use ($sortOrder) {
+                    $query->with('user')
+                        ->withCount([
+                            'likes as likes_count' => function ($q) {
+                                $q->where('is_like', true);
+                            },
+                            'likes as dislikes_count' => function ($q) {
+                                $q->where('is_like', false);
+                            },
+                            'shares'
+                        ])
+                        ->orderBy('created_at', $sortOrder);
+                }
+            ])
+            ->withCount([
+                'likes as likes_count' => function ($q) {
+                    $q->where('is_like', true);
+                },
+                'likes as dislikes_count' => function ($q) {
+                    $q->where('is_like', false);
+                },
+                'shares',
+                'replies'
+            ]);
 
-        // Har bir topic uchun message_id 1 dan boshlanadi
-        // $query->select('posts.*')
-        //         ->selectRaw('ROW_NUMBER() OVER (PARTITION BY topic_id ORDER BY id) as message_id');
-
-
-        $query->orderBy('created_at', $orderBy);
+        if ($sortBy === 'likes_count') {
+            $query->withCount(['likes as likes_count' => function ($q) {
+                $q->where('is_like', true);
+            }])->orderBy('likes_count', $sortOrder);
+        } else {
+            $query->orderBy($sortBy, $sortOrder);
+        }
 
         $posts = $query->paginate($perPage);
 
-        // Response formatting
-        $posts->getCollection()->transform(function ($post) use ($user) {
-            // User bu post ga like/dislike qilganmi
-            $userLike = $post->likes()->where('user_id', $user->id)->first();
-            
-            return [
-                'id' => $post->id,
-                // 'message_id' => $post->message_id,
-                'content' => $post->content,
-                'image' => $post->image,
-                'reply_to' => $post->reply_id,
-                'created_at' => $post->created_at,
-                'updated_at' => $post->updated_at,
-                'author' => $post->user,
-                'likes_count' => $post->likes_count ?? 0,
-                'dislikes_count' => $post->dislikes_count ?? 0,
-                'user_reaction' => $userLike ? ($userLike->is_like ? 'like' : 'dislike') : null,
-                'can_edit' => $post->user_id === $user->id || $user->is_admin,
-                'can_delete' => $post->user_id === $user->id || $user->is_admin
-            ];
-        });
+        // User reaction qo'shish
+        if ($user) {
+            $posts->getCollection()->transform(function ($post) use ($user) {
+                return $this->formatPostWithReaction($post, $user);
+            });
+        } else {
+            $posts->getCollection()->transform(function ($post) {
+                return $this->formatPostWithoutAuth($post);
+            });
+        }
 
         return response()->json([
             'success' => true,
             'message' => 'Posts retrieved successfully',
-            'posts' => $posts->items(),
+            'data' => $posts->items(),
             'pagination' => [
                 'current_page' => $posts->currentPage(),
                 'per_page' => $posts->perPage(),
@@ -104,6 +127,13 @@ class PostController extends Controller
     {
         $user = $request->user();
         
+        if (!$user) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Authentication required'
+            ], 401);
+        }
+
         if (!$this->userHasAccess($user, $topic->section)) {
             return response()->json([
                 'success' => false,
@@ -111,7 +141,6 @@ class PostController extends Controller
             ], 403);
         }
 
-        // Topic yopilganmi tekshirish
         if ($topic->closed && !$user->is_admin) {
             return response()->json([
                 'success' => false,
@@ -120,9 +149,14 @@ class PostController extends Controller
         }
 
         $validator = Validator::make($request->all(), [
-            'content' => 'required|string',
+            'content' => 'required|string|min:1|max:10000',
             'image' => 'nullable|string',
-            'reply_id' => 'nullable|exists:posts,id'
+            'reply_id' => 'nullable|integer|exists:posts,id'
+        ], [
+            'content.required' => 'Post content is required',
+            'content.min' => 'Post must be at least 1 character',
+            'content.max' => 'Post cannot exceed 10000 characters',
+            'reply_id.exists' => 'Reply post not found'
         ]);
 
         if ($validator->fails()) {
@@ -132,7 +166,7 @@ class PostController extends Controller
             ], 422);
         }
 
-        // Reply_id tekshirish (shu topic ichida bo'lishi kerak)
+        // Agar bu reply bo'lsa, parent post mavjudligini va max depth ni tekshirish
         if ($request->reply_id) {
             $replyPost = Post::where('id', $request->reply_id)
                 ->where('topic_id', $topic->id)
@@ -143,6 +177,17 @@ class PostController extends Controller
                     'success' => false,
                     'message' => 'Reply post not found in this topic'
                 ], 404);
+            }
+
+            // Max 2 level depth (post -> reply -> reply)
+            if ($replyPost->reply_id !== null) {
+                $grandParent = Post::find($replyPost->reply_id);
+                if ($grandParent && $grandParent->reply_id !== null) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Maximum reply depth exceeded (max 3 levels)'
+                    ], 422);
+                }
             }
         }
 
@@ -156,67 +201,106 @@ class PostController extends Controller
 
         $post->load('user');
 
-        // Message ID hisoblash
-        $messageId = Post::where('topic_id', $topic->id)
-            ->where('id', '<=', $post->id)
-            ->count();
-
-        // Topic ning updated_at ni yangilash
         $topic->touch();
 
-        // WebSocket event yuborish
         event(new PostCreated($post->load('topic')));
 
         return response()->json([
             'success' => true,
             'message' => 'Post created successfully',
-            'post' => [
+            'data' => [
                 'id' => $post->id,
-                'message_id' => $messageId,
                 'content' => $post->content,
                 'image' => $post->image,
                 'created_at' => $post->created_at,
-                'author' => $user,
+                'updated_at' => $post->updated_at,
+                'user' => $post->user,
+                'reply_id' => $post->reply_id,
                 'likes_count' => 0,
                 'dislikes_count' => 0,
+                'shares_count' => 0,
+                'replies_count' => 0,
                 'user_reaction' => null,
-                'reply_to' => $post->reply_id,
+                'user_shared' => false,
+                'can_edit' => true,
+                'can_delete' => true,
             ]
         ], 201);
     }
 
     /**
-     * Post ko'rish
+     * Bitta postni ko'rsatish
      */
     public function show(Request $request, Post $post): JsonResponse
     {
         $user = $request->user();
-        // Kirish huquqini tekshirish
-        if (!$this->userHasAccess($user, $post->topic->section)) {
+        
+        if ($user && !$this->userHasAccess($user, $post->topic->section)) {
             return response()->json([
                 'success' => false,
                 'message' => 'You do not have access to this topic'
             ], 403);
         }
 
-        $post->load('user');    
+        $post->load([
+            'user',
+            'topic:id,title',
+            'reply.user',
+            'replies' => function ($query) {
+                $query->with('user')
+                    ->withCount([
+                        'likes as likes_count' => function ($q) {
+                            $q->where('is_like', true);
+                        },
+                        'likes as dislikes_count' => function ($q) {
+                            $q->where('is_like', false);
+                        },
+                        'shares'
+                    ])
+                    ->orderBy('created_at', 'asc');
+            }
+        ])->loadCount([
+            'likes as likes_count' => function ($q) {
+                $q->where('is_like', true);
+            },
+            'likes as dislikes_count' => function ($q) {
+                $q->where('is_like', false);
+            },
+            'shares',
+            'replies'
+        ]);
+
+        $userReaction = null;
+        $userShared = false;
+
+        if ($user) {
+            $userLike = $post->likes()->where('user_id', $user->id)->first();
+            $userReaction = $userLike ? ($userLike->is_like ? 'like' : 'dislike') : null;
+            $userShared = $post->shares()->where('user_id', $user->id)->exists();
+        }
 
         return response()->json([
             'success' => true,
             'message' => 'Post retrieved successfully',
-            'post' => [
+            'data' => [
                 'id' => $post->id,
                 'content' => $post->content,
                 'image' => $post->image,
-                'reply_to' => $post->reply_id,
+                'reply_id' => $post->reply_id,
                 'created_at' => $post->created_at,
                 'updated_at' => $post->updated_at,
-                'author' => $post->user,
-                'likes_count' => $post->likes()->where('is_like', true)->count(),
-                'dislikes_count' => $post->likes()->where('is_like', false)->count(),
-                'user_reaction' => $post->likes()->where('user_id', $user->id)->first()?->is_like ? 'like' : ( $post->likes()->where('user_id', $user->id)->first()?->is_like === false ? 'dislike' : null),
-                'can_edit' => $post->user_id === $user->id || $user->is_admin,
-                'can_delete' => $post->user_id === $user->id || $user->is_admin
+                'user' => $post->user,
+                'topic' => $post->topic,
+                'reply_to' => $post->reply,
+                'replies' => $post->replies,
+                'likes_count' => $post->likes_count,
+                'dislikes_count' => $post->dislikes_count,
+                'shares_count' => $post->shares_count,
+                'replies_count' => $post->replies_count,
+                'user_reaction' => $userReaction,
+                'user_shared' => $userShared,
+                'can_edit' => $user ? ($post->user_id === $user->id || $user->is_admin) : false,
+                'can_delete' => $user ? ($post->user_id === $user->id || $user->is_admin) : false,
             ]
         ], 200);
     }
@@ -228,7 +312,13 @@ class PostController extends Controller
     {
         $user = $request->user();
         
-        // Faqat muallif yoki admin tahrirlashi mumkin
+        if (!$user) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Authentication required'
+            ], 401);
+        }
+
         if ($post->user_id !== $user->id && !$user->is_admin) {
             return response()->json([
                 'success' => false,
@@ -236,9 +326,21 @@ class PostController extends Controller
             ], 403);
         }
 
+        // 24 soatdan oshgan postlarni tahrirlash mumkin emas (admin bundan mustasno)
+        if (!$user->is_admin && $post->created_at->lt(now()->subDay())) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Posts can only be edited within 24 hours of creation'
+            ], 403);
+        }
+
         $validator = Validator::make($request->all(), [
-            'content' => 'sometimes|required|string',
+            'content' => 'required|string|min:1|max:10000',
             'image' => 'nullable|string'
+        ], [
+            'content.required' => 'Post content is required',
+            'content.min' => 'Post must be at least 1 character',
+            'content.max' => 'Post cannot exceed 10000 characters'
         ]);
 
         if ($validator->fails()) {
@@ -249,11 +351,42 @@ class PostController extends Controller
         }
 
         $post->update($request->only(['content', 'image']));
+        
+        $post->load('user')
+            ->loadCount([
+                'likes as likes_count' => function ($q) {
+                    $q->where('is_like', true);
+                },
+                'likes as dislikes_count' => function ($q) {
+                    $q->where('is_like', false);
+                },
+                'shares',
+                'replies'
+            ]);
+
+        $userLike = $post->likes()->where('user_id', $user->id)->first();
+        $userShared = $post->shares()->where('user_id', $user->id)->exists();
 
         return response()->json([
             'success' => true,
             'message' => 'Post updated successfully',
-            'post' => $post
+            'data' => [
+                'id' => $post->id,
+                'content' => $post->content,
+                'image' => $post->image,
+                'created_at' => $post->created_at,
+                'updated_at' => $post->updated_at,
+                'user' => $post->user,
+                'reply_id' => $post->reply_id,
+                'likes_count' => $post->likes_count,
+                'dislikes_count' => $post->dislikes_count,
+                'shares_count' => $post->shares_count,
+                'replies_count' => $post->replies_count,
+                'user_reaction' => $userLike ? ($userLike->is_like ? 'like' : 'dislike') : null,
+                'user_shared' => $userShared,
+                'can_edit' => $post->user_id === $user->id || $user->is_admin,
+                'can_delete' => $post->user_id === $user->id || $user->is_admin,
+            ]
         ], 200);
     }
 
@@ -264,7 +397,13 @@ class PostController extends Controller
     {
         $user = $request->user();
         
-        // Faqat muallif yoki admin o'chirishi mumkin
+        if (!$user) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Authentication required'
+            ], 401);
+        }
+
         if ($post->user_id !== $user->id && !$user->is_admin) {
             return response()->json([
                 'success' => false,
@@ -272,12 +411,82 @@ class PostController extends Controller
             ], 403);
         }
 
+        // Agar postda replylar bo'lsa, ularni ham o'chirish
+        $post->replies()->delete();
+
         $post->delete();
 
         return response()->json([
             'success' => true,
             'message' => 'Post deleted successfully'
         ], 200);
+    }
+
+    /**
+     * User reactionni qo'shish (helper method - authenticated user)
+     */
+    private function formatPostWithReaction($post, $user)
+    {
+        $userLike = $post->likes->firstWhere('user_id', $user->id);
+        $userShared = $post->shares->firstWhere('user_id', $user->id);
+        
+        $formattedPost = [
+            'id' => $post->id,
+            'content' => $post->content,
+            'image' => $post->image,
+            'created_at' => $post->created_at,
+            'updated_at' => $post->updated_at,
+            'user' => $post->user,
+            'likes_count' => $post->likes_count,
+            'dislikes_count' => $post->dislikes_count,
+            'shares_count' => $post->shares_count,
+            'replies_count' => $post->replies_count,
+            'user_reaction' => $userLike ? ($userLike->is_like ? 'like' : 'dislike') : null,
+            'user_shared' => $userShared ? true : false,
+            'can_edit' => $post->user_id === $user->id || $user->is_admin,
+            'can_delete' => $post->user_id === $user->id || $user->is_admin,
+        ];
+
+        // Nested replies uchun ham formatlaymiz
+        if ($post->replies && $post->replies->isNotEmpty()) {
+            $formattedPost['replies'] = $post->replies->map(function ($reply) use ($user) {
+                return $this->formatPostWithReaction($reply, $user);
+            });
+        }
+
+        return $formattedPost;
+    }
+
+    /**
+     * Format post without authentication (guest user)
+     */
+    private function formatPostWithoutAuth($post)
+    {
+        $formattedPost = [
+            'id' => $post->id,
+            'content' => $post->content,
+            'image' => $post->image,
+            'created_at' => $post->created_at,
+            'updated_at' => $post->updated_at,
+            'user' => $post->user,
+            'likes_count' => $post->likes_count,
+            'dislikes_count' => $post->dislikes_count,
+            'shares_count' => $post->shares_count,
+            'replies_count' => $post->replies_count,
+            'user_reaction' => null,
+            'user_shared' => false,
+            'can_edit' => false,
+            'can_delete' => false,
+        ];
+
+        // Nested replies uchun ham formatlaymiz
+        if ($post->replies && $post->replies->isNotEmpty()) {
+            $formattedPost['replies'] = $post->replies->map(function ($reply) {
+                return $this->formatPostWithoutAuth($reply);
+            });
+        }
+
+        return $formattedPost;
     }
 
     /**

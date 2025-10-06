@@ -19,7 +19,7 @@ class TopicCreated implements ShouldBroadcast
 
     public function __construct(Topic $topic)
     {
-        $this->topic = $topic->load(['user:id,name,avatar', 'section:id,name']);
+        $this->topic = $topic->load(['user', 'section:id,name']);
     }
 
     public function broadcastOn(): array

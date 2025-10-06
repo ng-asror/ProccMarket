@@ -154,7 +154,7 @@ class LikeController extends Controller
     public function getTopicLikes(Topic $topic): JsonResponse
     {
         $likes = $topic->likes()
-            ->with('user:id,name,email,avatar')
+            ->with('user')
             ->where('is_like', true)
             ->latest()
             ->paginate(20);
@@ -172,7 +172,7 @@ class LikeController extends Controller
     public function getTopicDislikes(Topic $topic): JsonResponse
     {
         $dislikes = $topic->likes()
-            ->with('user:id,name,email,avatar')
+            ->with('user')
             ->where('is_like', false)
             ->latest()
             ->paginate(20);
@@ -190,7 +190,7 @@ class LikeController extends Controller
     public function getPostLikes(Post $post): JsonResponse
     {
         $likes = $post->likes()
-            ->with('user:id,name,email,avatar')
+            ->with('user')
             ->where('is_like', true)
             ->latest()
             ->paginate(20);
@@ -208,7 +208,7 @@ class LikeController extends Controller
     public function getPostDislikes(Post $post): JsonResponse
     {
         $dislikes = $post->likes()
-            ->with('user:id,name,email,avatar')
+            ->with('user')
             ->where('is_like', false)
             ->latest()
             ->paginate(20);

@@ -48,7 +48,7 @@ class TopicController extends Controller
         $sortOrder = $request->input('sort_order', 'desc');
 
         $query = Topic::where('section_id', $section->id)
-            ->with(['user:id,name,email,avatar', 'posts' => function ($q) {
+            ->with(['user', 'posts' => function ($q) {
                 $q->latest()->limit(1);
             }])
             ->withCount([
@@ -164,7 +164,7 @@ class TopicController extends Controller
             'image' => $imagePath,
         ]);
 
-        $topic->load('user:id,name,email,avatar');
+        $topic->load('user');
 
         event(new TopicCreated($topic));
 
@@ -208,7 +208,7 @@ class TopicController extends Controller
         // Avtomatik view tracking
         $this->trackView($request, $topic, $user);
 
-        $topic->load(['user:id,name,email,avatar', 'section:id,name'])
+        $topic->load(['user', 'section:id,name'])
             ->loadCount([
                 'posts',
                 'likes as likes_count' => function ($q) {
@@ -279,7 +279,7 @@ class TopicController extends Controller
 
         $topic->update($request->only(['title', 'content', 'image', 'closed']));
         
-        $topic->load(['user:id,name,email,avatar', 'section:id,name'])
+        $topic->load(['user', 'section:id,name'])
             ->loadCount([
                 'posts',
                 'likes as likes_count' => function ($q) {

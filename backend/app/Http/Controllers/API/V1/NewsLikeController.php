@@ -157,7 +157,7 @@ class NewsLikeController extends Controller
     public function getNewsLikes(News $news): JsonResponse
     {
         $likes = $news->likes()
-            ->with('user:id,name,email')
+            ->with('user')
             ->where('is_like', true)
             ->latest()
             ->paginate(20);
@@ -175,7 +175,7 @@ class NewsLikeController extends Controller
     public function getNewsDislikes(News $news): JsonResponse
     {
         $dislikes = $news->likes()
-            ->with('user:id,name,email')
+            ->with('user')
             ->where('is_like', false)
             ->latest()
             ->paginate(20);
@@ -193,7 +193,7 @@ class NewsLikeController extends Controller
     public function getCommentLikes(Comment $comment): JsonResponse
     {
         $likes = $comment->likes()
-            ->with('user:id,name,email')
+            ->with('user')
             ->where('is_like', true)
             ->latest()
             ->paginate(20);
@@ -211,7 +211,7 @@ class NewsLikeController extends Controller
     public function getCommentDislikes(Comment $comment): JsonResponse
     {
         $dislikes = $comment->likes()
-            ->with('user:id,name,email')
+            ->with('user')
             ->where('is_like', false)
             ->latest()
             ->paginate(20);

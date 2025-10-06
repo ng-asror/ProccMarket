@@ -20,17 +20,19 @@
 	</div>
 	<div>
 		<div class="border-1 border-[#E1E1E1] p-[15px] rounded-[12px] rounded-b-none flex flex-col gap-y-[10px]">
-			<div class="grid grid-cols-2 gap-x-[10px]">
-				<div class="input w-full cursor-pointer">
+			<div class="space-y-[10px]">
+				<div class=" input w-full cursor-pointer">
+					<p>От</p>
 					<input type="text" id="ot" autocomplete="off" class="w-full" (change)="getAllTransactions.reload()"
-						[(ngModel)]="sortFilter.start_date" placeholder="От" appDateFocus readonly />
+						[(ngModel)]="sortFilter.start_date" appDateFocus readonly />
 					<lucide-icon *ngIf="sortFilter.start_date === ''" [name]="ICONS.Calendar" size="18"></lucide-icon>
 					<lucide-icon *ngIf="sortFilter.start_date !== ''" [name]="ICONS.X" size="20"
 						(click)="sortFilter.start_date = ''; getAllTransactions.reload()"></lucide-icon>
 				</div>
 				<div class="input w-full cursor-pointer">
+					<p>До</p>
 					<input type="text" autocomplete="off" [(ngModel)]="sortFilter.end_date" (change)="getAllTransactions.reload()"
-						class="w-full" placeholder="До" id="do" appDateFocus readonly />
+						class="w-full" id="do" appDateFocus readonly />
 					<lucide-icon *ngIf="sortFilter.end_date === ''" [name]="ICONS.Calendar" size="18"></lucide-icon>
 					<lucide-icon *ngIf="sortFilter.end_date !== ''" [name]="ICONS.X" size="20"
 						(click)="sortFilter.end_date = ''; getAllTransactions.reload()"></lucide-icon>

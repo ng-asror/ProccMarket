@@ -2,11 +2,10 @@ import { Component, inject, resource, signal } from '@angular/core';
 import { icons, LucideAngularModule } from 'lucide-angular';
 import { DateFocus } from '../../shared';
 import { AmDateFormatPipe, Auth, BalanceService, Telegram, TTransactionTypes } from '../../core';
-import { firstValueFrom, timeInterval } from 'rxjs';
+import { firstValueFrom } from 'rxjs';
 import { NgFor, NgIf } from '@angular/common';
 import { NumeralPipe } from '../../core';
 import {
-  AbstractControl,
   FormGroup,
   FormsModule,
   NonNullableFormBuilder,

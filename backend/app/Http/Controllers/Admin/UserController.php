@@ -8,6 +8,7 @@ use App\Models\Role;
 use App\Models\Transaction;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 
 class UserController extends Controller
@@ -76,9 +77,18 @@ class UserController extends Controller
             'password' => 'nullable|string|min:8',
             'role_id' => 'required|exists:roles,id',
             'is_admin' => 'boolean',
+            'description' => 'nullable|string|max:1000',
+            'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
-        $validated['password'] = Hash::make($validated['password']);
+        if ($request->hasFile('avatar')) {
+            $validated['avatar'] = $request->file('avatar')->store('avatars', 'public');
+        }
+
+        if (isset($validated['password'])) {
+            $validated['password'] = Hash::make($validated['password']);
+        }
+
         User::create($validated);
 
         return redirect()->route('admin.users.index')->with('success', 'User created successfully');
@@ -97,7 +107,31 @@ class UserController extends Controller
             'email' => 'required|email|unique:users,email,' . $user->id,
             'role_id' => 'required|exists:roles,id',
             'is_admin' => 'boolean',
+            'description' => 'nullable|string|max:1000',
+            'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'remove_avatar' => 'nullable|boolean',
         ]);
+
+        // Handle avatar removal
+        if ($request->input('remove_avatar') && $user->avatar) {
+            // Only delete if it's a stored file (not a URL)
+            if (!filter_var($user->avatar, FILTER_VALIDATE_URL)) {
+                Storage::disk('public')->delete($user->avatar);
+            }
+            $validated['avatar'] = null;
+        }
+
+        // Handle avatar upload
+        if ($request->hasFile('avatar')) {
+            // Delete old avatar if exists
+            if ($user->avatar && !filter_var($user->avatar, FILTER_VALIDATE_URL)) {
+                Storage::disk('public')->delete($user->avatar);
+            }
+            $validated['avatar'] = $request->file('avatar')->store('avatars', 'public');
+        }
+
+        // Remove the remove_avatar flag from validated data
+        unset($validated['remove_avatar']);
 
         $user->update($validated);
         return redirect()->route('admin.users.index')->with('success', 'User updated successfully');
@@ -164,6 +198,11 @@ class UserController extends Controller
 
     public function destroy(User $user)
     {
+        // Delete avatar if exists
+        if ($user->avatar && !filter_var($user->avatar, FILTER_VALIDATE_URL)) {
+            Storage::disk('public')->delete($user->avatar);
+        }
+        
         $user->delete();
         return redirect()->route('admin.users.index')->with('success', 'User deleted successfully');
     }

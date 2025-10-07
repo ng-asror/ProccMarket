@@ -12,6 +12,9 @@ import {
   IconChevronDown,
   IconLock,
   IconHistory,
+  IconX,
+  IconUser,
+  IconUpload,
 } from "@tabler/icons-react"
 import {
   ColumnDef,
@@ -73,6 +76,7 @@ import {
 } from "@/components/ui/tabs"
 import { router } from '@inertiajs/react'
 import { parse } from "path"
+import { Textarea } from "./ui/textarea"
 
 // Schema for user data validation
 export const userSchema = z.object({
@@ -85,7 +89,9 @@ export const userSchema = z.object({
   }).nullable(),
   balance: z.number(),
   banned: z.boolean(),
+  description: z.string().nullable(),
   avatar: z.string().nullable(),
+  avatar_url: z.string().nullable(),
   is_admin: z.boolean(),
   created_at: z.string(),
 })
@@ -411,18 +417,77 @@ function UserEditDialog({ user, roles, onUpdate }: {
     email: user.email,
     role_id: user.role?.id.toString() || "",
     is_admin: user.is_admin,
+    description: user.description || "",
   })
+  const [avatarFile, setAvatarFile] = React.useState<File | null>(null)
+  const [avatarPreview, setAvatarPreview] = React.useState<string | null>(user.avatar_url || null)
+  const [removeAvatar, setRemoveAvatar] = React.useState(false)
+  const fileInputRef = React.useRef<HTMLInputElement>(null)
+
+  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      // Validate file size (max 2MB)
+      if (file.size > 2048 * 1024) {
+        toast.error("Image size must be less than 2MB")
+        return
+      }
+
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        toast.error("Please upload an image file")
+        return
+      }
+
+      setAvatarFile(file)
+      setRemoveAvatar(false)
+      
+      // Create preview
+      const reader = new FileReader()
+      reader.onloadend = () => {
+        setAvatarPreview(reader.result as string)
+      }
+      reader.readAsDataURL(file)
+    }
+  }
+
+  const handleRemoveAvatar = () => {
+    setAvatarFile(null)
+    setAvatarPreview(null)
+    setRemoveAvatar(true)
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ""
+    }
+  }
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    router.patch(route('admin.users.update', user.id), formData, {
+    
+    const submitData = new FormData()
+    submitData.append('name', formData.name)
+    submitData.append('email', formData.email)
+    submitData.append('role_id', formData.role_id)
+    submitData.append('is_admin', formData.is_admin ? '1' : '0')
+    submitData.append('description', formData.description)
+    
+    if (avatarFile) {
+      submitData.append('avatar', avatarFile)
+    }
+    
+    if (removeAvatar && !avatarFile) {
+      submitData.append('remove_avatar', '1')
+    }   
+    
+
+    router.post(route('admin.users.update', user.id), submitData, {
       onSuccess: () => {
         toast.success("User updated successfully")
         setOpen(false)
         onUpdate()
       },
       onError: (errors) => {
-        toast.error("Failed to update user")
+        const errorMessages = Object.values(errors).flat()
+        toast.error(errorMessages[0] || "Failed to update user")
       }
     })
   }
@@ -435,12 +500,81 @@ function UserEditDialog({ user, roles, onUpdate }: {
           Edit User
         </DropdownMenuItem>
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Edit User: {user.name || user.email}</DialogTitle>
+          <DialogTitle>Edit User Profile</DialogTitle>
+          <DialogDescription>
+            Update user information, role, and avatar
+          </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit}>
-          <div className="grid gap-4 py-4">
+          <div className="grid gap-6 py-4">
+            {/* Avatar Section */}
+            <div className="space-y-3">
+              <Label>Profile Avatar</Label>
+              <div className="flex items-start gap-4">
+                <div className="relative">
+                  {avatarPreview ? (
+                    <div className="relative group">
+                      <img
+                        src={avatarPreview}
+                        alt="Avatar preview"
+                        className="h-24 w-24 rounded-full object-cover border-2 border-border"
+                      />
+                      <button
+                        type="button"
+                        onClick={handleRemoveAvatar}
+                        className="absolute -top-2 -right-2 h-6 w-6 rounded-full bg-destructive text-destructive-foreground opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
+                      >
+                        <IconX className="h-4 w-4" />
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="h-24 w-24 rounded-full bg-muted flex items-center justify-center border-2 border-dashed border-border">
+                      <IconUser className="h-10 w-10 text-muted-foreground" />
+                    </div>
+                  )}
+                </div>
+                
+                <div className="flex-1 space-y-2">
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/jpeg,image/png,image/jpg,image/gif"
+                    onChange={handleAvatarChange}
+                    className="hidden"
+                    id="avatar-upload"
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="w-full"
+                  >
+                    <IconUpload className="mr-2 h-4 w-4" />
+                    Upload New Avatar
+                  </Button>
+                  {avatarPreview && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={handleRemoveAvatar}
+                      className="w-full text-destructive hover:text-destructive"
+                    >
+                      <IconX className="mr-2 h-4 w-4" />
+                      Remove Avatar
+                    </Button>
+                  )}
+                  <p className="text-xs text-muted-foreground">
+                    JPG, PNG or GIF. Max size 2MB.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Name */}
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="name" className="text-right">
                 Name
@@ -450,11 +584,14 @@ function UserEditDialog({ user, roles, onUpdate }: {
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 className="col-span-3"
+                placeholder="Enter full name"
               />
             </div>
+
+            {/* Email */}
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="email" className="text-right">
-                Email
+                Email *
               </Label>
               <Input
                 id="email"
@@ -463,11 +600,32 @@ function UserEditDialog({ user, roles, onUpdate }: {
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                 className="col-span-3"
                 required
+                placeholder="user@example.com"
               />
             </div>
+
+            {/* Description */}
+            <div className="grid grid-cols-4 items-start gap-4">
+              <Label htmlFor="description" className="text-right pt-2">
+                Bio
+              </Label>
+              <Textarea
+                id="description"
+                value={formData.description}
+                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                className="col-span-3 min-h-[100px] resize-none"
+                placeholder="Write a short bio about this user..."
+                maxLength={1000}
+              />
+              <div className="col-start-2 col-span-3 text-xs text-muted-foreground">
+                {formData.description.length}/1000 characters
+              </div>
+            </div>
+
+            {/* Role */}
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="role" className="text-right">
-                Role
+                Role *
               </Label>
               <Select
                 value={formData.role_id}
@@ -479,15 +637,19 @@ function UserEditDialog({ user, roles, onUpdate }: {
                 <SelectContent>
                   {roles.map((role) => (
                     <SelectItem key={role.id} value={role.id.toString()}>
-                      {role.name}
+                      <div className="flex items-center gap-2">
+                        {role.name}
+                      </div>
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
+
+            {/* Admin Status */}
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="is_admin" className="text-right">
-                Admin
+                Admin Access
               </Label>
               <div className="col-span-3 flex items-center space-x-2">
                 <Checkbox
@@ -495,14 +657,51 @@ function UserEditDialog({ user, roles, onUpdate }: {
                   checked={formData.is_admin}
                   onCheckedChange={(checked) => setFormData({ ...formData, is_admin: checked === true })}
                 />
-                <label htmlFor="is_admin" className="text-sm font-medium leading-none">
-                  Is Administrator
+                <label htmlFor="is_admin" className="text-sm font-medium leading-none cursor-pointer">
+                  Grant administrator privileges
                 </label>
               </div>
             </div>
+
+            {/* User Stats Info */}
+            <div className="grid grid-cols-4 items-start gap-4 pt-4 border-t">
+              <Label className="text-right text-muted-foreground">
+                User Info
+              </Label>
+              <div className="col-span-3 space-y-2 text-sm">
+                <div className="flex justify-between items-center">
+                  <span className="text-muted-foreground">Current Balance:</span>
+                  <Badge variant="outline" className="font-mono">
+                    {user.balance.toLocaleString()}
+                  </Badge>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-muted-foreground">Status:</span>
+                  <Badge variant={user.banned ? "destructive" : "outline"}>
+                    {user.banned ? "Banned" : "Active"}
+                  </Badge>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-muted-foreground">Joined:</span>
+                  <span className="text-foreground">
+                    {new Date(user.created_at).toLocaleDateString()}
+                  </span>
+                </div>
+              </div>
+            </div>
           </div>
-          <DialogFooter>
-            <Button type="submit">Save Changes</Button>
+          
+          <DialogFooter className="gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button type="submit">
+              Save Changes
+            </Button>
           </DialogFooter>
         </form>
       </DialogContent>
@@ -556,9 +755,9 @@ const columns = (roles: any[], refreshData: () => void): ColumnDef<z.infer<typeo
       const user = row.original
       return (
         <div className="flex items-center gap-3">
-          {user.avatar ? (
+          {user.avatar_url ? (
             <img
-              src={user.avatar}
+              src={user.avatar_url}
               alt={user.name || user.email}
               className="h-10 w-10 rounded-full"
             />

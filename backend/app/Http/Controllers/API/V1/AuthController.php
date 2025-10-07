@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Storage;
 
 class AuthController extends Controller
 {
@@ -127,6 +128,8 @@ class AuthController extends Controller
             'name' => 'sometimes|string|max:255',
             'email' => 'sometimes|email|unique:users,email,' . $user->id,
             'password' => 'sometimes|string|min:8|confirmed',
+            'description' => 'sometimes|nullable|string|max:1000',
+            'avatar' => 'sometimes|nullable|string',
         ]);
 
         if ($validator->fails()) {
@@ -136,9 +139,31 @@ class AuthController extends Controller
             ], 422);
         }
 
-        $data = $request->only(['name', 'email']);
+        $data = $request->only(['name', 'email', 'description']);
+        
         if ($request->filled('password')) {
             $data['password'] = Hash::make($request->password);
+        }
+
+        // Handle avatar (URL or file upload)
+        if ($request->filled('avatar')) {
+            $avatar = $request->avatar;
+            
+            // Check if it's a URL
+            if (filter_var($avatar, FILTER_VALIDATE_URL)) {
+                $data['avatar'] = $avatar;
+            } 
+            // Check if it's a base64 image
+            elseif (preg_match('/^data:image\/(\w+);base64,/', $avatar, $matches)) {
+                $imageData = substr($avatar, strpos($avatar, ',') + 1);
+                $imageData = base64_decode($imageData);
+                $extension = $matches[1];
+                
+                $filename = 'avatars/' . uniqid() . '.' . $extension;
+                Storage::disk('public')->put($filename, $imageData);
+                
+                $data['avatar'] = $filename;
+            }
         }
 
         $user->update($data);
@@ -146,7 +171,7 @@ class AuthController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Profile updated successfully',
-            'user' => $user,
+            'user' => $user->load('role'),
         ], 200);
     }
 
@@ -187,6 +212,41 @@ class AuthController extends Controller
     }
 
     /**
+     * Get user profile with analytics.
+     */
+    public function profile(Request $request): JsonResponse
+    {
+        $user = $request->user()->load('role');
+
+        // Get topics count
+        $topicsCount = $user->topics()->count();
+
+        // Get total views on user's topics
+        $viewsCount = $user->topics()
+            ->withCount('views')
+            ->get()
+            ->sum('views_count');
+
+        // Get total likes on user's topics (only is_like = true)
+        $likesCount = $user->topics()
+            ->withCount(['likes' => function ($query) {
+                $query->where('is_like', true);
+            }])
+            ->get()
+            ->sum('likes_count');
+
+        return response()->json([
+            'success' => true,
+            'user' => $user,
+            'analytics' => [
+                'topics_count' => $topicsCount,
+                'views_count' => $viewsCount,
+                'likes_count' => $likesCount,
+            ]
+        ], 200);
+    }
+
+    /**
      * Log out a user.
      */
     public function logout(Request $request): JsonResponse
@@ -214,7 +274,7 @@ class AuthController extends Controller
             ], 422);
         }
 
-        // Google’dan tokenni verify qilish
+        // Google'dan tokenni verify qilish
         $response = Http::get("https://oauth2.googleapis.com/tokeninfo", [
             'id_token' => $request->id_token
         ]);

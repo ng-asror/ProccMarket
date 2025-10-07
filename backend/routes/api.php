@@ -33,12 +33,12 @@ Route::prefix('v1')->group(function () {
 
         Route::middleware('auth:sanctum')->group(function () {
             Route::get('/me', [AuthController::class, 'me']);
+            Route::get('/profile', [AuthController::class, 'profile']);
             Route::put('/update', [AuthController::class, 'update']);
             Route::put('/update-role', [AuthController::class, 'updateRole']);
             Route::post('/logout', [AuthController::class, 'logout']);
         });
     });
-
     /* PUBLIC ENDPOINTS */
     Route::prefix('public')->group(function () {
         Route::get('/all', [PublicApiController::class, 'allPublicData']);

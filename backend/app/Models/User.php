@@ -18,6 +18,7 @@ class User extends Authenticatable
         'balance',
         'name',
         'avatar',
+        'description',
         'banned',
         'last_deposit_at',
         'password',
@@ -41,15 +42,15 @@ class User extends Authenticatable
         ];
     }
 
-    protected $appends = ['role_name', 'image_url'];
+    protected $appends = ['role_name', 'avatar_url'];
 
-    public function getImageUrlAttribute()
+    public function getAvatarUrlAttribute()
     {
-        if (filter_var($this->image, FILTER_VALIDATE_URL)) {
-            return $this->image;
+        if (filter_var($this->avatar, FILTER_VALIDATE_URL)) {
+            return $this->avatar;
         }
 
-        return $this->image ? asset('storage/' . $this->image) : null;
+        return $this->avatar ? asset('storage/' . $this->avatar) : null;
     }
 
     public function getRoleNameAttribute()

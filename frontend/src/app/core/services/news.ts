@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment.development';
-import { INewsCommentsRes, INewsInfoRes, INewsRes } from '../interfaces';
+import { ILikeDislikeRes, INewsCommentsRes, INewsInfoRes, INewsRes } from '../interfaces';
 
 @Injectable({
   providedIn: 'root',
@@ -22,9 +22,16 @@ export class News {
     return this.http.get<INewsCommentsRes>(`${environment.apiUrl}/news/${id}/comments`);
   }
 
-  newsToggleLike(news_id: number): Observable<any> {
-    return this.http.post<any>(`${environment.apiUrl}/news/${news_id}/like`, {
+  newsToggleLike(news_id: number): Observable<ILikeDislikeRes> {
+    return this.http.post<ILikeDislikeRes>(`${environment.apiUrl}/news/${news_id}/like`, {
       is_like: true,
+    });
+  }
+
+  createComment(news_id: number, content: string, replay_id?: number): Observable<any> {
+    return this.http.post<any>(`${environment.apiUrl}/news/${news_id}/comments`, {
+      content,
+      replay_id,
     });
   }
 }

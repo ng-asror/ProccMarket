@@ -44,7 +44,7 @@ export interface INewsInfo {
   views_count: number;
   shares_count: number;
   comments_count: number;
-  user_reaction: any;
+  user_reaction: 'like' | null;
   user_shared: boolean;
   category: { id: number; name: string };
 }
@@ -102,4 +102,12 @@ export interface IAuthorNewsInfo {
   role_name: any;
   image_url: any;
   role: any;
+}
+
+export interface ILikeDislikeRes extends Result {
+  data: {
+    user_reaction: 'like' | null;
+    likes_count: number;
+    dislikes_count: number;
+  };
 }

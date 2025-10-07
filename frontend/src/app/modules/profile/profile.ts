@@ -1,20 +1,10 @@
-import { Component, inject } from '@angular/core';
-import { Router } from '@angular/router';
-import { icons, LucideAngularModule } from 'lucide-angular';
-import { Auth } from '../../core';
+import { Component } from '@angular/core';
+import { RouterOutlet } from '@angular/router';
 
 @Component({
   selector: 'app-profile',
-  imports: [LucideAngularModule],
+  imports: [RouterOutlet],
   templateUrl: './profile.html',
   styleUrl: './profile.scss',
 })
-export class Profile {
-  private authService = inject(Auth);
-  constructor(private router: Router) {}
-  protected ICONS = icons;
-
-  protected logout(): void {
-    this.authService.logout();
-  }
-}
+export class Profile {}

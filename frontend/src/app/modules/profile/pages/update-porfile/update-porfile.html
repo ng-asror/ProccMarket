@@ -1,0 +1,29 @@
+<div class="px-[15px]">
+	<div class="w-[100px] h-[100px] mx-auto mb-[25px]" onclick="avatarsModal.showModal()">
+		<img [src]="'https://e2a4cbe47a81.ngrok.app/' + avatar()" class="w-full h-full block" />
+	</div>
+	<form [formGroup]="updateForm" class="space-y-[15px] card">
+		<div>
+			<label for="email" class="text-black text-[14px] leading-[100%] mb-[5px] block">Электронная почта</label>
+			<input type="email" placeholder="example@gmail.com" class="input placeholder:text-black/50 w-full" id="email"
+				formControlName="email" />
+		</div>
+	</form>
+</div>
+
+<dialog id="avatarsModal" class="modal modal-bottom">
+	<div class="modal-box">
+		<h3 class="text-lg font-bold">Выбор аватара</h3>
+		<div class="grid grid-cols-5 mt-[15px] gap-[10px]">
+			<button type="button" *ngFor="let item of localAavatars" class="w-full cursor-pointer"
+				(click)="selectAvatar(item)">
+				<img [src]="'https://e2a4cbe47a81.ngrok.app/' + item" [alt]="item" class="w-full h-auto block">
+			</button>
+		</div>
+		<div class="modal-action">
+			<form method="dialog">
+				<button class="btn">Закрыть</button>
+			</form>
+		</div>
+	</div>
+</dialog>

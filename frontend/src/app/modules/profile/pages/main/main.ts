@@ -1,5 +1,5 @@
 import { Component, inject, resource } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { icons, LucideAngularModule } from 'lucide-angular';
 import { firstValueFrom } from 'rxjs';
 import { Auth, NumeralPipe, ProfileService } from '../../../../core';
@@ -7,7 +7,7 @@ import { NgIf } from '@angular/common';
 
 @Component({
   selector: 'app-main',
-  imports: [NumeralPipe, LucideAngularModule, NgIf],
+  imports: [NumeralPipe, LucideAngularModule, NgIf, RouterLink],
   templateUrl: './main.html',
   styleUrl: './main.scss',
 })

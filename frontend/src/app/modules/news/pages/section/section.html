@@ -38,7 +38,8 @@
 					[disabled]="comment().content ===''">Отправить</button>
 			</div>
 			<div class="space-y-[10px]" *ngIf="comments.value() as comments">
-				<div class="card border-1 border-[#E1E1E1] space-y-[10px] p-[10px]" *ngFor="let item of comments.data">
+				@for (item of comments.data; track item.id) {
+				<div class="card border-1 border-[#E1E1E1] space-y-[10px] p-[10px]">
 					<div class="flex items-center justify-between">
 						<div class="flex items-center gap-x-[5px]">
 							<div class="avatar">
@@ -74,6 +75,7 @@
 						</div>
 					</div>
 				</div>
+				}
 				<div class="card border-1 w-[95%] ml-auto border-[#E1E1E1] space-y-[10px] p-[10px]">
 					<div class="flex items-center justify-between">
 						<div class="flex items-center gap-x-[5px]">

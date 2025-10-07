@@ -19,7 +19,7 @@ export interface IProfileRes extends ResultData {
     updated_at: Date;
     deleted_at: any;
     role_name: string;
-    avatar_url: string;
+    avatar_url: string | null;
     role: IRole;
   };
   analytics: {

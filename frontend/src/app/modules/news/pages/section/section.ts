@@ -1,29 +1,34 @@
-import { Component, inject, OnDestroy, OnInit, resource, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  inject,
+  OnDestroy,
+  OnInit,
+  resource,
+  signal,
+} from '@angular/core';
 import { icons, LucideAngularModule } from 'lucide-angular';
 import { News, Telegram } from '../../../../core';
 import { ActivatedRoute } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { MomentModule } from 'ngx-moment';
-import { NgForOf, NgIf } from '@angular/common';
+import { NgIf } from '@angular/common';
 import { AmDateFormatPipe, NumeralPipe } from '../../../../core/pipes';
 import { FormsModule } from '@angular/forms';
+
 @Component({
   selector: 'app-section',
-  imports: [
-    LucideAngularModule,
-    NgIf,
-    NgForOf,
-    MomentModule,
-    AmDateFormatPipe,
-    NumeralPipe,
-    FormsModule,
-  ],
+  imports: [LucideAngularModule, NgIf, MomentModule, AmDateFormatPipe, NumeralPipe, FormsModule],
   templateUrl: './section.html',
   styleUrl: './section.scss',
+  // changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Section implements OnInit, OnDestroy {
   private telegram = inject(Telegram);
   private newsService = inject(News);
+  private cdr = inject(ChangeDetectorRef);
+
   protected ICONS = icons;
   protected comment = signal<{ content: string; replay_id?: number }>({
     content: '',
@@ -59,7 +64,7 @@ export class Section implements OnInit, OnDestroy {
 
   comments = resource({
     loader: () => firstValueFrom(this.newsService.getComments(this.news_id)),
-  });
+  }).asReadonly();
 
   ngOnInit(): void {
     this.telegram.showBackButton('/news');
@@ -83,7 +88,6 @@ export class Section implements OnInit, OnDestroy {
       this.newsService.createComment(Number(this.news_id), this.comment().content)
     ).then((res) => {
       this.comment.set({ content: '', replay_id: undefined });
-      this.comments.reload();
     });
   }
 }

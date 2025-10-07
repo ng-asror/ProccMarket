@@ -14,24 +14,28 @@
 			<div [innerHTML]="news.data.description"></div>
 			<div class="flex items-center gap-x-[20px]">
 				<button type="button" class="text-black/50 text-[18px] flex items-center gap-x-[5px] cursor-pointer"
-					(click)="newToggleLike(news.data.id)" [ngClass]="news.data.user_reaction === 'like'?'text-[#030303]':''">
-					<lucide-icon [name]="ICONS.ThumbsUp"></lucide-icon>
-					<span class="block">{{news.data.likes_count}}</span>
+					(click)="newToggleLike(news.data.id)">
+					<lucide-icon [name]="ICONS.ThumbsUp"
+						[color]="newsCounts().user_reaction === 'like'?'#030303':'#00000080'"></lucide-icon>
+					<span class="block"
+						[class.text-[#030303]]="newsCounts().user_reaction === 'like'?'#030303':''">{{newsCounts().likes_count}}</span>
 				</button>
 				<button type="button" class="text-black/50 text-[18px] flex items-center gap-x-[5px] cursor-pointer">
 					<lucide-icon [name]="ICONS.Share"></lucide-icon>
-					<span class="block">{{news.data.shares_count}}</span>
+					<span class="block">{{newsCounts().share_count}}</span>
 				</button>
 				<button type="button" class="text-black/50 text-[18px] flex items-center gap-x-[5px]">
 					<lucide-icon [name]="ICONS.MessagesSquare"></lucide-icon>
-					<span class="block">{{news.data.comments_count}}</span>
+					<span class="block">{{newsCounts().comments}}</span>
 				</button>
 			</div>
 			<div class="space-y-[10px]">
 				<h2 class="text-lg font-semibold">Оставьте комментарий</h2>
 				<textarea placeholder="Ваш комментарий"
-					class="textarea placeholder:text-black/50 textarea-primary mb-[10px] w-full"></textarea>
-				<button type="button" class="btn btn-primary ml-auto block">Отправить</button>
+					class="textarea placeholder:text-black/50 textarea-primary mb-[10px] w-full"
+					[(ngModel)]="comment().content"></textarea>
+				<button type="button" class="btn btn-primary ml-auto block" (click)="createComment()"
+					[disabled]="comment().content ===''">Отправить</button>
 			</div>
 			<div class="space-y-[10px]" *ngIf="comments.value() as comments">
 				<div class="card border-1 border-[#E1E1E1] space-y-[10px] p-[10px]" *ngFor="let item of comments.data">
@@ -44,7 +48,7 @@
 							</div>
 							<div>
 								<h4 class="text-lg font-[400] leading-[100%]">{{item.user.name}}</h4>
-								<p class="text-sm text-black/60">{{item.user.role_name}}</p>
+								<p class="text-sm text-black/60">{{item.user.role_name??'Гость'}}</p>
 							</div>
 						</div>
 						<b class="text-black text-[16px]">{{item.user.balance | numeral: '$0,0'}}</b>

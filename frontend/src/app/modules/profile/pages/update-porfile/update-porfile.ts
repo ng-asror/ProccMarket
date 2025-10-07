@@ -1,28 +1,37 @@
-import { Component, inject, OnInit, resource, signal } from '@angular/core';
-import { ProfileService } from '../../../../core';
+import { Component, inject, OnDestroy, OnInit, resource, signal } from '@angular/core';
+import { ProfileService, Telegram } from '../../../../core';
 import { firstValueFrom } from 'rxjs';
-import { AbstractControl, FormGroup, NonNullableFormBuilder, Validators } from '@angular/forms';
+import {
+  AbstractControl,
+  FormGroup,
+  NonNullableFormBuilder,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
 import { avatarsMock } from '../../mock/avatars';
 import { NgFor } from '@angular/common';
 
 @Component({
   selector: 'app-update-porfile',
-  imports: [NgFor],
+  imports: [NgFor, ReactiveFormsModule],
   templateUrl: './update-porfile.html',
   styleUrl: './update-porfile.scss',
 })
-export class UpdatePorfile implements OnInit {
+export class UpdatePorfile implements OnInit, OnDestroy {
+  private telegram = inject(Telegram);
   private profileService = inject(ProfileService);
   updateForm!: FormGroup;
   protected localAavatars = avatarsMock;
   avatar = signal<string>('avatars/avatar01.svg');
 
   constructor(private fb: NonNullableFormBuilder) {}
+
   getProfile = resource({
     loader: () => firstValueFrom(this.profileService.getProfile()),
   });
 
   ngOnInit(): void {
+    this.telegram.showBackButton('/profile');
     const profile = this.getProfile.value();
     if (profile) {
       this.updateForm = this.fb.group(
@@ -61,5 +70,9 @@ export class UpdatePorfile implements OnInit {
       'avatarsModal'
     ) as HTMLDialogElement;
     dialog?.close();
+  }
+
+  ngOnDestroy(): void {
+    this.telegram.hiddeBackButton('/profile');
   }
 }

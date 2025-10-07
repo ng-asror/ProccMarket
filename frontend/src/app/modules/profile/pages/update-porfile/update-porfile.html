@@ -1,9 +1,14 @@
 <div class="px-[15px]">
-	<div class="avatar justify-center">
-		<label class="w-[100px] h-[100px] rounded-full" onclick="avatarsModal.showModal()">
-			<img [src]="'https://e2a4cbe47a81.ngrok.app/' + avatar()" class="w-full h-auto block" />
-		</label>
+	<div class="w-[100px] h-[100px] mx-auto mb-[25px]" onclick="avatarsModal.showModal()">
+		<img [src]="'https://e2a4cbe47a81.ngrok.app/' + avatar()" class="w-full h-full block" />
 	</div>
+	<form [formGroup]="updateForm" class="space-y-[15px] card">
+		<div>
+			<label for="email" class="text-black text-[14px] leading-[100%] mb-[5px] block">Электронная почта</label>
+			<input type="email" placeholder="example@gmail.com" class="input placeholder:text-black/50 w-full" id="email"
+				formControlName="email" />
+		</div>
+	</form>
 </div>
 
 <dialog id="avatarsModal" class="modal modal-bottom">

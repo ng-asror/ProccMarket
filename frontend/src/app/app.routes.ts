@@ -3,6 +3,7 @@ import { Routes } from '@angular/router';
 import { newsRoutes } from './modules/news/news.routes';
 import { notificationRoutes } from './modules/notifications/notifications.routes';
 import { authGuard } from './core';
+import { profileRoutes } from './modules/profile/profile.routes';
 
 export const routes: Routes = [
   {
@@ -17,6 +18,7 @@ export const routes: Routes = [
       },
       ...newsRoutes,
       ...notificationRoutes,
+      ...profileRoutes,
       {
         path: 'search',
         loadComponent: () => import('./modules').then((m) => m.Search),
@@ -24,10 +26,6 @@ export const routes: Routes = [
       {
         path: 'balance',
         loadComponent: () => import('./modules').then((m) => m.Balance),
-      },
-      {
-        path: 'profile',
-        loadComponent: () => import('./modules').then((m) => m.Profile),
       },
       {
         path: 'comments/:id',
@@ -49,8 +47,7 @@ export const routes: Routes = [
       },
       {
         path: 'register',
-        loadComponent: () =>
-          import('./auth/components').then((c) => c.Register),
+        loadComponent: () => import('./auth/components').then((c) => c.Register),
       },
       {
         path: '',

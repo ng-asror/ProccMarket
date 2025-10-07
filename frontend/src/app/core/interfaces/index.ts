@@ -4,3 +4,5 @@ export * from './news';
 export * from './result-data';
 export * from './me';
 export * from './transaction';
+export * from './profile';
+export * from './role';

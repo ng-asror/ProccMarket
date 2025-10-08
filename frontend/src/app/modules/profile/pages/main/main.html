@@ -1,7 +1,8 @@
 <div class="w-full h-[255]">
 	<img src="/img/user-bg.png" alt="user bg img" class="w-full h-full block">
 </div>
-<div class="px-[15px] pb-[15px] relative z-2 mt-[-120px]" *ngIf="profile.value() as profile">
+@if (profile.value(); as profile) {
+<div class="px-[15px] pb-[15px] relative z-2 mt-[-120px]">
 	<div class="rounded-[12px] border-1 border-[#E1E1E1] p-[15px] bg-white flex flex-col gap-y-[15px] mb-[15px]">
 		<div>
 			<div class="rounded-full w-[100px] h-[100px] overflow-hidden p-[5px] mx-auto mt-[-60px]">
@@ -40,7 +41,7 @@
 		<span>Аккаунт заблокирован</span>
 	</div>
 	<ul class="menu w-full bg-white rounded-box p-0">
-		<li><a>
+		<li><a routerLink="my-topics">
 				<lucide-icon [name]="ICONS.Newspaper" size="20"></lucide-icon>
 				Темы
 				<lucide-icon [name]="ICONS.ChevronRight" size="20"></lucide-icon></a>
@@ -91,6 +92,7 @@
 		</li>
 	</ul>
 </div>
+}
 
 <dialog id="my_modal_5" class="modal modal-bottom sm:modal-middle">
 	<div class="modal-box">

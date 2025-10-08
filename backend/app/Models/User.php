@@ -83,6 +83,53 @@ class User extends Authenticatable
     }
 
     /**
+     * Get all purchased roles by this user
+     */
+    public function purchasedRoles()
+    {
+        return $this->hasMany(UserRole::class);
+    }
+
+    /**
+     * Get roles through the pivot table
+     */
+    public function ownedRoles()
+    {
+        return $this->belongsToMany(Role::class, 'user_roles')
+            ->withPivot(['purchase_price', 'transaction_id', 'purchased_at'])
+            ->withTimestamps()
+            ->orderByPivot('purchased_at', 'desc');
+    }
+
+    /**
+     * Check if user has purchased a specific role
+     */
+    public function hasPurchasedRole(int $roleId): bool
+    {
+        return $this->purchasedRoles()
+            ->where('role_id', $roleId)
+            ->exists();
+    }
+
+    /**
+     * Check if user can afford a role
+     */
+    public function canAffordRole(Role $role): bool
+    {
+        return $this->balance >= $role->min_deposit;
+    }
+
+    /**
+     * Get the highest role user owns
+     */
+    public function getHighestPurchasedRole(): ?Role
+    {
+        return $this->ownedRoles()
+            ->orderBy('min_deposit', 'desc')
+            ->first();
+    }
+
+    /**
      * Check if user is eligible for withdrawal
      */
     public function isEligibleForWithdrawal(): array

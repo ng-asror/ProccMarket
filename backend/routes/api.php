@@ -3,6 +3,7 @@
 use App\Http\Controllers\API\V1\CommentController;
 use App\Http\Controllers\API\V1\NewsLikeController;
 use App\Http\Controllers\API\V1\NewsShareController;
+use App\Http\Controllers\API\V1\RoleController;
 use App\Http\Controllers\API\V1\SectionController;
 use App\Http\Controllers\API\V1\AuthController;
 use App\Http\Controllers\API\V1\CryptoBotController;
@@ -34,11 +35,20 @@ Route::prefix('v1')->group(function () {
         Route::middleware('auth:sanctum')->group(function () {
             Route::get('/me', [AuthController::class, 'me']);
             Route::get('/profile', [AuthController::class, 'profile']);
+            Route::get('/my-topics', [AuthController::class, 'myTopics']);
             Route::put('/update', [AuthController::class, 'update']);
-            Route::put('/update-role', [AuthController::class, 'updateRole']);
             Route::post('/logout', [AuthController::class, 'logout']);
         });
     });
+
+    Route::prefix('roles')->middleware('auth:sanctum')->group(function () {
+        Route::get('/', [RoleController::class, 'index']);        
+        Route::get('/my-purchased-roles', [RoleController::class, 'myPurchasedRoles']);        
+        Route::post('/purchase', [RoleController::class, 'purchaseRole']);        
+        Route::post('/switch', [RoleController::class, 'switchRole']);        
+        Route::get('/statistics', [RoleController::class, 'roleStatistics']);
+    });
+
     /* PUBLIC ENDPOINTS */
     Route::prefix('public')->group(function () {
         Route::get('/all', [PublicApiController::class, 'allPublicData']);

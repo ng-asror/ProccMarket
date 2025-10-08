@@ -30,7 +30,7 @@ Route::middleware(['auth', 'verified', 'admin'])->group(function () {
         Route::get('/', [UserController::class, 'index'])->name('admin.users.index');
         Route::post('/', [UserController::class, 'store'])->name('admin.users.store');
         Route::get('/{user}', [UserController::class, 'show'])->name('admin.users.show');
-        Route::patch('/{user}', [UserController::class, 'update'])->name('admin.users.update');
+        Route::post('/{user}', [UserController::class, 'update'])->name('admin.users.update');
         Route::patch('/{user}/password', [UserController::class, 'updatePassword'])->name('admin.users.password.update');
         Route::patch('/{user}/balance', [UserController::class, 'updateBalance'])->name('admin.users.balance.update');
         Route::post('/{user}/ban', [UserController::class, 'ban'])->name('admin.users.ban');

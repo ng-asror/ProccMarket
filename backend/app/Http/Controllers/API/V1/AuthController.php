@@ -117,6 +117,70 @@ class AuthController extends Controller
         ], 200);
     }
 
+    public function myTopics(Request $request): JsonResponse
+    {
+        $user = $request->user();
+
+        $topics = $user->topics()
+            ->with([
+                'section',
+                'posts' => function ($q) {
+                    $q->latest()->limit(1);
+                },
+                'likes',
+                'shares'
+            ])
+            ->withCount([
+                'posts',
+                'likes as likes_count' => function ($q) {
+                    $q->where('is_like', true);
+                },
+                'likes as dislikes_count' => function ($q) {
+                    $q->where('is_like', false);
+                },
+                'shares',
+                'views'
+            ])
+            ->get()
+            ->transform(function ($topic) use ($user) {
+                $userLike = $topic->likes->firstWhere('user_id', $user->id);
+
+                return [
+                    'id' => $topic->id,
+                    'title' => $topic->title,
+                    'image' => $topic->image,
+                    'image_url' => $topic->image_url,
+                    'closed' => $topic->closed,
+                    'created_at' => $topic->created_at,
+                    'updated_at' => $topic->updated_at,
+                    'section' => $topic->section ? [
+                        'id' => $topic->section->id,
+                        'name' => $topic->section->name,
+                        'description' => $topic->section->description,
+                        'image_url' => $topic->section->image_url,
+                        'access_price' => $topic->section->access_price,
+                        'position' => $topic->section->position,
+                        'parent_id' => $topic->section->parent_id,
+                    ] : null,
+                    'posts_count' => $topic->posts_count,
+                    'likes_count' => $topic->likes_count,
+                    'dislikes_count' => $topic->dislikes_count,
+                    'shares_count' => $topic->shares_count,
+                    'views_count' => $topic->views_count,
+                    'user_reaction' => $userLike ? ($userLike->is_like ? 'like' : 'dislike') : null,
+                    'user_shared' => $topic->shares->contains('user_id', $user->id),
+                ];
+            });
+
+        return response()->json([
+            'success' => true,
+            'user' => $user->load(['role']),
+            'topics' => $topics,
+        ], 200);
+    }
+
+
+
     /**
      * Update user profile.
      */
@@ -171,42 +235,6 @@ class AuthController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Profile updated successfully',
-            'user' => $user->load('role'),
-        ], 200);
-    }
-
-    /**
-     * Update user role.
-     */
-    public function updateRole(Request $request): JsonResponse
-    {
-        $user = $request->user();
-
-        $validator = Validator::make($request->all(), [
-            'role_id' => 'required|exists:roles,id',
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'errors' => $validator->errors()
-            ], 422);
-        }
-
-        $role = Role::find($request->role_id);
-
-        if ($user->balance < $role->min_deposit) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Insufficient balance to upgrade to this role',
-            ], 403);
-        }
-
-        $user->update(['role_id' => $request->role_id]);
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Role updated successfully',
             'user' => $user->load('role'),
         ], 200);
     }

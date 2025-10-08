@@ -6,7 +6,7 @@
 		<img [src]="item.image_url" [alt]="item.title" class="w-full h-[100px] object-center object-cover rounded-box">
 		<div>
 			<p class="text-[14px] text-[#030303]/90">{{item.section.name}}</p>
-			<h1 class="text-[16px] font-semibold title">{{item.title}}</h1>
+			<a routerLink="" class="text-[16px] font-semibold title">{{item.title}}</a>
 		</div>
 		<div class="flex items-center justify-between">
 			<div class="flex gap-x-[15px]">
@@ -31,8 +31,12 @@
 				<button type="button" class="cursor-pointer">
 					<lucide-icon [name]="ICONS.FilePenLine" size="20" color="#030303"></lucide-icon>
 				</button>
-				<button type="button" class="cursor-pointer">
+				<button type="button" class="cursor-pointer" (click)="closedToggle(item.id)">
+					@if (item.closed) {
+					<lucide-icon [name]="ICONS.LockKeyhole" size="20" color="#030303"></lucide-icon>
+					} @else {
 					<lucide-icon [name]="ICONS.LockKeyholeOpen" size="20" color="#030303"></lucide-icon>
+					}
 				</button>
 				<button type="button" class="cursor-pointer">
 					<lucide-icon [name]="ICONS.Trash2" size="20" color="red"></lucide-icon>
@@ -45,8 +49,60 @@
 	<div class="space-y-4">
 		<div class="border-1 border-[#E1E1E1] rounded-[12px] space-y-[10px] p-[15px]">
 			<div class="skeleton  w-full h-[100px] rounded-box"></div>
+			<div class="skeleton w-[50%] h-[21px]"></div>
 			<div class="skeleton w-full h-[24px]"></div>
-			<div class="skeleton w-[50%] h-[24px]"></div>
+			<div class="skeleton w-full h-[24px]"></div>
+			<div class="flex items-center justify-between gap-x-[20px] w-full">
+				<div class="grid grid-cols-4 max-w-[177.49px] gap-x-[15px] w-full">
+					<div class="skeleton w-full h-[24px]"></div>
+					<div class="skeleton w-full h-[24px]"></div>
+					<div class="skeleton w-full h-[24px]"></div>
+					<div class="skeleton w-full h-[24px]"></div>
+				</div>
+				<div class="grid grid-cols-3 max-w-[80px] gap-x-[15px] w-full">
+					<div class="skeleton w-full h-[24px]"></div>
+					<div class="skeleton w-full h-[24px]"></div>
+					<div class="skeleton w-full h-[24px]"></div>
+				</div>
+			</div>
+		</div>
+		<div class="border-1 border-[#E1E1E1] rounded-[12px] space-y-[10px] p-[15px]">
+			<div class="skeleton  w-full h-[100px] rounded-box"></div>
+			<div class="skeleton w-[50%] h-[21px]"></div>
+			<div class="skeleton w-full h-[24px]"></div>
+			<div class="skeleton w-full h-[24px]"></div>
+			<div class="flex items-center justify-between gap-x-[20px] w-full">
+				<div class="grid grid-cols-4 max-w-[177.49px] gap-x-[15px] w-full">
+					<div class="skeleton w-full h-[24px]"></div>
+					<div class="skeleton w-full h-[24px]"></div>
+					<div class="skeleton w-full h-[24px]"></div>
+					<div class="skeleton w-full h-[24px]"></div>
+				</div>
+				<div class="grid grid-cols-3 max-w-[80px] gap-x-[15px] w-full">
+					<div class="skeleton w-full h-[24px]"></div>
+					<div class="skeleton w-full h-[24px]"></div>
+					<div class="skeleton w-full h-[24px]"></div>
+				</div>
+			</div>
+		</div>
+		<div class="border-1 border-[#E1E1E1] rounded-[12px] space-y-[10px] p-[15px]">
+			<div class="skeleton  w-full h-[100px] rounded-box"></div>
+			<div class="skeleton w-[50%] h-[21px]"></div>
+			<div class="skeleton w-full h-[24px]"></div>
+			<div class="skeleton w-full h-[24px]"></div>
+			<div class="flex items-center justify-between gap-x-[20px] w-full">
+				<div class="grid grid-cols-4 max-w-[177.49px] gap-x-[15px] w-full">
+					<div class="skeleton w-full h-[24px]"></div>
+					<div class="skeleton w-full h-[24px]"></div>
+					<div class="skeleton w-full h-[24px]"></div>
+					<div class="skeleton w-full h-[24px]"></div>
+				</div>
+				<div class="grid grid-cols-3 max-w-[80px] gap-x-[15px] w-full">
+					<div class="skeleton w-full h-[24px]"></div>
+					<div class="skeleton w-full h-[24px]"></div>
+					<div class="skeleton w-full h-[24px]"></div>
+				</div>
+			</div>
 		</div>
 	</div>
 	}

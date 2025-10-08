@@ -4,6 +4,7 @@ import { icons, LucideAngularModule } from 'lucide-angular';
 import { firstValueFrom } from 'rxjs';
 import { Auth, NumeralPipe, ProfileService } from '../../../../core';
 import { NgIf } from '@angular/common';
+import { environment } from '../../../../../environments/environment.development';
 
 @Component({
   selector: 'app-main',
@@ -15,6 +16,7 @@ export class Main {
   private authService = inject(Auth);
   private profileService = inject(ProfileService);
 
+  protected apurl = environment.ngrok;
   constructor(private router: Router) {}
   protected ICONS = icons;
 

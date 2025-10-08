@@ -3,7 +3,14 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment.development';
 import { IProfileRes } from '../interfaces';
-
+interface updateProfileBody {
+  name: string;
+  email: string;
+  description: string;
+  avatar: string;
+  password?: string;
+  password_confirmation?: string;
+}
 @Injectable({
   providedIn: 'root',
 })
@@ -12,5 +19,9 @@ export class ProfileService {
 
   getProfile(): Observable<IProfileRes> {
     return this.http.get<IProfileRes>(`${environment.apiUrl}/auth/profile`);
+  }
+
+  updateProfile(req: updateProfileBody): Observable<any> {
+    return this.http.put<any>(`${environment.apiUrl}/auth/update`, req);
   }
 }

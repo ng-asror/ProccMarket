@@ -1,13 +1,93 @@
-<div class="px-[15px]">
+<div class="px-[15px] pb-[15px]">
 	<div class="w-[100px] h-[100px] mx-auto mb-[25px]" onclick="avatarsModal.showModal()">
-		<img [src]="'https://e2a4cbe47a81.ngrok.app/' + avatar()" class="w-full h-full block" />
+		<img [src]="userAvatar()" class="w-full h-full block" />
 	</div>
-	<form [formGroup]="updateForm" class="space-y-[15px] card">
+	<form [formGroup]="updateForm" class="card space-y-4" (ngSubmit)="update()">
+
+		<h2 class="text-2xl font-semibold text-center mb-4">Обновление профиля</h2>
+		<!-- Имя -->
 		<div>
-			<label for="email" class="text-black text-[14px] leading-[100%] mb-[5px] block">Электронная почта</label>
-			<input type="email" placeholder="example@gmail.com" class="input placeholder:text-black/50 w-full" id="email"
-				formControlName="email" />
+			<label for="name" class="text-black text-[14px] mb-1 block">Имя и Фамилия*</label>
+			<input type="text" id="name" formControlName="name" placeholder="Ваше имя"
+				class="input placeholder:text-[#030303]/50 input-bordered w-full" />
+			<span class="text-xs text-error"
+				*ngIf="updateForm.get('name')?.hasError('required') && updateForm.get('name')?.touched">
+				Поле обязательно.
+			</span>
+			<span class="text-xs text-error"
+				*ngIf="updateForm.get('name')?.hasError('minlength') && updateForm.get('name')?.touched">
+				Минимум 2 символа.
+			</span>
+			<span class="text-xs text-error"
+				*ngIf="updateForm.get('name')?.hasError('maxlength') && updateForm.get('name')?.touched">
+				Максимум 60 символов.
+			</span>
 		</div>
+
+		<!-- Email -->
+		<div>
+			<label for="email" class="text-black text-[14px] mb-1 block">Электронная почта*</label>
+			<input type="email" id="email" formControlName="email" placeholder="user@gmail.com"
+				class="input placeholder:text-[#030303]/50 input-bordered w-full" />
+			<span class="text-xs text-error"
+				*ngIf="updateForm.get('email')?.hasError('required') && updateForm.get('email')?.touched">
+				Поле обязательно.
+			</span>
+			<span class="text-xs text-error"
+				*ngIf="updateForm.get('email')?.hasError('email') && updateForm.get('email')?.touched">
+				Введите корректный email.
+			</span>
+		</div>
+
+		<!-- Description -->
+		<div>
+			<label for="desc" class="text-black text-[14px] mb-1 block">Биография</label>
+			<textarea id="desc" formControlName="description" placeholder="Напишите немного о себе"
+				class="textarea placeholder:text-[#030303]/50 textarea-bordered w-full" rows="3"></textarea>
+			<span class="text-xs text-error"
+				*ngIf="updateForm.get('description')?.hasError('maxlength') && updateForm.get('description')?.touched">
+				Максимум 100 символов.
+			</span>
+		</div>
+
+		<!-- Password -->
+		<div>
+			<label class="text-black text-[14px] mb-1 block">Новый пароль</label>
+			<input type="password" formControlName="password" placeholder="Введите пароль"
+				class="input placeholder:text-[#030303]/50 input-bordered w-full" />
+			<span class="text-xs text-error"
+				*ngIf="updateForm.get('password')?.hasError('required') && updateForm.get('password')?.touched">
+				Поле обязательно.
+			</span>
+			<span class="text-xs text-error"
+				*ngIf="updateForm.get('password')?.hasError('minlength') && updateForm.get('password')?.touched">
+				Минимум 8 символов.
+			</span>
+			<span class="text-xs text-error"
+				*ngIf="updateForm.get('password')?.hasError('maxlength') && updateForm.get('password')?.touched">
+				Максимум 16 символов.
+			</span>
+		</div>
+
+		<!-- Password Confirmation -->
+		<div>
+			<label class="text-black text-[14px] mb-1 block">Подтвердите пароль</label>
+			<input type="password" formControlName="password_confirmation" placeholder="Повторите пароль"
+				class="input placeholder:text-[#030303]/50 input-bordered w-full" />
+			<span class="text-xs text-error"
+				*ngIf="updateForm.get('password_confirmation')?.hasError('required') && updateForm.get('password_confirmation')?.touched">
+				Поле обязательно.
+			</span>
+			<span class="text-xs text-error"
+				*ngIf="updateForm.get('password_confirmation')?.hasError('mismatch') && updateForm.get('password_confirmation')?.touched">
+				Пароли не совпадают.
+			</span>
+		</div>
+
+		<!-- Submit Button -->
+		<button type="submit" class="btn btn-primary w-full" [disabled]="updateForm.invalid">
+			Сохранить изменения
+		</button>
 	</form>
 </div>
 
@@ -15,10 +95,11 @@
 	<div class="modal-box">
 		<h3 class="text-lg font-bold">Выбор аватара</h3>
 		<div class="grid grid-cols-5 mt-[15px] gap-[10px]">
-			<button type="button" *ngFor="let item of localAavatars" class="w-full cursor-pointer"
-				(click)="selectAvatar(item)">
-				<img [src]="'https://e2a4cbe47a81.ngrok.app/' + item" [alt]="item" class="w-full h-auto block">
-			</button>
+			@for (item of localAavatars; track $index) {
+			<div class="w-full cursor-pointer" (click)="selectAvatar(item)">
+				<img [src]="item" [alt]="item" class="w-full h-auto block">
+			</div>
+			}
 		</div>
 		<div class="modal-action">
 			<form method="dialog">

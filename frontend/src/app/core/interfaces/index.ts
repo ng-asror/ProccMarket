@@ -6,3 +6,4 @@ export * from './me';
 export * from './transaction';
 export * from './profile';
 export * from './role';
+export * from './sections';

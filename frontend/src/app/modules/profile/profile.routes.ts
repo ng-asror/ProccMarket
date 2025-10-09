@@ -17,6 +17,10 @@ export const profileRoutes: Routes = [
         path: 'my-topics',
         loadComponent: () => import('./pages').then((p) => p.Topics),
       },
+      {
+        path: 'my-topics/:id',
+        loadComponent: () => import('./pages').then((p) => p.EditTheme),
+      },
     ],
   },
 ];

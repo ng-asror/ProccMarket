@@ -35,6 +35,7 @@ export class UpdatePorfile implements OnInit, OnDestroy {
   private fb = inject(NonNullableFormBuilder);
   private router = inject(Router);
   updateForm!: FormGroup;
+  loader = signal<boolean>(true);
   protected localAavatars = avatarsMock;
   userAvatar = signal<string>('https://proccmarket.com/avatars/avatar10.svg');
   constructor() {
@@ -52,16 +53,20 @@ export class UpdatePorfile implements OnInit, OnDestroy {
 
   async ngOnInit(): Promise<void> {
     this.telegram.showBackButton('/profile');
-    await firstValueFrom(this.profileService.getProfile()).then((res) => {
-      this.userAvatar.set(
-        res.user.avatar_url ? res.user.avatar_url : 'https://proccmarket.com/avatars/avatar10.svg'
-      );
-      this.updateForm.patchValue({
-        name: res.user.name,
-        email: res.user.email,
-        description: res.user.description,
+    await firstValueFrom(this.profileService.getProfile())
+      .then((res) => {
+        this.userAvatar.set(
+          res.user.avatar_url ? res.user.avatar_url : 'https://proccmarket.com/avatars/avatar10.svg'
+        );
+        this.updateForm.patchValue({
+          name: res.user.name,
+          email: res.user.email,
+          description: res.user.description,
+        });
+      })
+      .finally(() => {
+        this.loader.set(false);
       });
-    });
   }
 
   // Custom validator
@@ -89,7 +94,6 @@ export class UpdatePorfile implements OnInit, OnDestroy {
       delete body.password;
       delete body.password_confirmation;
     }
-    console.log(body);
     firstValueFrom(this.profileService.updateProfile({ ...body, avatar: this.userAvatar() })).then(
       (res) => {
         this.router.navigate(['/profile']);

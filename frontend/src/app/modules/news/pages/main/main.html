@@ -1,18 +1,25 @@
-<div class="flex items-center justify-between px-[15px]">
-	<h2 class="text-[22px] font-[600] text-[#030303] leading-[100%]">Что случилось?</h2>
-</div>
-<div class="mt-[20px] px-[15px] flex flex-col space-y-[10px]">
-	<ng-container *ngIf="news.value() as news; else noNews">
-		<app-accordion-item *ngFor="let item of news.data" [news-blog]="item"></app-accordion-item>
-	</ng-container>
-	<ng-template #noNews>
-		<div class="border-1 border-[#ebebeb] p-[16px] rounded-[0.5rem]" *ngFor="let item of [1,2,3, 4, 5]">
-			<div class="flex w-full flex-col gap-4">
-				<div class="skeleton h-4 w-[50%]"></div>
-				<div class="skeleton h-4 w-full"></div>
-				<div class="skeleton h-4 w-full"></div>
-				<div class="skeleton h-4 w-full"></div>
-			</div>
+<main class="w-full h-screen bg-[#030303] grid grid-cols-1 grid-rows-[auto_1fr_auto]">
+	<app-navbar />
+	<section class="w-full h-full bg-white pt-[10px] rounded-b-[30px] overflow-y-scroll">
+		<div class="flex items-center justify-between px-[15px]">
+			<h2 class="text-[22px] font-[600] text-[#030303] leading-[100%]">Что случилось?</h2>
 		</div>
-	</ng-template>
-</div>
+		<div class="mt-[20px] px-[15px] flex flex-col space-y-[10px]">
+			<ng-container *ngIf="news.value() as news; else noNews">
+				<app-accordion-item *ngFor="let item of news.data" [news-blog]="item"></app-accordion-item>
+			</ng-container>
+			<ng-template #noNews>
+				<div class="border-1 border-[#ebebeb] p-[16px] rounded-[0.5rem]" *ngFor="let item of [1,2,3, 4, 5]">
+					<div class="flex w-full flex-col gap-4">
+						<div class="skeleton h-4 w-[50%]"></div>
+						<div class="skeleton h-4 w-full"></div>
+						<div class="skeleton h-4 w-full"></div>
+						<div class="skeleton h-4 w-full"></div>
+					</div>
+				</div>
+			</ng-template>
+		</div>
+
+	</section>
+	<app-menubar />
+</main>

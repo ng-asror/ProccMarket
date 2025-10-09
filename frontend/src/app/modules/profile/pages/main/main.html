@@ -133,15 +133,20 @@
 	<div class="modal-box">
 		<div class="space-y-[15px]">
 			<div class="rating justify-center">
-				<input type="radio" name="rating-1" class="mask mask-star" aria-label="1 star" />
-				<input type="radio" name="rating-1" class="mask mask-star" aria-label="2 star" />
-				<input type="radio" name="rating-1" class="mask mask-star" aria-label="3 star" />
-				<input type="radio" name="rating-1" class="mask mask-star" aria-label="4 star" checked="checked" />
-				<input type="radio" name="rating-1" class="mask mask-star" aria-label="5 star" />
+				<input type="radio" name="rating-1" value="1" class="mask mask-star" [(ngModel)]="rating" aria-label="1 star" />
+				<input type="radio" name="rating-1" value="2" class="mask mask-star" [(ngModel)]="rating" aria-label="2 star" />
+				<input type="radio" name="rating-1" value="3" class="mask mask-star" [(ngModel)]="rating" aria-label="3 star" />
+				<input type="radio" name="rating-1" value="4" class="mask mask-star" [(ngModel)]="rating" aria-label="4 star"
+					aria-current="true" />
+				<input type="radio" name="rating-1" value="5" class="mask mask-star" [(ngModel)]="rating" aria-label="5 star" />
 			</div>
-			<textarea name="comment" placeholder="Расскажите, что вы думаете..."
-				class="textarea placeholder:text-black/50 w-full"></textarea>
-			<button type="button" class="btn btn-primary ml-auto block">Отправить</button>
+			<div>
+				<textarea name="comment" placeholder="Расскажите, что вы думаете..." [(ngModel)]="message" maxlength="500"
+					class="textarea placeholder:text-black/50 w-full mb-[5px]"></textarea>
+				<p class="text-sm text-[#030303]/50 block text-end">{{message.length}}/500</p>
+			</div>
+			<button type="button" class="btn btn-primary ml-auto block" (click)="sendReview()"
+				[disabled]="message === ''">Отправить</button>
 		</div>
 
 	</div>

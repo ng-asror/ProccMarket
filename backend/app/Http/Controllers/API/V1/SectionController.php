@@ -11,6 +11,89 @@ use App\Http\Controllers\Controller;
 
 class SectionController extends Controller
 {
+
+    public function dashboard(Request $request): JsonResponse
+    {
+        $user = $request->user();
+
+        $page = $request->get('page', 1);
+        $perPage = $request->get('per_page', 10);
+        
+        // Barcha root sectionlarni olish
+        $sections = Section::with(['parent',
+                'topics' => function ($query) use ($user, $page, $perPage) {
+                    $query->with(['user'])
+                        ->withCount([
+                            'posts',
+                            'likes as likes_count' => function ($q) {
+                                $q->where('is_like', true);
+                            },
+                            'likes as dislikes_count' => function ($q) {
+                                $q->where('is_like', false);
+                            },
+                            'shares',
+                            'views'
+                        ])
+                        ->latest('updated_at')
+                        ->skip(($page - 1) * $perPage)
+                        ->take($perPage);
+                }
+            ])
+            ->withCount('topics')
+            ->get();
+
+        // Har bir section uchun ma'lumotlarni formatlash
+        $dashboardData = $sections->map(function ($section) use ($user) {
+            $hasAccess = $this->userHasAccess($user, $section);
+            
+            // Topic'larni formatlash
+            $topics = $section->topics->map(function ($topic) use ($user) {
+                $userLike = $topic->likes->firstWhere('user_id', $user->id);
+                
+                return [
+                    'id' => $topic->id,
+                    'title' => $topic->title,
+                    'image' => $topic->image,
+                    'image_url' => $topic->image_url,
+                    'closed' => $topic->closed,
+                    'created_at' => $topic->created_at,
+                    'updated_at' => $topic->updated_at,
+                    'author' => $topic->user,
+                    'posts_count' => $topic->posts_count,
+                    'likes_count' => $topic->likes_count,
+                    'dislikes_count' => $topic->dislikes_count,
+                    'shares_count' => $topic->shares_count,
+                    'views_count' => $topic->views_count,
+                    'user_reaction' => $userLike ? ($userLike->is_like ? 'like' : 'dislike') : null,
+                    'user_shared' => $topic->shares()->where('user_id', $user->id)->exists(),
+                ];
+            });
+
+            return [
+                'id' => $section->id,
+                'name' => $section->name,
+                'description' => $section->description,
+                'image_url' => $section->image_url,
+                'access_price' => $section->access_price,
+                'topics_count' => $section->topics_count,
+                'has_access' => $hasAccess,
+                'is_purchased' => $user->sections()->where('section_id', $section->id)->exists(),
+                'default_roles_json' => $section->default_roles_json,
+                'parent_id' => $section->parent_id,
+                'parent' => $section->parent,
+                'position' => $section->position,
+                'topics' => $topics,
+            ];
+        });
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Dashboard data retrieved successfully',
+            'sections' => $dashboardData,
+            'total_sections' => $sections->count(),
+        ], 200);
+    }
+    
     /**
      * Barcha sectionlarni ko'rsatish (foydalanuvchi kirishi mumkin yoki mumkin emasligi bilan)
      */
@@ -35,7 +118,7 @@ class SectionController extends Controller
                     'posts_count' => $section->topics->sum('posts_count'),
                     'has_access' => $hasAccess,
                     'is_purchased' => $user->sections()->where('section_id', $section->id)->exists(),
-                    'default_roles' => $section->default_roles,
+                    'default_roles_json' => $section->default_roles_json,
                     'parent_id' => $section->parent_id,
                     'position' => $section->position
                 ];

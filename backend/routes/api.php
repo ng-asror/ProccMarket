@@ -80,6 +80,7 @@ Route::prefix('v1')->group(function () {
         // Sections (Forums)
         Route::prefix('sections')->group(function () {
             Route::get('/', [SectionController::class, 'index']); // Barcha sectionlar
+            Route::get('/dashboard', [SectionController::class, 'dashboard']); // Dashboard uchun sectionlar
             Route::get('/{section}', [SectionController::class, 'show']); // Section ma'lumotlari
             Route::post('/{section}/purchase', [SectionController::class, 'purchase']); // Section sotib olish
         });

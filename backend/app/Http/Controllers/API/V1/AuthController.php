@@ -123,7 +123,7 @@ class AuthController extends Controller
 
         $topics = $user->topics()
             ->with([
-                'section',
+                'section', 'section.parent',
                 'posts' => function ($q) {
                     $q->latest()->limit(1);
                 },
@@ -161,6 +161,15 @@ class AuthController extends Controller
                         'access_price' => $topic->section->access_price,
                         'position' => $topic->section->position,
                         'parent_id' => $topic->section->parent_id,
+                        'parent' => $topic->section->parent ? [
+                            'id' => $topic->section->parent->id,
+                            'name' => $topic->section->parent->name,
+                            'description' => $topic->section->parent->description,
+                            'image_url' => $topic->section->parent->image_url,
+                            'access_price' => $topic->section->parent->access_price,
+                            'position' => $topic->section->parent->position,
+                            'parent_id' => $topic->section->parent->parent_id,
+                        ] : null,
                     ] : null,
                     'posts_count' => $topic->posts_count,
                     'likes_count' => $topic->likes_count,

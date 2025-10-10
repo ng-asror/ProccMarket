@@ -5,11 +5,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { CKEditor } from '@ckeditor/ckeditor5-react';
-import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 import { ArrowLeft } from 'lucide-react';
 import { FormEventHandler, useRef } from 'react';
 import { BreadcrumbItem } from '@/types';
+import { RichTextEditor } from '@/components/rich-text-editor';
 
 const breadcrumbs: BreadcrumbItem[] = [
   {
@@ -130,31 +129,9 @@ export default function Create({ categories }: Props) {
                                 <div className="space-y-2">
                                     <Label>Description *</Label>
                                     <div className={`border rounded-md ${errors.description ? 'border-red-500' : 'border-gray-300 dark:border-gray-700'}`}>
-                                        <CKEditor
-                                            editor={ClassicEditor}
-                                            data={data.description}
-                                            onChange={(event, editor) => {
-                                                const content = editor.getData();
-                                                setData('description', content);
-                                            }}
-                                            config={{
-                                                licenseKey: "eyJhbGciOiJFUzI1NiJ9.eyJleHAiOjE3NjAzOTk5OTksImp0aSI6IjM1N2ZjYzhhLWMzYjQtNGU0Yy05NGVlLTY3OTUzNDBlZTliZCIsInVzYWdlRW5kcG9pbnQiOiJodHRwczovL3Byb3h5LWV2ZW50LmNrZWRpdG9yLmNvbSIsImRpc3RyaWJ1dGlvbkNoYW5uZWwiOlsiY2xvdWQiLCJkcnVwYWwiLCJzaCJdLCJ3aGl0ZUxhYmVsIjp0cnVlLCJsaWNlbnNlVHlwZSI6InRyaWFsIiwiZmVhdHVyZXMiOlsiKiJdLCJ2YyI6Ijg2YjM4ZWUwIn0.AROYwgJKvItN4vJtjSW68e34lQatBolEP4e37EKVsLX3tGX9C9ABuTpxB7P-PGoSeFFnQIE5TaxmaKHzlrjZZw",
-                                                toolbar: [
-                                                    'heading',
-                                                    '|',
-                                                    'bold',
-                                                    'italic',
-                                                    'link',
-                                                    'bulletedList',
-                                                    'numberedList',
-                                                    '|',
-                                                    'blockQuote',
-                                                    'insertTable',
-                                                    '|',
-                                                    'undo',
-                                                    'redo'
-                                                ],
-                                            }}
+                                        <RichTextEditor
+                                            value={data.description}
+                                            onChange={(value) => setData('description', value)}
                                         />
                                     </div>
                                     {errors.description && <p className="text-sm text-red-500">{errors.description}</p>}

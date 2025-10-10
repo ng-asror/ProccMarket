@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\TransactionController;
 use App\Http\Controllers\Admin\WithdrawalController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\NewsController;
+use App\Http\Controllers\Admin\ReviewController;
 use App\Http\Controllers\GoogleController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -92,6 +93,13 @@ Route::middleware(['auth', 'verified', 'admin'])->group(function () {
     Route::delete('/categories/{category}', [CategoryController::class, 'destroy'])->name('categories.destroy');
 
     
+    Route::prefix('reviews')->name('admin.reviews.')->group(function () {
+        Route::get('/', [ReviewController::class, 'index'])->name('index');
+        Route::get('/{review}', [ReviewController::class, 'show'])->name('show');
+        Route::delete('/{review}', [ReviewController::class, 'destroy'])->name('destroy');
+        Route::get('/user/{user}', [ReviewController::class, 'userReviews'])->name('user');
+        Route::get('/export/csv', [ReviewController::class, 'export'])->name('export');
+    });
 
 });
 

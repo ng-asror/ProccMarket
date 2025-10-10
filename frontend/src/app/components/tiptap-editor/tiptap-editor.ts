@@ -67,7 +67,7 @@ export class TiptapEditorComponent implements OnInit, OnDestroy {
     ],
     editorProps: {
       attributes: {
-        class: 'p-2 outline-hidden min-h-[200px]',
+        class: 'p-2 outline-hidden editor-content min-h-[200px]',
         spellCheck: 'false',
       },
     },

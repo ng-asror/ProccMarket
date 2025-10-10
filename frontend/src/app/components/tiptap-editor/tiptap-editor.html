@@ -110,18 +110,18 @@
 		</button>
 
 		<!-- Add image (from URL) -->
-		<button type="button" title="Add Image from URL"
+		<!-- <button type="button" title="Add Image from URL"
 			class="p-2 rounded-md transition-all duration-200 text-gray-700 hover:bg-gray-900 hover:text-white cursor-pointer">
 			<lucide-icon [name]="ICONS.Image" size="16"></lucide-icon>
-		</button>
+		</button> -->
 
 		<!-- Upload image -->
-		<label
+		<!-- <label
 			class="p-2 rounded-md transition-all duration-200 text-gray-700 hover:bg-gray-900 hover:text-white cursor-pointer cursor-pointer"
 			title="Upload Image">
 			<lucide-icon [name]="ICONS.Upload" size="16"></lucide-icon>
 			<input accept="image/*" class="hidden" type="file">
-		</label>
+		</label> -->
 	</div>
 
 	<tiptap-editor [editor]="editor" name="simple-editor" [(ngModel)]="value" [ngModelOptions]="{standalone: true}"
@@ -147,10 +147,10 @@
 		}
 
 		<div class="flex justify-end gap-x-[10px] mt-[15px]">
-			<button class="btn btn-primary" type="button" [disabled]="!writeUrlEl.valid">
+			<button class="btn btn-primary" type="button" [disabled]="!writeUrlEl.valid" (click)="confirmAddLink()">
 				Добавить
 			</button>
-			<button class="btn" type="button">Отменить</button>
+			<button class="btn" type="button" (click)="cancel()">Отменить</button>
 		</div>
 	</div>
 </dialog>

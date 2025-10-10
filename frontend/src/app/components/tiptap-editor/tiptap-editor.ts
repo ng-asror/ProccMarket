@@ -40,6 +40,7 @@ export class TiptapEditorComponent implements OnInit, OnDestroy {
       Placeholder.configure({
         placeholder: 'Введите текст...',
       }),
+
       TextAlign.configure({
         types: ['heading', 'paragraph'],
         alignments: ['left', 'center', 'right'],
@@ -76,6 +77,19 @@ export class TiptapEditorComponent implements OnInit, OnDestroy {
     this.value = value;
   }
 
+  protected cancel(): void {
+    const dialog: HTMLDialogElement | null = document.getElementById(
+      'addurlModal'
+    ) as HTMLDialogElement;
+    dialog?.close();
+  }
+  protected confirmAddLink(): void {
+    const dialog: HTMLDialogElement | null = document.getElementById(
+      'addurlModal'
+    ) as HTMLDialogElement;
+    dialog?.close();
+    this.editor.chain().focus().extendMarkRange('link').setLink({ href: this.addUrl }).run();
+  }
   ngOnDestroy(): void {
     this.editor.destroy();
   }

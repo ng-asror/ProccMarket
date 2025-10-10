@@ -3,6 +3,7 @@
 use App\Http\Controllers\API\V1\CommentController;
 use App\Http\Controllers\API\V1\NewsLikeController;
 use App\Http\Controllers\API\V1\NewsShareController;
+use App\Http\Controllers\API\V1\ReviewController;
 use App\Http\Controllers\API\V1\RoleController;
 use App\Http\Controllers\API\V1\SectionController;
 use App\Http\Controllers\API\V1\AuthController;
@@ -39,6 +40,11 @@ Route::prefix('v1')->group(function () {
             Route::put('/update', [AuthController::class, 'update']);
             Route::post('/logout', [AuthController::class, 'logout']);
         });
+    });
+
+    Route::prefix('reviews')->middleware('auth:sanctum')->group(function () {
+        Route::get('/can-review', [ReviewController::class, 'canReview']);        
+        Route::post('/', [ReviewController::class, 'store']);
     });
 
     Route::prefix('roles')->middleware('auth:sanctum')->group(function () {
@@ -112,10 +118,10 @@ Route::prefix('v1')->group(function () {
         Route::get('/search', [SearchController::class, 'search']);
 
         // File uploads
-        Route::post('/upload/image', [UploadController::class, 'uploadImage']);
+        Route::post('/upload/image', [UploadController::class, 'uploadImage'])->withoutMiddleware('auth:sanctum');
 
         // Views tracking
-        Route::post('/topics/{topic}/view', [TopicController::class, 'incrementView']);
+        // Route::post('/topics/{topic}/view', [TopicController::class, 'incrementView']);
 
         // CryptoBot Payment Endpoints
         Route::prefix('pay/crypto-bot')->group(function () {

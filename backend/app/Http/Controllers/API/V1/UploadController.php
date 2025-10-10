@@ -19,7 +19,7 @@ class UploadController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'image' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:5120', // 5MB max
-            'type' => 'required|in:topic,post,avatar,section',
+            'type' => 'required|in:topic,post,avatar,section,description',
         ]);
 
         if ($validator->fails()) {

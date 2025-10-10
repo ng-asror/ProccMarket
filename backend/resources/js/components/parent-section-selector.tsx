@@ -31,7 +31,7 @@ export function ParentSectionSelector({
   allSections,
   excludeId,
   disabled = false,
-  root_level = false
+  root_level = false,
 }: ParentSectionSelectorProps) {
   const [open, setOpen] = React.useState(false);
   const [searchQuery, setSearchQuery] = React.useState('');
@@ -94,31 +94,41 @@ export function ParentSectionSelector({
   }: {
     section: any;
     level?: number;
-  }) => (
-    <div>
-      <button
-        type="button"
-        onClick={() => {
-          onChange(section.id);
-          setOpen(false);
-          setSearchQuery('');
-        }}
-        className={cn(
-          'flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm hover:bg-accent',
-          value === section.id && 'bg-accent'
-        )}
-        style={{ paddingLeft: `${level * 1.5 + 0.5}rem` }}
-      >
-        {section.children?.length > 0 && (
-          <IconChevronRight className="h-3 w-3 text-muted-foreground" />
-        )}
-        <span className="flex-1 text-left">{section.name}</span>
-      </button>
-      {section.children?.map((child: any) => (
-        <TreeItem key={child.id} section={child} level={level + 1} />
-      ))}
-    </div>
-  );
+  }) => {
+    const isRoot = section.parent_id === null;
+    const isDisabled = root_level && isRoot; // 🔹 faqat root-level itemlar disable bo'ladi
+
+    return (
+      <div>
+        <button
+          type="button"
+          disabled={isDisabled}
+          onClick={() => {
+            if (isDisabled) return; // agar disable bo'lsa, ishlamasin
+            onChange(section.id);
+            setOpen(false);
+            setSearchQuery('');
+          }}
+          className={cn(
+            'flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm hover:bg-accent',
+            value === section.id && 'bg-accent',
+            isDisabled && 'opacity-50 cursor-not-allowed hover:bg-transparent'
+          )}
+          style={{ paddingLeft: `${level * 1.5 + 0.5}rem` }}
+        >
+          {section.children?.length > 0 && (
+            <IconChevronRight className="h-3 w-3 text-muted-foreground" />
+          )}
+          <span className="flex-1 text-left">{section.name}</span>
+        </button>
+
+        {/* bolalarini rekursiv render qilish */}
+        {section.children?.map((child: any) => (
+          <TreeItem key={child.id} section={child} level={level + 1} />
+        ))}
+      </div>
+    );
+  };
 
   return (
     <div className="space-y-2">
@@ -132,9 +142,7 @@ export function ParentSectionSelector({
             className="w-full justify-between"
             disabled={disabled}
           >
-            <span className="truncate">
-              {getBreadcrumbPath(value)}
-            </span>
+            <span className="truncate">{getBreadcrumbPath(value)}</span>
             {value && (
               <IconX
                 className="ml-2 h-4 w-4 shrink-0 opacity-50"
@@ -160,7 +168,6 @@ export function ParentSectionSelector({
               className="border-0 focus-visible:ring-0 focus-visible:ring-offset-0"
             />
           </div>
-          {/* ScrollArea o'rniga oddiy div ishlatilgan */}
           <div className="max-h-[300px] overflow-y-auto overflow-x-hidden">
             <div className="p-2">
               <button
@@ -172,8 +179,10 @@ export function ParentSectionSelector({
                 }}
                 className={cn(
                   'flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm hover:bg-accent',
-                  value === null && 'bg-accent'
+                  value === null && 'bg-accent',
+                  root_level && 'opacity-50 cursor-not-allowed hover:bg-transparent' // 🔹 Root-level "None" ham disable bo'ladi
                 )}
+                disabled={root_level}
               >
                 <span className="flex-1 text-left font-medium">
                   None (Root Level)

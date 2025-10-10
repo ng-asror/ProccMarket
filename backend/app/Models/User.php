@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class User extends Authenticatable
 {
@@ -230,5 +231,21 @@ class User extends Authenticatable
     public function updateLastDepositDate(): void
     {
         $this->update(['last_deposit_at' => now()]);
+    }
+
+    /**
+     * Get the reviews for the user.
+     */
+    public function reviews(): HasMany
+    {
+        return $this->hasMany(Review::class);
+    }
+
+    /**
+     * Get the user's latest review.
+     */
+    public function latestReview()
+    {
+        return $this->hasOne(Review::class)->latestOfMany();
     }
 }

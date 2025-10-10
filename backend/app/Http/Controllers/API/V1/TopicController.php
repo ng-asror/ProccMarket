@@ -208,7 +208,7 @@ class TopicController extends Controller
         // Avtomatik view tracking
         $this->trackView($request, $topic, $user);
 
-        $topic->load(['user', 'section:id,name'])
+        $topic->load(['user', 'section', 'section.parent'])
             ->loadCount([
                 'posts',
                 'likes as likes_count' => function ($q) {

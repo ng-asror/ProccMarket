@@ -78,7 +78,7 @@ class SectionController extends Controller
                 'topics_count' => $section->topics_count,
                 'has_access' => $hasAccess,
                 'is_purchased' => $user->sections()->where('section_id', $section->id)->exists(),
-                'default_roles' => $section->default_roles,
+                'default_roles_json' => $section->default_roles_json,
                 'parent_id' => $section->parent_id,
                 'parent' => $section->parent,
                 'position' => $section->position,
@@ -118,7 +118,7 @@ class SectionController extends Controller
                     'posts_count' => $section->topics->sum('posts_count'),
                     'has_access' => $hasAccess,
                     'is_purchased' => $user->sections()->where('section_id', $section->id)->exists(),
-                    'default_roles' => $section->default_roles,
+                    'default_roles_json' => $section->default_roles_json,
                     'parent_id' => $section->parent_id,
                     'position' => $section->position
                 ];

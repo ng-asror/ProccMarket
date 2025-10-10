@@ -21,11 +21,34 @@ class Section extends Model
 
     protected $casts = [
         'access_price' => 'decimal:2',
-        'default_roles' => 'array',
         'position' => 'integer',
+        'default_roles' => 'array',
+        'default_roles_json' => 'json',
     ];
 
-    protected $appends = ['image_url'];
+    protected $appends = ['image_url', 'default_roles_json'];
+
+
+    public function getDefaultRolesJsonAttribute()
+    {
+        if (!is_array($this->default_roles)) {
+            return [];
+        }
+
+        return Role::whereIn('id', $this->default_roles)
+            ->get()
+            ->map(function ($role) {
+                return [
+                    'id' => $role->id,
+                    'name' => $role->name,
+                    'min_deposit' => $role->min_deposit,
+                    'users_count' => $role->users_count,
+                ];
+            })
+            ->toArray();
+    }
+
+
 
     /**
      * Get the parent section

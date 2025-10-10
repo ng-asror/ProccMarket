@@ -1,5 +1,8 @@
-<div class="p-[15px] pt-0">
-	<h1 class="text-[22px] font-[600] text-[#030303] leading-[100%] mb-[20px]">Мои темы.</h1>
+<div class="p-[15px]">
+	<div class="flex items-center justify-between mb-[20px]">
+		<h1 class="text-[22px] font-[600] text-[#030303] leading-[100%]">Мои темы</h1>
+		<a routerLink="create" class="btn">Создать</a>
+	</div>
 	@if(!myTopics.isLoading()) {
 	@for (item of myTopics.value()?.topics; track item.id) {
 	<div class="border-1 border-[#E1E1E1] p-[15px] space-y-[10px] rounded-[12px]">

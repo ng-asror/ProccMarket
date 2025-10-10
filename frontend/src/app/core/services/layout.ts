@@ -6,7 +6,7 @@ import { environment } from '../../../environments/environment.development';
 @Injectable({
   providedIn: 'root',
 })
-export class Layout {
+export class LayoutService {
   private http = inject(HttpClient);
 
   writeReview(star: number, comment: string): Observable<any> {

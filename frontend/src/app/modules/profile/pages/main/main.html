@@ -1,156 +1,164 @@
-<div class="w-full h-[255] mt-[-10px]">
-	<img src="/img/user-bg.png" alt="user bg img" class="w-full h-full block">
-</div>
-<div class="px-[15px] pb-[15px] relative z-2 mt-[-120px]">
-	@if (profile.value(); as profile) {
-	<div class="rounded-[12px] border-1 border-[#E1E1E1] p-[15px] bg-white flex flex-col gap-y-[15px] mb-[15px]">
-		<div class="rounded-full w-[100px] h-[100px] overflow-hidden mx-auto mt-[-60px]">
-			@if(profile.user.avatar_url !== null){
-			<img src="{{profile.user.avatar_url}}" alt="user face" class="w-full h-full block rounded-full">
-			}@else {
-			<img [src]="profile.user.avatar_url" alt="avatar10" class="w-full h-full block rounded-full">
+<app-layout>
+	<ng-content content>
+		<div class="w-full h-[255px] mt-[-10px]">
+			<img src="/img/user-bg.png" alt="user bg img" class="w-full h-full block">
+		</div>
+		<div class="px-[15px] pb-[15px] relative z-2 mt-[-120px]">
+			@if (profile.value(); as profile) {
+			<div class="rounded-[12px] border-1 border-[#E1E1E1] p-[15px] bg-white flex flex-col gap-y-[15px] mb-[15px]">
+				<div class="rounded-full w-[100px] h-[100px] overflow-hidden mx-auto mt-[-60px]">
+					@if(profile.user.avatar_url !== null){
+					<img src="{{profile.user.avatar_url}}" alt="user face" class="w-full h-full block rounded-full">
+					}@else {
+					<img [src]="profile.user.avatar_url" alt="avatar10" class="w-full h-full block rounded-full">
+					}
+				</div>
+				<div class="space-y-[10px]">
+					<h1 class=" text-[20px] text-[#030300] font-[500] mb-1 leading-[100%] text-center">{{profile.user.name}}</h1>
+					<h2 class="text-[16px] lowercase text-[#030300] font-[500] leading-[100%] text-center">
+						[{{profile.user.role_name?
+						profile.user.role_name: 'Гость'}}]</h2>
+				</div>
+				<p class="text-[16px] text-[#030300] leading-[120%] font-[400] block">{{profile.user.description}}</p>
+				<div class="flex content-center divide-x-1 divide-[#F2F2F2] mb-[10px]">
+					<div class="flex-1">
+						<h1 class="text-[16px] text-[#030300] leading-[100%] font-[400] mb-[4px]">{{profile.analytics.likes_count |
+							numeral: '0a'}}</h1>
+						<p class="text-[14px] text-[#030300] leading-[100%] font-[400]">Лайки</p>
+					</div>
+					<div class="flex-1 px-[10px]">
+						<h1 class="text-[16px] text-[#030300] leading-[100%] font-[400] mb-[4px]">{{profile.analytics.views_count|
+							numeral: '0a'}}</h1>
+						<p class="text-[14px] text-[#030300] leading-[100%] font-[400]">Просмотры</p>
+					</div>
+					<div class="flex-1 px-[10px]">
+						<h1 class="text-[16px] text-[#030300] leading-[100%] font-[400] mb-[4px]">{{profile.analytics.topics_count |
+							numeral: '0a'}}</h1>
+						<p class="text-[14px] text-[#030300] leading-[100%] font-[400]">Посты</p>
+					</div>
+				</div>
+			</div>
+			<div role="alert" class="alert alert-error mb-[15px]" *ngIf="profile.user.banned">
+				<lucide-icon [name]="ICONS.Lock"></lucide-icon>
+				<span>Аккаунт заблокирован</span>
+			</div>
+			<ul class="menu w-full bg-white rounded-box p-0">
+				<li><a routerLink="my-topics">
+						<lucide-icon [name]="ICONS.Newspaper" size="20"></lucide-icon>
+						Темы
+						<lucide-icon [name]="ICONS.ChevronRight" size="20"></lucide-icon></a>
+				</li>
+				<li>
+					<a routerLink="update-profile">
+						<lucide-icon [name]="ICONS.UserPen" size="20"></lucide-icon>
+						Редактировать
+						<lucide-icon [name]="ICONS.ChevronRight" size="20"></lucide-icon></a>
+				</li>
+				<li><label>
+						<lucide-icon [name]="ICONS.Bell" size="20"></lucide-icon>
+						Уведомления
+						<input type="checkbox" checked="checked" class="toggle toggle-md" /></label>
+				</li>
+				<li>
+					<button type="button" onclick="my_modal_5.showModal()">
+						<lucide-icon [name]="ICONS.Star" size="20"></lucide-icon>
+						Оценить приложение
+					</button>
+				</li>
+				<li>
+					<a>
+						<lucide-icon [name]="ICONS.Share2" size="20"></lucide-icon>
+						Поделиться приложением
+						<lucide-icon [name]="ICONS.ChevronRight" size="20"></lucide-icon>
+					</a>
+				</li>
+				<li>
+					<a>
+						<lucide-icon [name]="ICONS.Lock" size="20"></lucide-icon>
+						Политика конфиденциальности
+						<lucide-icon [name]="ICONS.ChevronRight" size="20"></lucide-icon>
+					</a>
+				</li>
+				<li>
+					<a>
+						<lucide-icon [name]="ICONS.File" size="20"></lucide-icon>
+						Условия и положения
+						<lucide-icon [name]="ICONS.ChevronRight" size="20"></lucide-icon>
+					</a>
+				</li>
+				<li>
+					<button type="button" (click)="logout()">
+						<lucide-icon [name]="ICONS.LogOut" size="20"></lucide-icon>
+						Выход
+					</button>
+				</li>
+			</ul>
+			} @else {
+			<div class="rounded-[12px] border-1 border-[#E1E1E1] p-[15px] bg-white flex flex-col gap-y-[15px] mb-[15px]">
+				<div class="space-y-[5px]">
+					<div class="skeleton rounded-full w-[90px] h-[90px] mx-auto mt-[-60px]"></div>
+					<div class="skeleton w-[60%] mx-auto h-[20px]"></div>
+					<div class="skeleton w-[40%] mx-auto h-[15px]"></div>
+				</div>
+				<div class="space-y-[5px]">
+					<div class="skeleton w-[100%] h-[16px]"></div>
+					<div class="skeleton w-[90%] h-[16px]"></div>
+				</div>
+				<div class="flex content-center divide-x-1 divide-[#F2F2F2] mb-[10px]">
+					<div class="flex-1 px-[10px] space-y-[4px]">
+						<div class="skeleton w-[50%] h-[16px]"></div>
+						<div class="skeleton w-[100%] h-[16px]"></div>
+					</div>
+					<div class="flex-1 px-[10px] space-y-[4px]">
+						<div class="skeleton w-[50%] h-[16px]"></div>
+						<div class="skeleton w-[100%] h-[16px]"></div>
+					</div>
+					<div class="flex-1 px-[10px] space-y-[4px]">
+						<div class="skeleton w-[50%] h-[16px]"></div>
+						<div class="skeleton w-[100%] h-[16px]"></div>
+					</div>
+				</div>
+			</div>
+			<div class="space-y-[10px]">
+				<div class="skeleton w-full h-[25px]"></div>
+				<div class="skeleton w-full h-[25px]"></div>
+				<div class="skeleton w-full h-[25px]"></div>
+				<div class="skeleton w-full h-[25px]"></div>
+				<div class="skeleton w-full h-[25px]"></div>
+				<div class="skeleton w-full h-[25px]"></div>
+				<div class="skeleton w-full h-[25px]"></div>
+				<div class="skeleton w-full h-[25px]"></div>
+			</div>
 			}
 		</div>
-		<div class="space-y-[10px]">
-			<h1 class=" text-[20px] text-[#030300] font-[500] mb-1 leading-[100%] text-center">{{profile.user.name}}</h1>
-			<h2 class="text-[16px] lowercase text-[#030300] font-[500] leading-[100%] text-center">
-				[{{profile.user.role_name?
-				profile.user.role_name: 'Гость'}}]</h2>
-		</div>
-		<p class="text-[16px] text-[#030300] leading-[120%] font-[400] block">{{profile.user.description}}</p>
-		<div class="flex content-center divide-x-1 divide-[#F2F2F2] mb-[10px]">
-			<div class="flex-1">
-				<h1 class="text-[16px] text-[#030300] leading-[100%] font-[400] mb-[4px]">{{profile.analytics.likes_count |
-					numeral: '0a'}}</h1>
-				<p class="text-[14px] text-[#030300] leading-[100%] font-[400]">Лайки</p>
-			</div>
-			<div class="flex-1 px-[10px]">
-				<h1 class="text-[16px] text-[#030300] leading-[100%] font-[400] mb-[4px]">{{profile.analytics.views_count|
-					numeral: '0a'}}</h1>
-				<p class="text-[14px] text-[#030300] leading-[100%] font-[400]">Просмотры</p>
-			</div>
-			<div class="flex-1 px-[10px]">
-				<h1 class="text-[16px] text-[#030300] leading-[100%] font-[400] mb-[4px]">{{profile.analytics.topics_count |
-					numeral: '0a'}}</h1>
-				<p class="text-[14px] text-[#030300] leading-[100%] font-[400]">Посты</p>
-			</div>
-		</div>
-	</div>
-	<div role="alert" class="alert alert-error mb-[15px]" *ngIf="profile.user.banned">
-		<lucide-icon [name]="ICONS.Lock"></lucide-icon>
-		<span>Аккаунт заблокирован</span>
-	</div>
-	<ul class="menu w-full bg-white rounded-box p-0">
-		<li><a routerLink="my-topics">
-				<lucide-icon [name]="ICONS.Newspaper" size="20"></lucide-icon>
-				Темы
-				<lucide-icon [name]="ICONS.ChevronRight" size="20"></lucide-icon></a>
-		</li>
-		<li>
-			<a routerLink="update-profile">
-				<lucide-icon [name]="ICONS.UserPen" size="20"></lucide-icon>
-				Редактировать
-				<lucide-icon [name]="ICONS.ChevronRight" size="20"></lucide-icon></a>
-		</li>
-		<li><label>
-				<lucide-icon [name]="ICONS.Bell" size="20"></lucide-icon>
-				Уведомления
-				<input type="checkbox" checked="checked" class="toggle toggle-md" /></label>
-		</li>
-		<li>
-			<button type="button" onclick="my_modal_5.showModal()">
-				<lucide-icon [name]="ICONS.Star" size="20"></lucide-icon>
-				Оценить приложение
-			</button>
-		</li>
-		<li>
-			<a>
-				<lucide-icon [name]="ICONS.Share2" size="20"></lucide-icon>
-				Поделиться приложением
-				<lucide-icon [name]="ICONS.ChevronRight" size="20"></lucide-icon>
-			</a>
-		</li>
-		<li>
-			<a>
-				<lucide-icon [name]="ICONS.Lock" size="20"></lucide-icon>
-				Политика конфиденциальности
-				<lucide-icon [name]="ICONS.ChevronRight" size="20"></lucide-icon>
-			</a>
-		</li>
-		<li>
-			<a>
-				<lucide-icon [name]="ICONS.File" size="20"></lucide-icon>
-				Условия и положения
-				<lucide-icon [name]="ICONS.ChevronRight" size="20"></lucide-icon>
-			</a>
-		</li>
-		<li>
-			<button type="button" (click)="logout()">
-				<lucide-icon [name]="ICONS.LogOut" size="20"></lucide-icon>
-				Выход
-			</button>
-		</li>
-	</ul>
-	} @else {
-	<div class="rounded-[12px] border-1 border-[#E1E1E1] p-[15px] bg-white flex flex-col gap-y-[15px] mb-[15px]">
-		<div class="space-y-[5px]">
-			<div class="skeleton rounded-full w-[90px] h-[90px] mx-auto mt-[-60px]"></div>
-			<div class="skeleton w-[60%] mx-auto h-[20px]"></div>
-			<div class="skeleton w-[40%] mx-auto h-[15px]"></div>
-		</div>
-		<div class="space-y-[5px]">
-			<div class="skeleton w-[100%] h-[16px]"></div>
-			<div class="skeleton w-[90%] h-[16px]"></div>
-		</div>
-		<div class="flex content-center divide-x-1 divide-[#F2F2F2] mb-[10px]">
-			<div class="flex-1 px-[10px] space-y-[4px]">
-				<div class="skeleton w-[50%] h-[16px]"></div>
-				<div class="skeleton w-[100%] h-[16px]"></div>
-			</div>
-			<div class="flex-1 px-[10px] space-y-[4px]">
-				<div class="skeleton w-[50%] h-[16px]"></div>
-				<div class="skeleton w-[100%] h-[16px]"></div>
-			</div>
-			<div class="flex-1 px-[10px] space-y-[4px]">
-				<div class="skeleton w-[50%] h-[16px]"></div>
-				<div class="skeleton w-[100%] h-[16px]"></div>
-			</div>
-		</div>
-	</div>
-	<div class="space-y-[10px]">
-		<div class="skeleton w-full h-[25px]"></div>
-		<div class="skeleton w-full h-[25px]"></div>
-		<div class="skeleton w-full h-[25px]"></div>
-		<div class="skeleton w-full h-[25px]"></div>
-		<div class="skeleton w-full h-[25px]"></div>
-		<div class="skeleton w-full h-[25px]"></div>
-		<div class="skeleton w-full h-[25px]"></div>
-		<div class="skeleton w-full h-[25px]"></div>
-	</div>
-	}
-</div>
-<dialog id="my_modal_5" class="modal modal-bottom sm:modal-middle">
-	<div class="modal-box">
-		<div class="space-y-[15px]">
-			<div class="rating justify-center">
-				<input type="radio" name="rating-1" value="1" class="mask mask-star" [(ngModel)]="rating" aria-label="1 star" />
-				<input type="radio" name="rating-1" value="2" class="mask mask-star" [(ngModel)]="rating" aria-label="2 star" />
-				<input type="radio" name="rating-1" value="3" class="mask mask-star" [(ngModel)]="rating" aria-label="3 star" />
-				<input type="radio" name="rating-1" value="4" class="mask mask-star" [(ngModel)]="rating" aria-label="4 star"
-					aria-current="true" />
-				<input type="radio" name="rating-1" value="5" class="mask mask-star" [(ngModel)]="rating" aria-label="5 star" />
-			</div>
-			<div>
-				<textarea name="comment" placeholder="Расскажите, что вы думаете..." [(ngModel)]="message" maxlength="500"
-					class="textarea placeholder:text-black/50 w-full mb-[5px]"></textarea>
-				<p class="text-sm text-[#030303]/50 block text-end">{{message.length}}/500</p>
-			</div>
-			<button type="button" class="btn btn-primary ml-auto block" (click)="sendReview()"
-				[disabled]="message === ''">Отправить</button>
-		</div>
+		<dialog id="my_modal_5" class="modal modal-bottom sm:modal-middle">
+			<div class="modal-box">
+				<div class="space-y-[15px]">
+					<div class="rating justify-center">
+						<input type="radio" name="rating-1" value="1" class="mask mask-star" [(ngModel)]="rating"
+							aria-label="1 star" />
+						<input type="radio" name="rating-1" value="2" class="mask mask-star" [(ngModel)]="rating"
+							aria-label="2 star" />
+						<input type="radio" name="rating-1" value="3" class="mask mask-star" [(ngModel)]="rating"
+							aria-label="3 star" />
+						<input type="radio" name="rating-1" value="4" class="mask mask-star" [(ngModel)]="rating"
+							aria-label="4 star" aria-current="true" />
+						<input type="radio" name="rating-1" value="5" class="mask mask-star" [(ngModel)]="rating"
+							aria-label="5 star" />
+					</div>
+					<div>
+						<textarea name="comment" placeholder="Расскажите, что вы думаете..." [(ngModel)]="message" maxlength="500"
+							class="textarea placeholder:text-black/50 w-full mb-[5px]"></textarea>
+						<p class="text-sm text-[#030303]/50 block text-end">{{message.length}}/500</p>
+					</div>
+					<button type="button" class="btn btn-primary ml-auto block" (click)="sendReview()"
+						[disabled]="message === ''">Отправить</button>
+				</div>
 
-	</div>
-	<form method="dialog" class="modal-backdrop">
-		<button>close</button>
-	</form>
-</dialog>
+			</div>
+			<form method="dialog" class="modal-backdrop">
+				<button>close</button>
+			</form>
+		</dialog>
+	</ng-content>
+</app-layout>

@@ -1,3 +1,44 @@
-<div class="px-[15px]">
-
+<div class="p-[15px]">
+	<h2 class="text-[22px] mb-[20px] font-[600] text-[#030303] leading-[100%]">Создать новую тему</h2>
+	<form class="space-y-4">
+		<div class="form-control">
+			<label class="label">
+				<span class="label-text text-black text-[16px] leading-[100%] mb-[5px] block">Разделы темы*</span>
+			</label>
+			<select class="select w-full mb-[10px]">
+				<option disabled selected>Выберите раздел темы</option>
+				<option>Crimson</option>
+				<option>Amber</option>
+				<option>Velvet</option>
+			</select>
+			<select class="select w-full">
+				<option disabled selected>Выберите раздел темы</option>
+				<option>Crimson</option>
+				<option>Amber</option>
+				<option>Velvet</option>
+			</select>
+		</div>
+		<!-- Title -->
+		<div class="form-control">
+			<label class="label">
+				<span class="label-text text-black text-[16px] leading-[100%] mb-[5px] block">Заголовок*</span>
+			</label>
+			<textarea placeholder="Введите заголовок" class="textarea placeholder:text-black/50 w-full" maxlength="255"
+				required></textarea>
+		</div>
+		<!-- image upload -->
+		<div class="form-control">
+			<label class="label">
+				<span class="label-text text-black text-[14px] leading-[100%] mb-[5px] block">Заголовок*</span>
+			</label>
+			<input type="file" class="file-input w-full" />
+			<label class="label text-[14px]">Максимальный размер 2 МБ</label>
+		</div>
+		<!-- content editor -->
+		<tiptap-editor [editor]="content" [(ngModel)]="value"></tiptap-editor>
+		<!-- Submit button -->
+		<div class="form-control mt-4">
+			<button type="submit" class="btn btn-primary w-full">Опубликовать</button>
+		</div>
+	</form>
 </div>

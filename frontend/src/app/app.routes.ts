@@ -8,7 +8,6 @@ import { profileRoutes } from './modules/profile/profile.routes';
 export const routes: Routes = [
   {
     path: '',
-    loadComponent: () => import('./layout/layout').then((p) => p.Layout),
     canActivate: [authGuard],
     children: [
       { path: '', redirectTo: 'home', pathMatch: 'full' },

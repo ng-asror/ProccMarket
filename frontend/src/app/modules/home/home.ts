@@ -1,11 +1,11 @@
 import { Component } from '@angular/core';
 import { HomeSlide, TabContent, TabSlide } from './components';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Menubar, Navbar } from '../../components';
+import { Layout } from '../../layout/layout';
 
 @Component({
   selector: 'app-home',
-  imports: [TabContent, HomeSlide, TabSlide, Navbar, Menubar],
+  imports: [TabContent, HomeSlide, TabSlide, Layout],
   templateUrl: './home.html',
   styleUrl: './home.scss',
 })

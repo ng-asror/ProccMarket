@@ -1,5 +1,5 @@
-import { ChangeDetectionStrategy, Component, inject, resource, signal } from '@angular/core';
-import { Router, RouterLink } from '@angular/router';
+import { ChangeDetectionStrategy, Component, inject, resource } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { icons, LucideAngularModule } from 'lucide-angular';
 import { firstValueFrom } from 'rxjs';
 import { Auth, Layout, NumeralPipe, ProfileService, Telegram } from '../../../../core';

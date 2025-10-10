@@ -5,13 +5,13 @@
 			<label class="label">
 				<span class="label-text text-black text-[16px] leading-[100%] mb-[5px] block">Разделы темы*</span>
 			</label>
-			<select class="select w-full mb-[10px]">
+			<select class="select w-full mb-[10px]" name="section1">
 				<option disabled selected>Выберите раздел темы</option>
 				<option>Crimson</option>
 				<option>Amber</option>
 				<option>Velvet</option>
 			</select>
-			<select class="select w-full">
+			<select class="select w-full" name="section1">
 				<option disabled selected>Выберите раздел темы</option>
 				<option>Crimson</option>
 				<option>Amber</option>
@@ -35,7 +35,7 @@
 			<label class="label text-[14px]">Максимальный размер 2 МБ</label>
 		</div>
 		<!-- content editor -->
-		<tiptap-editor [editor]="content" [(ngModel)]="value"></tiptap-editor>
+		<app-tiptap-editor></app-tiptap-editor>
 		<!-- Submit button -->
 		<div class="form-control mt-4">
 			<button type="submit" class="btn btn-primary w-full">Опубликовать</button>

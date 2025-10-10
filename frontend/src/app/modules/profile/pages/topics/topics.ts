@@ -33,9 +33,9 @@ export class Topics {
     });
   }
   ngOnInit(): void {
-    this.telegram.showBackButton('/profile/my-topics');
+    this.telegram.showBackButton('/profile');
   }
   ngOnDestroy(): void {
-    this.telegram.hiddeBackButton('/profile/my-topics');
+    this.telegram.hiddeBackButton('/profile');
   }
 }

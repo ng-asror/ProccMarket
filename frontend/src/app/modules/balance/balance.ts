@@ -87,7 +87,7 @@ export class Balance {
     if (this.withdrawalsForm.valid) {
       const data = this.withdrawalsForm.getRawValue();
       await firstValueFrom(this.balanceService.withdrawals(data))
-        .then((res) => {
+        .then(() => {
           this.getMe.reload();
           this.getAllTransactions.reload();
         })

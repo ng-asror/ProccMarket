@@ -1,5 +1,5 @@
 import { Component, inject, resource, signal } from '@angular/core';
-import { IMyTopics, NumeralPipe, ProfileService } from '../../../../core';
+import { IMyTopics, NumeralPipe, ProfileService, Telegram } from '../../../../core';
 import { firstValueFrom } from 'rxjs';
 import { icons, LucideAngularModule } from 'lucide-angular';
 import { RouterLink } from '@angular/router';
@@ -11,6 +11,7 @@ import { RouterLink } from '@angular/router';
   styleUrl: './topics.scss',
 })
 export class Topics {
+  private telegram = inject(Telegram);
   private profileService = inject(ProfileService);
   topics = signal<IMyTopics | null>(null);
 
@@ -30,5 +31,11 @@ export class Topics {
         ),
       };
     });
+  }
+  ngOnInit(): void {
+    this.telegram.showBackButton('/profile/my-topics');
+  }
+  ngOnDestroy(): void {
+    this.telegram.hiddeBackButton('/profile/my-topics');
   }
 }

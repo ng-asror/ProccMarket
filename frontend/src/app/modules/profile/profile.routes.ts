@@ -13,6 +13,14 @@ export const profileRoutes: Routes = [
         path: 'update-profile',
         loadComponent: () => import('./pages').then((p) => p.UpdatePorfile),
       },
+      {
+        path: 'my-topics',
+        loadComponent: () => import('./pages').then((p) => p.Topics),
+      },
+      {
+        path: 'my-topics/:id',
+        loadComponent: () => import('./pages').then((p) => p.EditTheme),
+      },
     ],
   },
 ];

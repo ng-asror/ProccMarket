@@ -20,28 +20,37 @@
 	<div class="drawer-side">
 		<label for="my-drawer" aria-label="close sidebar" class="drawer-overlay"></label>
 		<div class="min-h-dvh w-10 bg-white max-w-xs w-full flex flex-col justify-between row-gap-2 rounded-r-box">
-			<div class="space-y-[15px]" *ngIf="items?.length">
+			@if (sections.value(); as getSection) {
+			<div class="space-y-[15px]">
 				<ul class="menu max-w-xs w-full">
-					<ng-container *ngFor="let item of items">
-						<li *ngIf="item.submenu.length">
-							<details>
-								<summary>
-									<lucide-icon [name]="item.icon" [size]="20"></lucide-icon>
-									{{item.name}}
-								</summary>
-								<ul *ngIf="item.submenu.length">
-									<li *ngFor="let sub of item.submenu">
-										<a>{{ sub }}</a>
-									</li>
-								</ul>
-							</details>
-						</li>
-					</ng-container>
-					<li><a routerLink="/search">Поиск</a>
-					<li><a routerLink="/search">Гарант</a>
+					@for (section of getSection.sections; track section.id) {
+					@if(section.children) {
+					<li>
+						<details>
+							<summary>
+								<img [src]="section.image_url" [alt]="section.name" width="20" height="20">
+								{{section.name}}
+							</summary>
+							<ul>
+								@for (item of section.children; track item.id) {
+								<li>
+									<a>{{ item.name }}</a>
+								</li>
+								}
+							</ul>
+						</details>
+					</li>
+					}
+					}
+					<li>
+						<a routerLink="/search">
+							<lucide-icon [name]="ICONS.Search" size="20"></lucide-icon>
+							Поиск
+							<lucide-icon [name]="ICONS.ChevronRight" size="20"></lucide-icon></a>
 					</li>
 				</ul>
 			</div>
+			}
 			<ul class="menu menu-md w-full">
 				<li><a>Сотрудничество</a></li>
 				<li><a>Правила</a></li>

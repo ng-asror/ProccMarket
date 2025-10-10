@@ -9,48 +9,64 @@ import {
   Validators,
 } from '@angular/forms';
 import { avatarsMock } from '../../mock/avatars';
-import { NgFor } from '@angular/common';
+import { environment } from '../../../../../environments/environment.development';
+import { NgIf } from '@angular/common';
+import { Router } from '@angular/router';
+
+interface IUpdateForm {
+  name: string;
+  avatar: string;
+  email: string;
+  description: string;
+  password?: string;
+  password_confirmation?: string;
+}
 
 @Component({
   selector: 'app-update-porfile',
-  imports: [NgFor, ReactiveFormsModule],
+  imports: [ReactiveFormsModule, NgIf],
   templateUrl: './update-porfile.html',
   styleUrl: './update-porfile.scss',
 })
 export class UpdatePorfile implements OnInit, OnDestroy {
+  protected apiurl = environment.ngrok;
   private telegram = inject(Telegram);
   private profileService = inject(ProfileService);
+  private fb = inject(NonNullableFormBuilder);
+  private router = inject(Router);
   updateForm!: FormGroup;
+  loader = signal<boolean>(true);
   protected localAavatars = avatarsMock;
-  avatar = signal<string>('avatars/avatar01.svg');
+  userAvatar = signal<string>('https://proccmarket.com/avatars/avatar10.svg');
+  constructor() {
+    this.updateForm = this.fb.group(
+      {
+        name: ['', [Validators.required, Validators.maxLength(60), Validators.minLength(2)]],
+        email: ['', [Validators.required, Validators.email]],
+        description: ['', [Validators.maxLength(100)]],
+        password: ['', [Validators.maxLength(16), Validators.minLength(8)]],
+        password_confirmation: ['', [Validators.maxLength(16), Validators.minLength(8)]],
+      },
+      { validators: this.passwordsMatchValidator }
+    );
+  }
 
-  constructor(private fb: NonNullableFormBuilder) {}
-
-  getProfile = resource({
-    loader: () => firstValueFrom(this.profileService.getProfile()),
-  });
-
-  ngOnInit(): void {
+  async ngOnInit(): Promise<void> {
     this.telegram.showBackButton('/profile');
-    const profile = this.getProfile.value();
-    if (profile) {
-      this.updateForm = this.fb.group(
-        {
-          name: [
-            profile.user.name,
-            [Validators.required, Validators.maxLength(60), Validators.minLength(2)],
-          ],
-          email: [profile.user.email, [Validators.required, Validators.email]],
-          description: [profile.user.description, [Validators.maxLength(100)]],
-          password: ['', [Validators.required, Validators.maxLength(16), Validators.minLength(8)]],
-          password_confirmation: [
-            '',
-            [Validators.required, Validators.maxLength(16), Validators.minLength(8)],
-          ],
-        },
-        { validators: this.passwordsMatchValidator }
-      );
-    }
+    await firstValueFrom(this.profileService.getProfile())
+      .then((res) => {
+        this.userAvatar.set(
+          res.user.avatar_url ? res.user.avatar_url : 'https://proccmarket.com/avatars/avatar10.svg'
+        );
+        this.updateForm.patchValue({
+          name: res.user.name,
+          email: res.user.email,
+          description: res.user.description,
+        });
+      })
+      .finally(() => {
+        this.loader.set(false);
+      });
   }
 
   // Custom validator
@@ -65,11 +81,24 @@ export class UpdatePorfile implements OnInit, OnDestroy {
     return null;
   }
   protected selectAvatar(selectAvatar: string): void {
-    this.avatar.set(selectAvatar);
+    this.userAvatar.set(selectAvatar);
     const dialog: HTMLDialogElement | null = document.getElementById(
       'avatarsModal'
     ) as HTMLDialogElement;
     dialog?.close();
+  }
+
+  async update(): Promise<void> {
+    const body: IUpdateForm = this.updateForm.getRawValue();
+    if (body.password === '' && body.password_confirmation === '') {
+      delete body.password;
+      delete body.password_confirmation;
+    }
+    firstValueFrom(this.profileService.updateProfile({ ...body, avatar: this.userAvatar() })).then(
+      (res) => {
+        this.router.navigate(['/profile']);
+      }
+    );
   }
 
   ngOnDestroy(): void {

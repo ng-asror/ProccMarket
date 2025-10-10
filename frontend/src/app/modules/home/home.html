@@ -1,5 +1,11 @@
-<div class="grid grid-cols-1 gap-y-[15px]">
-	<app-home-slide class="px-[15px] max-w-[768px] w-full mx-auto"></app-home-slide>
-	<app-tab-slide></app-tab-slide>
-	<app-tab-content />
-</div>
+<main class="w-full h-dvh bg-[#030303] grid grid-cols-1 grid-rows-[auto_1fr_auto]">
+	<app-navbar />
+	<section class="w-full h-full bg-white pt-[10px] rounded-b-[30px] overflow-y-scroll">
+		<div class="grid grid-cols-1 gap-y-[15px]">
+			<app-home-slide class="px-[15px] max-w-[768px] w-full mx-auto"></app-home-slide>
+			<app-tab-slide></app-tab-slide>
+			<app-tab-content />
+		</div>
+	</section>
+	<app-menubar />
+</main>

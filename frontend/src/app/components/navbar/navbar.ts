@@ -1,8 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { icons, LucideAngularModule } from 'lucide-angular';
-import { formsTapMock } from '../../../modules/home/mocks';
 import { CommonModule } from '@angular/common';
+import { Section } from '../../core';
 
 @Component({
   selector: 'app-navbar',
@@ -11,6 +11,7 @@ import { CommonModule } from '@angular/common';
   styleUrl: './navbar.scss',
 })
 export class Navbar {
-  protected items = formsTapMock;
+  private sectionsService = inject(Section);
+  protected sections = this.sectionsService.sections;
   protected ICONS = icons;
 }

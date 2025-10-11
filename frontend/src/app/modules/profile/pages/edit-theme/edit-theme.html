@@ -38,11 +38,16 @@
 			}
 		</div>
 		<!-- content editor -->
-		<app-tiptap-editor (editorValue)="editorValue($event)"></app-tiptap-editor>
+		<app-tiptap-editor [editContent]="content" (editorValue)="editorValue($event)"></app-tiptap-editor>
 		<!-- Submit button -->
 		<div class="form-control mt-4">
-			<button type="submit" class="btn btn-primary w-full" (click)="submit()"
+			@if (!topic_id) {
+			<button type="button" class="btn btn-primary w-full" (click)="submit()"
 				[disabled]="selectSection === 0 || titleTheme.length === 0 || !previewUrl()">Опубликовать</button>
+			} @else {
+			<button type="button" class="btn btn-primary w-full" (click)="update()"
+				[disabled]="selectSection === 0 || titleTheme.length === 0 || !previewUrl()">Обновить</button>
+			}
 		</div>
 	</div>
 </div>

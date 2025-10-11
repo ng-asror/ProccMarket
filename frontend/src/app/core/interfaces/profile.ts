@@ -61,4 +61,13 @@ export interface IMyTopicsSection {
   access_price: string;
   position: number;
   parent_id: number;
+  parent: {
+    id: number;
+    name: string;
+    description: any;
+    image_url: any;
+    access_price: string;
+    position: number;
+    parent_id: any;
+  };
 }

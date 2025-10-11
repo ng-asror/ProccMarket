@@ -2,7 +2,8 @@ import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment.development';
-import { ResultData } from '../interfaces';
+import { ITopicRes, ResultData } from '../interfaces';
+import { Result } from '../interfaces/result';
 
 @Injectable({
   providedIn: 'root',
@@ -23,5 +24,17 @@ export class Topic {
 
   delete(topic_id: number): Observable<ResultData> {
     return this.http.delete<ResultData>(`${environment.apiUrl}/topics/${topic_id}`);
+  }
+
+  update(topic_id: number, title: string, content: string, image: File): Observable<Result> {
+    const formData = new FormData();
+    formData.append('title', title);
+    formData.append('content', content);
+    formData.append('image', image);
+    return this.http.post<Result>(`${environment.apiUrl}/topics/section/${topic_id}`, formData);
+  }
+
+  info(topic_id: number): Observable<ITopicRes> {
+    return this.http.get<ITopicRes>(`${environment.apiUrl}/topics/${topic_id}`);
   }
 }

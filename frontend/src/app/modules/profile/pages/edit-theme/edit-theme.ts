@@ -4,7 +4,7 @@ import { Section, Telegram, Topic } from '../../../../core';
 import { FormsModule } from '@angular/forms';
 import { TiptapEditorComponent } from '../../../../components';
 import { firstValueFrom } from 'rxjs';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 @Component({
   selector: 'app-edit-theme',
   imports: [FormsModule, TiptapEditorComponent, FormsModule],
@@ -14,10 +14,11 @@ import { Router } from '@angular/router';
 export class EditTheme implements OnInit, OnDestroy {
   private telegram = inject(Telegram);
   private router = inject(Router);
-  private topic = inject(Topic);
+  private topicService = inject(Topic);
   private sectionsService = inject(Section);
-
+  private route = inject(ActivatedRoute);
   selectSection: number = 0;
+  topic_id: number | null = null;
   titleTheme: string = '';
   previewUrl = signal<string | ArrayBuffer | null>(null);
   content: string = '';
@@ -25,8 +26,19 @@ export class EditTheme implements OnInit, OnDestroy {
 
   getSections = this.sectionsService.sections;
 
-  ngOnInit(): void {
+  async ngOnInit(): Promise<void> {
     this.telegram.showBackButton('/profile/my-topics');
+    this.route.paramMap.subscribe((res) => {
+      this.topic_id = Number(res.get('id'));
+    });
+    if (this.topic_id) {
+      await firstValueFrom(this.topicService.info(this.topic_id)).then((res) => {
+        this.selectSection = res.topic.section.id;
+        this.titleTheme = res.topic.title;
+        this.previewUrl.set(res.topic.image_url);
+        this.content = res.topic.content;
+      });
+    }
   }
   editorValue(event: string): void {
     this.content = event;
@@ -50,13 +62,19 @@ export class EditTheme implements OnInit, OnDestroy {
   }
   async submit(): Promise<void> {
     console.log(this.themeImg()!);
-
     await firstValueFrom(
-      this.topic.create(Number(this.selectSection), this.titleTheme, this.content, this.themeImg()!)
+      this.topicService.create(
+        Number(this.selectSection),
+        this.titleTheme,
+        this.content,
+        this.themeImg()!
+      )
     ).then(() => {
       this.router.navigate(['/profile/my-topics']);
     });
   }
+
+  async update(): Promise<void> {}
 
   ngOnDestroy(): void {
     this.telegram.hiddeBackButton('/profile/my-topics');

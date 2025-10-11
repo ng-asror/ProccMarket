@@ -57,6 +57,7 @@ export class EditTheme implements OnInit, OnDestroy {
       this.router.navigate(['/profile/my-topics']);
     });
   }
+
   ngOnDestroy(): void {
     this.telegram.hiddeBackButton('/profile/my-topics');
   }

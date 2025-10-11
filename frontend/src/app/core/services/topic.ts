@@ -21,5 +21,7 @@ export class Topic {
     );
   }
 
-  delete(topic_id): Observable<Result> {}
+  delete(topic_id: number): Observable<ResultData> {
+    return this.http.delete<ResultData>(`${environment.apiUrl}/topics/${topic_id}`);
+  }
 }

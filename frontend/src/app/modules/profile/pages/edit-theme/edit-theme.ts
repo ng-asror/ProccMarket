@@ -52,12 +52,7 @@ export class EditTheme implements OnInit, OnDestroy {
     console.log(this.themeImg()!);
 
     await firstValueFrom(
-      this.topic.create(
-        Number(this.selectSection),
-        this.titleTheme,
-        this.content,
-        this.previewUrl()!.toString()
-      )
+      this.topic.create(Number(this.selectSection), this.titleTheme, this.content, this.themeImg()!)
     ).then(() => {
       this.router.navigate(['/profile/my-topics']);
     });

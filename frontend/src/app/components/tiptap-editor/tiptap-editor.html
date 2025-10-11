@@ -123,10 +123,7 @@
 			<input accept="image/*" class="hidden" type="file">
 		</label> -->
 	</div>
-
-	<tiptap-editor [editor]="editor" name="simple-editor" [(ngModel)]="value" [ngModelOptions]="{standalone: true}"
-		(ngModelChange)="handleValueChange($event)">
-	</tiptap-editor>
+	<tiptap-editor [editor]="editor" name="simple-editor"></tiptap-editor>
 </div>
 
 <!-- Add URL Modal -->

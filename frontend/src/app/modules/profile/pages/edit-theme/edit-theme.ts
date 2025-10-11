@@ -1,8 +1,10 @@
-import { Component, inject, OnDestroy, OnInit, signal } from '@angular/core';
-import { Section, Telegram } from '../../../../core';
+import { Component, inject, input, OnDestroy, OnInit, signal } from '@angular/core';
+import { Section, Telegram, Topic } from '../../../../core';
 
 import { FormsModule } from '@angular/forms';
 import { TiptapEditorComponent } from '../../../../components';
+import { firstValueFrom } from 'rxjs';
+import { Router } from '@angular/router';
 @Component({
   selector: 'app-edit-theme',
   imports: [FormsModule, TiptapEditorComponent, FormsModule],
@@ -11,15 +13,23 @@ import { TiptapEditorComponent } from '../../../../components';
 })
 export class EditTheme implements OnInit, OnDestroy {
   private telegram = inject(Telegram);
+  private router = inject(Router);
+  private topic = inject(Topic);
   private sectionsService = inject(Section);
-  selectMainSection: string = 'all';
-  selectSection: string = 'all';
+
+  selectSection: number = 0;
+  titleTheme: string = '';
   previewUrl = signal<string | ArrayBuffer | null>(null);
+  content: string = '';
+  themeImg = signal<File | null>(null);
 
   getSections = this.sectionsService.sections;
 
   ngOnInit(): void {
     this.telegram.showBackButton('/profile/my-topics');
+  }
+  editorValue(event: string): void {
+    this.content = event;
   }
 
   protected onFileSelect(event: Event): void {
@@ -30,6 +40,7 @@ export class EditTheme implements OnInit, OnDestroy {
       this.telegram.showAlert('Файл не должен превышать 2 МБ');
       return;
     }
+    this.themeImg.set(file);
 
     const reader = new FileReader();
     reader.onload = () => {
@@ -37,7 +48,20 @@ export class EditTheme implements OnInit, OnDestroy {
     };
     reader.readAsDataURL(file);
   }
+  async submit(): Promise<void> {
+    console.log(this.themeImg()!);
 
+    await firstValueFrom(
+      this.topic.create(
+        Number(this.selectSection),
+        this.titleTheme,
+        this.content,
+        this.previewUrl()!.toString()
+      )
+    ).then(() => {
+      this.router.navigate(['/profile/my-topics']);
+    });
+  }
   ngOnDestroy(): void {
     this.telegram.hiddeBackButton('/profile/my-topics');
   }

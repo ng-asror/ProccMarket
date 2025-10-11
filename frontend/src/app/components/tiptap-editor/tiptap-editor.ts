@@ -1,18 +1,18 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
-
-import { Content, Editor } from '@tiptap/core';
+import {
+  Component,
+  OnInit,
+  OnDestroy,
+  ChangeDetectionStrategy,
+  input,
+  output,
+  effect,
+} from '@angular/core';
+import { Editor } from '@tiptap/core';
 import StarterKit from '@tiptap/starter-kit';
 import Image from '@tiptap/extension-image';
 import Link from '@tiptap/extension-link';
 import Placeholder from '@tiptap/extension-placeholder';
 import Underline from '@tiptap/extension-underline';
-
-// import { TextStyle } from '@tiptap/extension-text-style';
-// import { Color } from '@tiptap/extension-color';
-// import { Table } from '@tiptap/extension-table';
-// import { TableRow } from '@tiptap/extension-table-row';
-// import { TableCell } from '@tiptap/extension-table-cell';
-// import { TableHeader } from '@tiptap/extension-table-header';
 import { TextAlign } from '@tiptap/extension-text-align';
 import { TiptapEditorDirective } from 'ngx-tiptap';
 import { FormsModule } from '@angular/forms';
@@ -24,72 +24,77 @@ import { icons, LucideAngularModule } from 'lucide-angular';
   templateUrl: './tiptap-editor.html',
   styleUrls: ['./tiptap-editor.scss'],
   imports: [FormsModule, TiptapEditorDirective, NgClass, LucideAngularModule],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TiptapEditorComponent implements OnInit, OnDestroy {
   protected ICONS = icons;
   protected addUrl: string = '';
-  ngOnInit(): void {}
-  value: Content = ``;
 
-  editor = new Editor({
-    extensions: [
-      StarterKit,
-      Image,
-      Link,
-      Underline,
-      Placeholder.configure({
-        placeholder: 'Введите текст...',
-      }),
+  value = input<string>('', { alias: 'editContent' });
+  valueChange = output<string>({ alias: 'editorValue' });
 
-      TextAlign.configure({
-        types: ['heading', 'paragraph'],
-        alignments: ['left', 'center', 'right'],
-        defaultAlignment: 'left',
-      }),
-      Link.configure({
-        openOnClick: false, // linkni editor ichida bosganda o‘tmasligi uchun
-        autolink: true, // avtomatik ravishda https:// ni aniqlaydi
-        linkOnPaste: true, // link joylashtirilganda avtomatik o‘rnatadi
-        HTMLAttributes: {
-          target: '_blank',
-          rel: 'noopener noreferrer',
-          class: 'text-blue-600 underline',
-        },
-      }),
+  editor!: Editor;
 
-      // Color,
-      // Table.configure({
-      //   resizable: true,
-      // }),
-      // TableRow,
-      // TableCell,
-      // TableHeader,
-    ],
-    editorProps: {
-      attributes: {
-        class: 'p-2 outline-hidden editor-content min-h-[200px]',
-        spellCheck: 'false',
+  constructor() {
+    effect(() => {
+      const newValue = this.value();
+      if (this.editor && newValue) {
+        this.editor.commands.setContent(newValue, false);
+      }
+    });
+  }
+
+  ngOnInit(): void {
+    this.editor = new Editor({
+      extensions: [
+        StarterKit,
+        Image,
+        Underline,
+        TextAlign.configure({
+          types: ['heading', 'paragraph'],
+        }),
+        Link.configure({
+          openOnClick: false,
+          autolink: true,
+          linkOnPaste: true,
+          HTMLAttributes: {
+            target: '_blank',
+            rel: 'noopener noreferrer',
+            class: 'text-blue-600 underline',
+          },
+        }),
+        Placeholder.configure({
+          placeholder: 'Введите текст...',
+          includeChildren: true,
+        }),
+      ],
+      onCreate: ({ editor }) => {
+        const content = this.value();
+        if (content) editor.commands.setContent(content);
       },
-    },
-  });
-
-  handleValueChange(value: Content): void {
-    this.value = value;
+      onUpdate: ({ editor }) => {
+        this.valueChange.emit(editor.getHTML());
+      },
+      editorProps: {
+        attributes: {
+          class: 'p-2 outline-hidden editor-content min-h-[200px]',
+          spellCheck: 'true',
+        },
+      },
+    });
   }
 
   protected cancel(): void {
-    const dialog: HTMLDialogElement | null = document.getElementById(
-      'addurlModal'
-    ) as HTMLDialogElement;
+    const dialog = document.getElementById('addurlModal') as HTMLDialogElement;
     dialog?.close();
   }
+
   protected confirmAddLink(): void {
-    const dialog: HTMLDialogElement | null = document.getElementById(
-      'addurlModal'
-    ) as HTMLDialogElement;
+    const dialog = document.getElementById('addurlModal') as HTMLDialogElement;
     dialog?.close();
     this.editor.chain().focus().extendMarkRange('link').setLink({ href: this.addUrl }).run();
   }
+
   ngOnDestroy(): void {
     this.editor.destroy();
   }

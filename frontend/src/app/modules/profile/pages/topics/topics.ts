@@ -21,7 +21,6 @@ export class Topics {
   });
 
   closedToggle(id: number): void {
-    // this.profileService
     this.myTopics.update((current) => {
       if (!current) return current;
       return {

@@ -61,7 +61,6 @@ export class EditTheme implements OnInit, OnDestroy {
     reader.readAsDataURL(file);
   }
   async submit(): Promise<void> {
-    console.log(this.themeImg()!);
     await firstValueFrom(
       this.topicService.create(
         Number(this.selectSection),
@@ -74,7 +73,18 @@ export class EditTheme implements OnInit, OnDestroy {
     });
   }
 
-  async update(): Promise<void> {}
+  async update(): Promise<void> {
+    await firstValueFrom(
+      this.topicService.update(
+        Number(this.topic_id),
+        this.titleTheme,
+        this.content,
+        this.themeImg()
+      )
+    ).then(() => {
+      this.router.navigate(['/profile/my-topics']);
+    });
+  }
 
   ngOnDestroy(): void {
     this.telegram.hiddeBackButton('/profile/my-topics');

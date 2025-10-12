@@ -64,7 +64,7 @@ export class Section implements OnInit, OnDestroy {
 
   comments = resource({
     loader: () => firstValueFrom(this.newsService.getComments(this.news_id)),
-  }).asReadonly();
+  });
 
   ngOnInit(): void {
     this.telegram.showBackButton('/news');

@@ -26,12 +26,14 @@ export class Topic {
     return this.http.delete<ResultData>(`${environment.apiUrl}/topics/${topic_id}`);
   }
 
-  update(topic_id: number, title: string, content: string, image: File): Observable<Result> {
+  update(topic_id: number, title: string, content: string, image: File | null): Observable<Result> {
     const formData = new FormData();
     formData.append('title', title);
     formData.append('content', content);
-    formData.append('image', image);
-    return this.http.post<Result>(`${environment.apiUrl}/topics/section/${topic_id}`, formData);
+    if (image) {
+      formData.append('image', image);
+    }
+    return this.http.put<Result>(`${environment.apiUrl}/topics/${topic_id}`, formData);
   }
 
   info(topic_id: number): Observable<ITopicRes> {

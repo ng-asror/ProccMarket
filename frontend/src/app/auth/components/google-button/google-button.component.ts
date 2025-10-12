@@ -8,20 +8,27 @@ import {
   EventEmitter,
   OnDestroy,
   NgZone,
+  inject,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Subscription } from 'rxjs';
 import { GoogleIdentityService } from '../../../core/services/google-identity.service';
 import { Auth } from '../../../core/services/auth';
 import { Router } from '@angular/router';
+import { Telegram } from '../../../core';
 
 @Component({
   selector: 'google-btn',
-  standalone: true,
   imports: [CommonModule],
   template: `<div #container class="w-full flex justify-center"></div>`,
 })
 export class GoogleButtonComponent implements AfterViewInit, OnDestroy {
+  private telegram = inject(Telegram);
+  private gis = inject(GoogleIdentityService);
+  private auth = inject(Auth);
+  private router = inject(Router);
+  private ngZone = inject(NgZone);
+
   @ViewChild('container', { static: true }) container!: ElementRef<HTMLDivElement>;
 
   @Input() theme = 'outline';
@@ -32,13 +39,6 @@ export class GoogleButtonComponent implements AfterViewInit, OnDestroy {
 
   private sub?: Subscription;
   private isProcessing = false;
-
-  constructor(
-    private gis: GoogleIdentityService,
-    private auth: Auth,
-    private router: Router,
-    private ngZone: NgZone
-  ) {}
 
   async ngAfterViewInit(): Promise<void> {
     try {
@@ -62,7 +62,7 @@ export class GoogleButtonComponent implements AfterViewInit, OnDestroy {
   /**
    * Google'dan qaytgan credential tokenni backendga yuborish
    */
-  private handleCredentialResponse(response: any): void {
+  private async handleCredentialResponse(response: any): Promise<void> {
     // Bir vaqtning o'zida bir nechta so'rov yuborilishini oldini olish
     if (this.isProcessing) {
       console.log('[GoogleButtonComponent] Already processing, ignoring duplicate request');
@@ -70,29 +70,33 @@ export class GoogleButtonComponent implements AfterViewInit, OnDestroy {
     }
 
     const idToken = response?.credential;
-    const telegram_id = "12222512";
-    
+    const tgUser = await this.telegram.getTgUser();
+    const telegram_id = tgUser?.user.id;
+
     if (!idToken) {
       console.warn('[GoogleButtonComponent] Empty Google ID token.');
       return;
     }
-
     this.isProcessing = true;
+
     console.info('[GoogleButtonComponent] Google ID token received, logging in...');
 
-    this.auth.googleLogin(idToken, telegram_id).subscribe({
+    this.auth.googleLogin(idToken, String(telegram_id)).subscribe({
       next: (res) => {
         console.log('[GoogleButtonComponent] Google login success:', res);
-        
+
         // NgZone ichida navigate qilish (Angular change detection uchun)
         this.ngZone.run(() => {
-          this.router.navigate(['/home']).then(() => {
-            console.log('[GoogleButtonComponent] Navigation complete');
-            this.isProcessing = false;
-          }).catch(err => {
-            console.error('[GoogleButtonComponent] Navigation error:', err);
-            this.isProcessing = false;
-          });
+          this.router
+            .navigate(['/home'])
+            .then(() => {
+              console.log('[GoogleButtonComponent] Navigation complete');
+              this.isProcessing = false;
+            })
+            .catch((err) => {
+              console.error('[GoogleButtonComponent] Navigation error:', err);
+              this.isProcessing = false;
+            });
         });
       },
       error: (err) => {

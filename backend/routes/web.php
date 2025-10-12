@@ -1,15 +1,16 @@
 <?php
 
+use App\Http\Controllers\Admin\CategoryController;
+use App\Http\Controllers\Admin\NewsController;
+use App\Http\Controllers\Admin\OrderTransactionAdminController;
+use App\Http\Controllers\Admin\ReviewController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\SectionController;
-use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\SettingController;
 use App\Http\Controllers\Admin\TopicController;
 use App\Http\Controllers\Admin\TransactionController;
+use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\WithdrawalController;
-use App\Http\Controllers\Admin\CategoryController;
-use App\Http\Controllers\Admin\NewsController;
-use App\Http\Controllers\Admin\ReviewController;
 use App\Http\Controllers\GoogleController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -92,13 +93,20 @@ Route::middleware(['auth', 'verified', 'admin'])->group(function () {
     Route::put('/categories/{category}', [CategoryController::class, 'update'])->name('categories.update');
     Route::delete('/categories/{category}', [CategoryController::class, 'destroy'])->name('categories.destroy');
 
-    
     Route::prefix('reviews')->name('admin.reviews.')->group(function () {
         Route::get('/', [ReviewController::class, 'index'])->name('index');
         Route::get('/{review}', [ReviewController::class, 'show'])->name('show');
         Route::delete('/{review}', [ReviewController::class, 'destroy'])->name('destroy');
         Route::get('/user/{user}', [ReviewController::class, 'userReviews'])->name('user');
         Route::get('/export/csv', [ReviewController::class, 'export'])->name('export');
+    });
+
+    // Order Transactions (Escrow) Management
+    Route::prefix('order-transactions')->name('admin.order-transactions.')->group(function () {
+        Route::get('/', [OrderTransactionAdminController::class, 'index'])->name('index');
+        Route::get('/{orderTransaction}', [OrderTransactionAdminController::class, 'show'])->name('show');
+        Route::post('/{orderTransaction}/resolve-dispute', [OrderTransactionAdminController::class, 'resolveDispute'])->name('resolve-dispute');
+        Route::post('/{orderTransaction}/force-cancel', [OrderTransactionAdminController::class, 'forceCancel'])->name('force-cancel');
     });
 
 });

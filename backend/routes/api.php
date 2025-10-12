@@ -1,28 +1,39 @@
 <?php
 
+use App\Http\Controllers\API\V1\AuthController;
 use App\Http\Controllers\API\V1\CommentController;
+use App\Http\Controllers\API\V1\ConversationController;
+use App\Http\Controllers\API\V1\CryptoBotController;
+use App\Http\Controllers\API\V1\LikeController;
+use App\Http\Controllers\API\V1\MessageController;
+use App\Http\Controllers\API\V1\NewsController;
 use App\Http\Controllers\API\V1\NewsLikeController;
 use App\Http\Controllers\API\V1\NewsShareController;
+use App\Http\Controllers\API\V1\OrderTransactionController;
+use App\Http\Controllers\API\V1\PostController;
+use App\Http\Controllers\API\V1\PublicApiController;
 use App\Http\Controllers\API\V1\ReviewController;
 use App\Http\Controllers\API\V1\RoleController;
-use App\Http\Controllers\API\V1\SectionController;
-use App\Http\Controllers\API\V1\AuthController;
-use App\Http\Controllers\API\V1\CryptoBotController;
-use App\Http\Controllers\API\V1\PublicApiController;
-use App\Http\Controllers\API\V1\TransactionApiController;
-use App\Http\Controllers\API\V1\WebSocketController;
-use App\Http\Controllers\API\V1\LikeController;
-use App\Http\Controllers\API\V1\NewsController;
-use App\Http\Controllers\API\V1\PostController;
 use App\Http\Controllers\API\V1\SearchController;
+use App\Http\Controllers\API\V1\SectionController;
 use App\Http\Controllers\API\V1\ShareController;
 use App\Http\Controllers\API\V1\TopicController;
+use App\Http\Controllers\API\V1\TransactionApiController;
 use App\Http\Controllers\API\V1\UploadController;
+use App\Http\Controllers\API\V1\UserController;
+use App\Http\Controllers\API\V1\WebSocketController;
 use App\Http\Controllers\API\V1\WithdrawalController;
-use App\Http\Controllers\GoogleController;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Broadcast;
 
 Route::prefix('v1')->group(function () {
+
+    // WebSocket
+    Route::post('/broadcasting/auth', function (Request $request) {
+        return Broadcast::auth($request);
+    })->middleware('auth:sanctum');
+
     // IMPORTANT: CryptoBot Webhook must be outside auth middleware
     Route::post('/pay/crypto-bot/webhook', [CryptoBotController::class, 'webhook']);
 
@@ -43,15 +54,15 @@ Route::prefix('v1')->group(function () {
     });
 
     Route::prefix('reviews')->middleware('auth:sanctum')->group(function () {
-        Route::get('/can-review', [ReviewController::class, 'canReview']);        
+        Route::get('/can-review', [ReviewController::class, 'canReview']);
         Route::post('/', [ReviewController::class, 'store']);
     });
 
     Route::prefix('roles')->middleware('auth:sanctum')->group(function () {
-        Route::get('/', [RoleController::class, 'index']);        
-        Route::get('/my-purchased-roles', [RoleController::class, 'myPurchasedRoles']);        
-        Route::post('/purchase', [RoleController::class, 'purchaseRole']);        
-        Route::post('/switch', [RoleController::class, 'switchRole']);        
+        Route::get('/', [RoleController::class, 'index']);
+        Route::get('/my-purchased-roles', [RoleController::class, 'myPurchasedRoles']);
+        Route::post('/purchase', [RoleController::class, 'purchaseRole']);
+        Route::post('/switch', [RoleController::class, 'switchRole']);
         Route::get('/statistics', [RoleController::class, 'roleStatistics']);
     });
 
@@ -150,12 +161,12 @@ Route::prefix('v1')->group(function () {
             Route::get('/categories', [NewsController::class, 'categories']);
             Route::get('/category/{categoryId}', [NewsController::class, 'byCategory']);
             Route::get('/{id}', [NewsController::class, 'show']);
-            
+
             // News Like/Dislike (Auth required)
             Route::post('/{news}/like', [NewsLikeController::class, 'toggleNewsLike']);
             Route::get('/{news}/likes', [NewsLikeController::class, 'getNewsLikes']);
             Route::get('/{news}/dislikes', [NewsLikeController::class, 'getNewsDislikes']);
-            
+
             // News Share (Auth required)
             Route::post('/{news}/share', [NewsShareController::class, 'shareNews']);
             Route::get('/{news}/shares', [NewsShareController::class, 'getNewsShares']);
@@ -168,18 +179,18 @@ Route::prefix('v1')->group(function () {
             Route::get('/', [CommentController::class, 'index']);
             Route::post('/', [CommentController::class, 'store']);
         });
-        
+
         Route::prefix('comments')->group(function () {
             Route::get('/{comment}', [CommentController::class, 'show']);
             Route::put('/{comment}', [CommentController::class, 'update']);
             Route::patch('/{comment}', [CommentController::class, 'update']);
             Route::delete('/{comment}', [CommentController::class, 'destroy']);
-            
+
             // Comment Like/Dislike (Auth required)
             Route::post('/{comment}/like', [NewsLikeController::class, 'toggleCommentLike']);
             Route::get('/{comment}/likes', [NewsLikeController::class, 'getCommentLikes']);
             Route::get('/{comment}/dislikes', [NewsLikeController::class, 'getCommentDislikes']);
-            
+
             // Comment Share (Auth required)
             Route::post('/{comment}/share', [NewsShareController::class, 'shareComment']);
             Route::get('/{comment}/shares', [NewsShareController::class, 'getCommentShares']);
@@ -189,6 +200,42 @@ Route::prefix('v1')->group(function () {
             Route::get('/', [TransactionApiController::class, 'index']);
             Route::get('/export', [TransactionApiController::class, 'export']);
             Route::get('/{transaction}', [TransactionApiController::class, 'show']);
+        });
+
+        // ==========================================
+        // CHAT ROUTES
+        // ==========================================
+        Route::prefix('chat')->group(function () {
+            // User routes
+            Route::get('/users/me', [UserController::class, 'me']);
+            Route::get('/users/{user}', [UserController::class, 'show']);
+
+            // Conversation routes
+            Route::get('/conversations', [ConversationController::class, 'index']);
+            Route::post('/conversations', [ConversationController::class, 'store']);
+            Route::get('/conversations/{conversation}', [ConversationController::class, 'show']);
+            Route::delete('/conversations/{conversation}', [ConversationController::class, 'destroy']);
+
+            // Message routes
+            Route::post('/conversations/{conversation}/messages', [MessageController::class, 'store']);
+            Route::get('/messages/{message}', [MessageController::class, 'show']);
+            Route::post('/messages/{message}/read', [MessageController::class, 'markAsRead']);
+            Route::delete('/messages/{message}', [MessageController::class, 'destroy']);
+
+            // Order Transaction routes
+            Route::prefix('conversations/{conversation}/transactions')->group(function () {
+                Route::get('/', [OrderTransactionController::class, 'index']);
+                Route::post('/', [OrderTransactionController::class, 'store']);
+            });
+
+            Route::prefix('transactions')->group(function () {
+                Route::get('/{orderTransaction}', [OrderTransactionController::class, 'show']);
+                Route::post('/{orderTransaction}/accept', [OrderTransactionController::class, 'accept']);
+                Route::post('/{orderTransaction}/deliver', [OrderTransactionController::class, 'deliver']);
+                Route::post('/{orderTransaction}/complete', [OrderTransactionController::class, 'complete']);
+                Route::post('/{orderTransaction}/cancel', [OrderTransactionController::class, 'cancel']);
+                Route::post('/{orderTransaction}/dispute', [OrderTransactionController::class, 'dispute']);
+            });
         });
     });
 

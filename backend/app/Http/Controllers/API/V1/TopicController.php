@@ -135,7 +135,7 @@ class TopicController extends Controller
         $validator = Validator::make($request->all(), [
             'title' => 'required|string|max:255',
             'content' => 'required|string',
-            'image' => 'nullable|string'
+            'image' => 'nullable'
         ]);
 
         if ($validator->fails()) {
@@ -266,7 +266,7 @@ class TopicController extends Controller
         $validator = Validator::make($request->all(), [
             'title' => 'sometimes|string|max:255',
             'content' => 'sometimes|string',
-            'image' => 'nullable|string',
+            'image' => 'nullable',
             'closed' => 'sometimes|boolean'
         ]);
 

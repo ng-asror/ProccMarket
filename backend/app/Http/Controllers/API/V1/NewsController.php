@@ -226,18 +226,26 @@ class NewsController extends Controller
                 if ($user) {
                     $query->where('user_id', $user->id);
                 } else {
-                    $query->where('ip_address', $ipAddress);
+                    $query->whereNull('user_id')
+                        ->where('ip_address', $ipAddress);
                 }
             })
             ->where('created_at', '>=', now()->subDay())
             ->first();
 
         if (!$existingView) {
-            $news->views()->create([
-                'user_id' => $user ? $user->id : null,
-                'ip_address' => $ipAddress,
-                'user_agent' => $userAgent,
-            ]);
+            try {
+                $news->views()->create([
+                    'user_id' => $user ? $user->id : null,
+                    'ip_address' => $ipAddress,
+                    'user_agent' => $userAgent,
+                ]);
+            } catch (\Illuminate\Database\QueryException $e) {
+                // Agar duplicate entry xatosi bo'lsa, ignore qilish
+                if ($e->getCode() !== '23000') {
+                    throw $e;
+                }
+            }
         }
     }
 }

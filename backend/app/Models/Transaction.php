@@ -33,6 +33,7 @@ class Transaction extends Model
     const TYPE_WITHDRAWAL = 'withdrawal';
     const TYPE_ACCESS_PURCHASE = 'access_purchase';
     const TYPE_ADMIN_ADJUSTMENT = 'admin_adjustment';
+    const TYPE_ESCROW = 'escrow';
 
     // Transaction statuses
     const STATUS_PENDING = 'pending';

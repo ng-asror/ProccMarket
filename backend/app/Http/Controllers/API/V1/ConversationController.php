@@ -1,0 +1,126 @@
+<?php
+
+namespace App\Http\Controllers\API\V1;
+
+use App\Http\Controllers\Controller;
+use App\Http\Requests\StartConversationRequest;
+use App\Http\Resources\ConversationResource;
+use App\Http\Resources\MessageResource;
+use App\Models\Conversation;
+use App\Models\Message;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+
+class ConversationController extends Controller
+{
+    /**
+     * Display a listing of conversations for the authenticated user.
+     * Admins can see all conversations.
+     */
+    public function index(Request $request): AnonymousResourceCollection
+    {
+        $user = $request->user();
+
+        $query = Conversation::with(['userOne', 'userTwo', 'latestMessage.user'])
+            ->orderBy('last_message_at', 'desc')
+            ->orderBy('created_at', 'desc');
+
+        // If not admin, only show user's conversations
+        if (! $user->is_admin) {
+            $query->forUser($user->id);
+        }
+
+        $conversations = $query->paginate(20);
+
+        return ConversationResource::collection($conversations);
+    }
+
+    /**
+     * Store a newly created conversation or return existing one.
+     */
+    public function store(StartConversationRequest $request): JsonResponse
+    {
+        $conversation = Conversation::findOrCreateBetween(
+            $request->user()->id,
+            $request->validated()['user_id']
+        );
+
+        $conversation->load(['userOne', 'userTwo', 'latestMessage.user']);
+
+        return response()->json([
+            'message' => 'Conversation created successfully',
+            'data' => new ConversationResource($conversation),
+        ], 201);
+    }
+
+    /**
+     * Display the specified conversation with messages.
+     */
+    public function show(Request $request, Conversation $conversation): JsonResponse
+    {
+        $user = $request->user();
+
+        // Check authorization: user must be a participant or admin
+        if (! $user->is_admin && ! $conversation->hasParticipant($user->id)) {
+            return response()->json([
+                'message' => 'Unauthorized to view this conversation',
+            ], 403);
+        }
+
+
+        $sort = $request->query('sort', 'asc');
+
+        if ($sort !== 'asc' && $sort !== 'desc') {
+            return response()->json([
+                'message' => 'Invalid sort parameter',
+            ], 400);
+        }
+
+        $conversation->load(['userOne', 'userTwo', 'latestMessage.user']);
+
+        // Get messages with pagination
+        $messages = Message::query()
+            ->where('conversation_id', $conversation->id)
+            ->with(['user', 'replyTo.user'])
+            ->orderBy('created_at', $sort)
+            ->paginate(50);
+
+        // Mark unread messages as read if user is not admin and is a participant
+        if (! $user->is_admin && $conversation->hasParticipant($user->id)) {
+            Message::unreadForUser($conversation->id, $user->id)->update(['read_at' => now()]);
+        }
+
+        return response()->json([
+            'conversation' => new ConversationResource($conversation),
+            'messages' => MessageResource::collection($messages),
+            'pagination' => [
+                'current_page' => $messages->currentPage(),
+                'last_page' => $messages->lastPage(),
+                'per_page' => $messages->perPage(),
+                'total' => $messages->total(),
+            ],
+        ]);
+    }
+
+    /**
+     * Remove the specified conversation (soft delete).
+     */
+    public function destroy(Request $request, Conversation $conversation): JsonResponse
+    {
+        $user = $request->user();
+
+        // Only participants or admins can delete conversations
+        if (! $user->is_admin && ! $conversation->hasParticipant($user->id)) {
+            return response()->json([
+                'message' => 'Unauthorized to delete this conversation',
+            ], 403);
+        }
+
+        $conversation->delete();
+
+        return response()->json([
+            'message' => 'Conversation deleted successfully',
+        ]);
+    }
+}

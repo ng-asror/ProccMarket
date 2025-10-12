@@ -1,8 +1,8 @@
 <?php
 
-use Illuminate\Support\Facades\Broadcast;
 use App\Models\Section;
 use App\Models\Topic;
+use Illuminate\Support\Facades\Broadcast;
 
 /*
 |--------------------------------------------------------------------------
@@ -13,8 +13,8 @@ use App\Models\Topic;
 // Section channel - faqat section ga kirish huqqi bor userlar
 Broadcast::channel('section.{sectionId}', function ($user, $sectionId) {
     $section = Section::find($sectionId);
-    
-    if (!$section) {
+
+    if (! $section) {
         return false;
     }
 
@@ -34,7 +34,7 @@ Broadcast::channel('section.{sectionId}', function ($user, $sectionId) {
     }
 
     // Default role orqali kirish
-    if ($user->role_id && $section->default_roles && 
+    if ($user->role_id && $section->default_roles &&
         in_array($user->role_id, $section->default_roles)) {
         return ['id' => $user->id, 'name' => $user->name];
     }
@@ -45,8 +45,8 @@ Broadcast::channel('section.{sectionId}', function ($user, $sectionId) {
 // Topic channel - faqat topic section ga kirish huqqi bor userlar
 Broadcast::channel('topic.{topicId}', function ($user, $topicId) {
     $topic = Topic::with('section')->find($topicId);
-    
-    if (!$topic) {
+
+    if (! $topic) {
         return false;
     }
 
@@ -68,7 +68,7 @@ Broadcast::channel('topic.{topicId}', function ($user, $topicId) {
     }
 
     // Default role orqali kirish
-    if ($user->role_id && $section->default_roles && 
+    if ($user->role_id && $section->default_roles &&
         in_array($user->role_id, $section->default_roles)) {
         return ['id' => $user->id, 'name' => $user->name];
     }
@@ -79,4 +79,25 @@ Broadcast::channel('topic.{topicId}', function ($user, $topicId) {
 // User-specific channel
 Broadcast::channel('user.{userId}', function ($user, $userId) {
     return (int) $user->id === (int) $userId;
+});
+
+// Conversation channel - only participants and admins can access
+Broadcast::channel('conversation.{conversationId}', function ($user, $conversationId) {
+    $conversation = \App\Models\Conversation::find($conversationId);
+
+    if (! $conversation) {
+        return false;
+    }
+
+    // Admin can access all conversations
+    if ($user->is_admin) {
+        return ['id' => $user->id, 'name' => $user->name];
+    }
+
+    // Check if user is a participant
+    if ($conversation->hasParticipant($user->id)) {
+        return ['id' => $user->id, 'name' => $user->name];
+    }
+
+    return false;
 });

@@ -11,7 +11,7 @@ import { useInitials } from '@/hooks/use-initials';
 import { cn } from '@/lib/utils';
 import { type BreadcrumbItem, type NavItem, type SharedData } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
-import { LetterText, UserRoundCog, NotepadText, Cog, Users, LayoutGrid, Menu, Search, Coins, HandCoins, Newspaper, Star} from 'lucide-react';
+import { LetterText, UserRoundCog, NotepadText, Cog, Users, LayoutGrid, Menu, Search, Coins, HandCoins, Newspaper, Star, BadgeCheck} from 'lucide-react';
 import AppLogo from './app-logo';
 import AppLogoIcon from './app-logo-icon';
 
@@ -55,6 +55,11 @@ const mainNavItems: NavItem[] = [
         title: 'Reviews',
         href: '/reviews',
         icon: Star,
+    },
+    {
+        title: 'Escrows',
+        href: '/order-transactions',
+        icon: BadgeCheck,
     }
 ];
 

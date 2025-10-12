@@ -150,7 +150,7 @@ class PostController extends Controller
 
         $validator = Validator::make($request->all(), [
             'content' => 'required|string|min:1|max:10000',
-            'image' => 'nullable|string',
+            'image' => 'nullable',
             'reply_id' => 'nullable|integer|exists:posts,id'
         ], [
             'content.required' => 'Post content is required',
@@ -336,7 +336,7 @@ class PostController extends Controller
 
         $validator = Validator::make($request->all(), [
             'content' => 'required|string|min:1|max:10000',
-            'image' => 'nullable|string'
+            'image' => 'nullable'
         ], [
             'content.required' => 'Post content is required',
             'content.min' => 'Post must be at least 1 character',

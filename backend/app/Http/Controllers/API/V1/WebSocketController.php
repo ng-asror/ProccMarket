@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Api\V1;
+namespace App\Http\Controllers\API\V1;
 
 use App\Http\Controllers\Controller;
 use App\Models\Topic;
@@ -23,7 +23,7 @@ class WebSocketController extends Controller
         $validator = Validator::make($request->all(), [
             'topic_id' => 'required|exists:topics,id',
             'content' => 'required|string',
-            'image' => 'nullable|string',
+            'image' => 'nullable',
             'reply_id' => 'nullable|exists:posts,id'
         ]);
 
@@ -209,7 +209,7 @@ class WebSocketController extends Controller
             $user, 
             $topic, 
             $request->is_typing
-        ))->toOthers();
+        ));
 
         return response()->json([
             'success' => true,

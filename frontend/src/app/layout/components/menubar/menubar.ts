@@ -1,6 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { icons, LucideAngularModule } from 'lucide-angular';
+import { Telegram } from '../../../core';
 
 @Component({
   selector: 'app-menubar',
@@ -9,5 +10,9 @@ import { icons, LucideAngularModule } from 'lucide-angular';
   styleUrl: './menubar.scss',
 })
 export class Menubar {
+  private telegram = inject(Telegram);
+  soon(): void {
+    this.telegram.showAlert('Скоро');
+  }
   protected icons = icons;
 }

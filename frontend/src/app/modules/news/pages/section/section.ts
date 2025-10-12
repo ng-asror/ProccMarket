@@ -13,16 +13,15 @@ import { News, Telegram } from '../../../../core';
 import { ActivatedRoute } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { MomentModule } from 'ngx-moment';
-import { NgIf } from '@angular/common';
 import { AmDateFormatPipe, NumeralPipe } from '../../../../core/pipes';
 import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-section',
-  imports: [LucideAngularModule, NgIf, MomentModule, AmDateFormatPipe, NumeralPipe, FormsModule],
+  imports: [LucideAngularModule, MomentModule, AmDateFormatPipe, NumeralPipe, FormsModule],
   templateUrl: './section.html',
   styleUrl: './section.scss',
-  // changeDetection: ChangeDetectionStrategy.OnPush,
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Section implements OnInit, OnDestroy {
   private telegram = inject(Telegram);
@@ -88,6 +87,17 @@ export class Section implements OnInit, OnDestroy {
       this.newsService.createComment(Number(this.news_id), this.comment().content)
     ).then((res) => {
       this.comment.set({ content: '', replay_id: undefined });
+      this.comments.update((comments) => {
+        if (!comments) return comments;
+        return {
+          ...comments,
+          data: [res.data, ...(comments.data ?? [])],
+        };
+      });
+      this.newsCounts.update((current) => ({
+        ...current,
+        comments: this.newsCounts().comments + 1,
+      }));
     });
   }
 }

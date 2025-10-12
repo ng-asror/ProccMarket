@@ -9,7 +9,7 @@ export interface IProfileRes extends ResultData {
     email: string;
     role_id: number;
     balance: string;
-    name: string;
+    name: string | null;
     avatar: string;
     description: string;
     banned: boolean;

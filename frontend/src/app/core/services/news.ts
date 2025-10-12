@@ -2,7 +2,13 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment.development';
-import { ILikeDislikeRes, INewsCommentsRes, INewsInfoRes, INewsRes } from '../interfaces';
+import {
+  ICommentsCreateRes,
+  ICommentsResponse,
+  ILikeDislikeRes,
+  INewsInfoRes,
+  INewsRes,
+} from '../interfaces';
 
 @Injectable({
   providedIn: 'root',
@@ -18,8 +24,8 @@ export class News {
     return this.http.get<INewsInfoRes>(`${environment.apiUrl}/news/${id}`);
   }
 
-  getComments(id: string): Observable<INewsCommentsRes> {
-    return this.http.get<INewsCommentsRes>(`${environment.apiUrl}/news/${id}/comments`);
+  getComments(id: string): Observable<ICommentsResponse> {
+    return this.http.get<ICommentsResponse>(`${environment.apiUrl}/news/${id}/comments`);
   }
 
   newsToggleLike(news_id: number): Observable<ILikeDislikeRes> {
@@ -28,8 +34,12 @@ export class News {
     });
   }
 
-  createComment(news_id: number, content: string, replay_id?: number): Observable<any> {
-    return this.http.post<any>(`${environment.apiUrl}/news/${news_id}/comments`, {
+  createComment(
+    news_id: number,
+    content: string,
+    replay_id?: number
+  ): Observable<ICommentsCreateRes> {
+    return this.http.post<ICommentsCreateRes>(`${environment.apiUrl}/news/${news_id}/comments`, {
       content,
       replay_id,
     });

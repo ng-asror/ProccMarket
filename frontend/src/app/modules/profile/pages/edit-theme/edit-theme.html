@@ -1,44 +1,53 @@
 <div class="p-[15px]">
 	<h2 class="text-[22px] mb-[20px] font-[600] text-[#030303] leading-[100%]">Создать новую тему</h2>
-	<form class="space-y-4">
+	<div class="space-y-4">
+		@if (getSections.value(); as sections) {
 		<div class="form-control">
 			<label class="label">
 				<span class="label-text text-black text-[16px] leading-[100%] mb-[5px] block">Разделы темы*</span>
 			</label>
-			<select class="select w-full mb-[10px]">
-				<option disabled selected>Выберите раздел темы</option>
-				<option>Crimson</option>
-				<option>Amber</option>
-				<option>Velvet</option>
-			</select>
-			<select class="select w-full">
-				<option disabled selected>Выберите раздел темы</option>
-				<option>Crimson</option>
-				<option>Amber</option>
-				<option>Velvet</option>
+			<select class="select w-full cursor-pointer" name=" section1" [(ngModel)]="selectSection">
+				<option disabled selected value="0" hidden>Выберите раздел темы</option>
+				@for (item of sections.sections; track item.id) {
+				@if(item.children) {
+				<option disabled class="ml-[-20px]">{{item.name}}</option>
+				@for (item of item.children; track item.id) {
+				<option class="pl-2" [value]="item.id">{{item.name}}</option>
+				}}}
 			</select>
 		</div>
+		}
 		<!-- Title -->
 		<div class="form-control">
 			<label class="label">
 				<span class="label-text text-black text-[16px] leading-[100%] mb-[5px] block">Заголовок*</span>
 			</label>
-			<textarea placeholder="Введите заголовок" class="textarea placeholder:text-black/50 w-full" maxlength="255"
-				required></textarea>
+			<textarea placeholder="Введите заголовок" class="textarea placeholder:text-black/50 w-full"
+				[(ngModel)]="titleTheme" maxlength="255" required></textarea>
 		</div>
 		<!-- image upload -->
 		<div class="form-control">
 			<label class="label">
-				<span class="label-text text-black text-[14px] leading-[100%] mb-[5px] block">Заголовок*</span>
+				<span class="label-text text-black text-[14px] leading-[100%] mb-[5px] block">Загрузить изображение для
+					темы*</span>
 			</label>
-			<input type="file" class="file-input w-full" />
+			<input type="file" class="file-input w-full" accept="image/*" (change)="onFileSelect($event)" />
 			<label class="label text-[14px]">Максимальный размер 2 МБ</label>
+			@if(previewUrl() !== null) {
+			<img [src]="previewUrl()" alt="theme img" class="w-full mt-[10px] h-auto block">
+			}
 		</div>
 		<!-- content editor -->
-		<tiptap-editor [editor]="content" [(ngModel)]="value"></tiptap-editor>
+		<app-tiptap-editor [editContent]="content" (editorValue)="editorValue($event)"></app-tiptap-editor>
 		<!-- Submit button -->
 		<div class="form-control mt-4">
-			<button type="submit" class="btn btn-primary w-full">Опубликовать</button>
+			@if (!topic_id) {
+			<button type="button" class="btn btn-primary w-full" (click)="submit()"
+				[disabled]="selectSection === 0 || titleTheme.length === 0 || !previewUrl()">Опубликовать</button>
+			} @else {
+			<button type="button" class="btn btn-primary w-full" (click)="update()"
+				[disabled]="selectSection === 0 || titleTheme.length === 0 || !previewUrl()">Обновить</button>
+			}
 		</div>
-	</form>
+	</div>
 </div>

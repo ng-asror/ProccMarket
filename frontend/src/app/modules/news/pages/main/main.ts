@@ -3,12 +3,12 @@ import { icons, LucideAngularModule } from 'lucide-angular';
 import { AccordionItem } from '../../components';
 import { News } from '../../../../core';
 import { firstValueFrom } from 'rxjs';
-import { NgFor, NgIf } from '@angular/common';
+import { NgFor } from '@angular/common';
 import { Menubar, Navbar } from '../../../../components';
 
 @Component({
   selector: 'app-main',
-  imports: [LucideAngularModule, AccordionItem, NgFor, NgIf, Navbar, Menubar],
+  imports: [LucideAngularModule, AccordionItem, NgFor, Navbar, Menubar],
   templateUrl: './main.html',
   styleUrl: './main.scss',
 })

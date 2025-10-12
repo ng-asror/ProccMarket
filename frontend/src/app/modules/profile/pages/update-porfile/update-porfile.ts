@@ -95,7 +95,7 @@ export class UpdatePorfile implements OnInit, OnDestroy {
       delete body.password_confirmation;
     }
     firstValueFrom(this.profileService.updateProfile({ ...body, avatar: this.userAvatar() })).then(
-      (res) => {
+      () => {
         this.router.navigate(['/profile']);
       }
     );

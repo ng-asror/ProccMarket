@@ -42,7 +42,7 @@ export class Telegram {
     this.tg.ready();
     this.tg.setHeaderColor(headerColor);
     this.tg.expand();
-    // this.tg.enableClosingConfirmation();
+    this.tg.enableClosingConfirmation();
   }
 
   hapticFeedback(type: 'light' | 'medium' | 'heavy' | 'rigid' | 'soft'): void {

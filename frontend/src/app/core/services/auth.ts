@@ -11,8 +11,8 @@ import { Router } from '@angular/router';
 })
 export class Auth {
   private telegram = inject(Telegram);
-
-  constructor(private http: HttpClient, private router: Router) {}
+  private router = inject(Router);
+  private http = inject(HttpClient);
 
   /** Oddiy email + password orqali ro'yxatdan o'tish */
   register(
@@ -39,9 +39,12 @@ export class Auth {
   /** Oddiy email + password orqali login */
   login(email: string, password: string): Observable<ILoginRes> {
     return this.http.post<ILoginRes>(`${environment.apiUrl}/auth/login`, { email, password }).pipe(
-      tap((res: ILoginRes) => {
-        this.telegram.setCloudItem('email', res.user.email);
-        this.telegram.setCloudItem('token', res.token);
+      tap(async (res: ILoginRes): Promise<void> => {
+        await this.telegram.setCloudItem('email', res.user.email);
+        await this.telegram.setCloudItem('token', res.token);
+        if (res.success) {
+          this.router.navigateByUrl('/home');
+        }
       })
     );
   }
@@ -82,7 +85,7 @@ export class Auth {
         this.router.navigate(['/auth']);
       });
     } catch (error) {
-      console.error(error);
+      console.error('Logout error: ' + error);
     }
   }
 

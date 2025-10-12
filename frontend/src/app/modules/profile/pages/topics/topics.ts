@@ -1,5 +1,5 @@
 import { Component, inject, resource, signal } from '@angular/core';
-import { IMyTopics, NumeralPipe, ProfileService, Telegram } from '../../../../core';
+import { IMyTopics, NumeralPipe, ProfileService, Telegram, Topic } from '../../../../core';
 import { firstValueFrom } from 'rxjs';
 import { icons, LucideAngularModule } from 'lucide-angular';
 import { RouterLink } from '@angular/router';
@@ -11,6 +11,7 @@ import { RouterLink } from '@angular/router';
   styleUrl: './topics.scss',
 })
 export class Topics {
+  private topicService = inject(Topic);
   private telegram = inject(Telegram);
   private profileService = inject(ProfileService);
   topics = signal<IMyTopics | null>(null);
@@ -21,7 +22,6 @@ export class Topics {
   });
 
   closedToggle(id: number): void {
-    // this.profileService
     this.myTopics.update((current) => {
       if (!current) return current;
       return {
@@ -32,10 +32,22 @@ export class Topics {
       };
     });
   }
+
+  async deleteTopic(topic_id: number): Promise<void> {
+    await firstValueFrom(this.topicService.delete(topic_id));
+    this.myTopics.update((current) => {
+      if (!current) return current;
+      return {
+        ...current,
+        topics: current.topics.filter((topic) => topic.id !== topic_id),
+      };
+    });
+  }
+
   ngOnInit(): void {
-    this.telegram.showBackButton('/profile/my-topics');
+    this.telegram.showBackButton('/profile');
   }
   ngOnDestroy(): void {
-    this.telegram.hiddeBackButton('/profile/my-topics');
+    this.telegram.hiddeBackButton('/profile');
   }
 }

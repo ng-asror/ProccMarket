@@ -7,3 +7,4 @@ export * from './balance';
 export * from './profile';
 export * from './layout';
 export * from './section';
+export * from './topic';

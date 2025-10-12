@@ -1,0 +1,153 @@
+<div class="border border-[#E1E1E1] overflow-hidden rounded-[12px]">
+	<div class="bg-gradient-to-r from-gray-50 to-gray-100 border-b border-gray-300 p-2 flex flex-wrap gap-1">
+		<!-- Bold -->
+		<button type="button" [ngClass]="{ 'bg-gray-900 text-white': editor.isActive('bold') }"
+			(click)="editor.chain().focus().toggleBold().run()" title="Bold (Ctrl+B)"
+			class="p-2 rounded-md transition-all duration-200 text-gray-700 hover:bg-gray-900 hover:text-white cursor-pointer">
+			<lucide-icon [name]="ICONS.Bold" size="16"></lucide-icon>
+		</button>
+
+		<!-- Italic -->
+		<button type="button" [ngClass]="{ 'bg-gray-900 text-white': editor.isActive('italic') }"
+			(click)="editor.chain().focus().toggleItalic().run()" title="Italic (Ctrl+I)"
+			class="p-2 rounded-md transition-all duration-200 text-gray-700 hover:bg-gray-900 hover:text-white cursor-pointer">
+			<lucide-icon [name]="ICONS.Italic" size="16"></lucide-icon>
+		</button>
+
+		<!-- Underline -->
+		<button type="button" [ngClass]="{ 'bg-gray-900 text-white': editor.isActive('underline') }"
+			(click)="editor.chain().focus().toggleUnderline().run()" title="Underline (Ctrl+U)"
+			class="p-2 rounded-md transition-all duration-200 text-gray-700 hover:bg-gray-900 hover:text-white cursor-pointer">
+			<lucide-icon [name]="ICONS.Underline" size="16"></lucide-icon>
+		</button>
+
+		<!-- StrikeThrough -->
+		<button type="button" [ngClass]="{ 'bg-gray-900 text-white': editor.isActive('strike') }"
+			(click)="editor.chain().focus().toggleStrike().run()" title="Strikethrough"
+			class="p-2 rounded-md transition-all duration-200 text-gray-700 hover:bg-gray-900 hover:text-white cursor-pointer">
+			<lucide-icon [name]="ICONS.Strikethrough" size="16"></lucide-icon>
+		</button>
+
+		<div class="w-px h-6 bg-gray-300 mx-1 self-center"></div>
+
+		<!-- Heading 1 -->
+		<button type="button" [ngClass]="{ 'bg-gray-900 text-white': editor.isActive('heading', { level: 1 }) }"
+			(click)="editor.chain().focus().toggleHeading({ level: 1 }).run()" title="Heading 1"
+			class="p-2 rounded-md transition-all duration-200 text-gray-700 hover:bg-gray-900 hover:text-white cursor-pointer">
+			<lucide-icon [name]="ICONS.Heading1" size="16"></lucide-icon>
+		</button>
+
+		<!-- Heading 2 -->
+		<button type="button" [ngClass]="{ 'bg-gray-900 text-white': editor.isActive('heading', { level: 2 }) }"
+			(click)="editor.chain().focus().toggleHeading({ level: 2 }).run()" title="Heading 2"
+			class="p-2 rounded-md transition-all duration-200 text-gray-700 hover:bg-gray-900 hover:text-white cursor-pointer">
+			<lucide-icon [name]="ICONS.Heading2" size="16"></lucide-icon>
+		</button>
+
+		<!-- Heading 3 -->
+		<button type="button" [ngClass]="{ 'bg-gray-900 text-white': editor.isActive('heading', { level: 3 }) }"
+			(click)="editor.chain().focus().toggleHeading({ level: 3 }).run()" title="Heading 3"
+			class="p-2 rounded-md transition-all duration-200 text-gray-700 hover:bg-gray-900 hover:text-white cursor-pointer">
+			<lucide-icon [name]="ICONS.Heading3" size="16"></lucide-icon>
+		</button>
+
+		<div class="w-px h-6 bg-gray-300 mx-1 self-center"></div>
+
+		<!-- Bullet List -->
+		<button type="button" [ngClass]="{ 'bg-gray-900 text-white': editor.isActive('bulletList') }"
+			(click)="editor.chain().focus().toggleBulletList().run()" title="Bullet List"
+			class="p-2 rounded-md transition-all duration-200 text-gray-700 hover:bg-gray-900 hover:text-white cursor-pointer">
+			<lucide-icon [name]="ICONS.List" size="16"></lucide-icon>
+		</button>
+
+		<!-- Ordered List -->
+		<button type="button" [ngClass]="{ 'bg-gray-900 text-white': editor.isActive('orderedList') }"
+			(click)="editor.chain().focus().toggleOrderedList().run()" title="Numbered List"
+			class="p-2 rounded-md transition-all duration-200 text-gray-700 hover:bg-gray-900 hover:text-white cursor-pointer">
+			<lucide-icon [name]="ICONS.ListOrdered" size="16"></lucide-icon>
+		</button>
+
+		<!-- Quote -->
+		<button type="button" [ngClass]="{ 'bg-gray-900 text-white': editor.isActive('blockquote') }"
+			(click)="editor.chain().focus().toggleBlockquote().run()" title="Quote"
+			class="p-2 rounded-md transition-all duration-200 text-gray-700 hover:bg-gray-900 hover:text-white cursor-pointer">
+			<lucide-icon [name]="ICONS.Quote" size="16"></lucide-icon>
+		</button>
+
+		<!-- Code Block -->
+		<button type="button" [ngClass]="{ 'bg-gray-900 text-white': editor.isActive('codeBlock') }"
+			(click)="editor.chain().focus().toggleCodeBlock().run()" title="Code Block"
+			class="p-2 rounded-md transition-all duration-200 text-gray-700 hover:bg-gray-900 hover:text-white cursor-pointer">
+			<lucide-icon [name]="ICONS.CodeXml" size="16"></lucide-icon>
+		</button>
+
+		<div class="w-px h-6 bg-gray-300 mx-1 self-center"></div>
+
+		<!-- Align Left -->
+		<button type="button" title="Align Left" (click)="editor.chain().focus().setTextAlign('left').run()"
+			class="p-2 rounded-md transition-all duration-200 text-gray-700 hover:bg-gray-900 hover:text-white cursor-pointer">
+			<lucide-icon [name]="ICONS.AlignLeft" size="16"></lucide-icon>
+		</button>
+
+		<!-- Align Center -->
+		<button type="button" title="Align Center" (click)="editor.chain().focus().setTextAlign('center').run()"
+			class="p-2 rounded-md transition-all duration-200 text-gray-700 hover:bg-gray-900 hover:text-white cursor-pointer">
+			<lucide-icon [name]="ICONS.AlignCenter" size="16"></lucide-icon>
+		</button>
+
+		<!-- Align Right -->
+		<button type="button" title="Align Right" (click)="editor.chain().focus().setTextAlign('right').run()"
+			class="p-2 rounded-md transition-all duration-200 text-gray-700 hover:bg-gray-900 hover:text-white cursor-pointer">
+			<lucide-icon [name]="ICONS.AlignRight" size="16"></lucide-icon>
+		</button>
+
+		<div class="w-px h-6 bg-gray-300 mx-1 self-center"></div>
+
+		<!-- Add link -->
+		<button type="button" title="Add Link" onclick="addurlModal.showModal()"
+			class="p-2 rounded-md transition-all duration-200 text-gray-700 hover:bg-gray-900 hover:text-white cursor-pointer">
+			<lucide-icon [name]="ICONS.Link" size="16"></lucide-icon>
+		</button>
+
+		<!-- Add image (from URL) -->
+		<!-- <button type="button" title="Add Image from URL"
+			class="p-2 rounded-md transition-all duration-200 text-gray-700 hover:bg-gray-900 hover:text-white cursor-pointer">
+			<lucide-icon [name]="ICONS.Image" size="16"></lucide-icon>
+		</button> -->
+
+		<!-- Upload image -->
+		<!-- <label
+			class="p-2 rounded-md transition-all duration-200 text-gray-700 hover:bg-gray-900 hover:text-white cursor-pointer cursor-pointer"
+			title="Upload Image">
+			<lucide-icon [name]="ICONS.Upload" size="16"></lucide-icon>
+			<input accept="image/*" class="hidden" type="file">
+		</label> -->
+	</div>
+	<tiptap-editor [editor]="editor" name="simple-editor"></tiptap-editor>
+</div>
+
+<!-- Add URL Modal -->
+<dialog id="addurlModal" class="modal">
+	<div class="modal-box">
+		<h3 class="text-lg font-bold mb-[10px]">Добавить ссылку!</h3>
+		<label class="input">
+			<lucide-icon [name]="ICONS.Link" size="16"></lucide-icon>
+			<input type="url" required placeholder="https://" [(ngModel)]="addUrl" #writeUrlEl="ngModel"
+				pattern="^(https?://)?([a-zA-Z0-9]([a-zA-Z0-9\-].*[a-zA-Z0-9])?\.)+[a-zA-Z].*$"
+				title="Должен быть действительный URL" maxlength="500"
+				class="flex-1 outline-none placeholder:text-[#030303]/50" />
+		</label>
+		@if(writeUrlEl.invalid && writeUrlEl.touched){
+		<p class="text-[14px] text-[#FF0000] mt-1">
+			Должен быть действительный URL
+		</p>
+		}
+
+		<div class="flex justify-end gap-x-[10px] mt-[15px]">
+			<button class="btn btn-primary" type="button" [disabled]="!writeUrlEl.valid" (click)="confirmAddLink()">
+				Добавить
+			</button>
+			<button class="btn" type="button" (click)="cancel()">Отменить</button>
+		</div>
+	</div>
+</dialog>

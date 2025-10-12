@@ -12,6 +12,7 @@ import {
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
+import { Layout } from '../../layout/layout';
 
 @Component({
   selector: 'app-balance',
@@ -20,10 +21,10 @@ import {
     DateFocus,
     NgIf,
     NumeralPipe,
-    NgFor,
     FormsModule,
     AmDateFormatPipe,
     ReactiveFormsModule,
+    Layout,
   ],
   templateUrl: './balance.html',
   styleUrl: './balance.scss',
@@ -43,7 +44,6 @@ export class Balance {
   constructor(private fb: NonNullableFormBuilder) {
     this.withdrawalsForm = this.fb.group({
       amount: [
-        ,
         [
           Validators.required,
           Validators.pattern(/^\d+(\.\d{1,2})?$/),
@@ -74,6 +74,24 @@ export class Balance {
       }),
   });
 
+  increasePage(type: 'next' | 'prev') {
+    if (type === 'next' && this.pagination().current_page < this.pagination().last_page!) {
+      this.pagination.update((state) => ({
+        ...state,
+        current_page: state.current_page + 1,
+      }));
+      this.getAllTransactions.reload();
+    }
+
+    if (type === 'prev' && this.pagination().current_page > 1) {
+      this.pagination.update((state) => ({
+        ...state,
+        current_page: state.current_page - 1,
+      }));
+      this.getAllTransactions.reload();
+    }
+  }
+
   getMe = resource({
     loader: () =>
       firstValueFrom(this.authService.getMe()).then((res) => {
@@ -87,7 +105,7 @@ export class Balance {
     if (this.withdrawalsForm.valid) {
       const data = this.withdrawalsForm.getRawValue();
       await firstValueFrom(this.balanceService.withdrawals(data))
-        .then((res) => {
+        .then(() => {
           this.getMe.reload();
           this.getAllTransactions.reload();
         })

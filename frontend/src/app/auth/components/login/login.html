@@ -1,12 +1,27 @@
 <form class="card space-y-4" [formGroup]="loginForm" (ngSubmit)="login()">
-	<div>
-		<label for="email" class="text-black text-[14px] leading-[100%] mb-[5px] block">Электронная почта</label>
+	<div class="space-y-[5px]">
+		<label for="email" class="text-black text-[16px] leading-[100%] block">Электронная почта*</label>
 		<input type="email" placeholder="example@gmail.com" class="input placeholder:text-black/50 w-full" id="email"
-			formControlName="email" />
+			maxlength="50" formControlName="email" />
+		@if(loginForm.invalid && loginForm.touched){
+		@if(loginForm.get('email')?.errors?.['required']){
+		<p class="text-[#FF0000] text-[14px] leading-[100%]">Введите адрес электронной почты</p>}
+		@if(loginForm.get('email')?.errors?.['email']) {
+		<p class="text-[#FF0000] text-[14px] leading-[100%]">Введите адрес электронной почты</p>}}
 	</div>
-	<div>
-		<label for="email" class="text-black text-[14px] leading-[100%] mb-[5px] block">Пароль</label>
-		<app-password-input [control]="passwordControl" placeholder="Введите пароль"></app-password-input>
+	<div class="space-y-[5px]">
+		<label for="email" class="text-black text-[16px] leading-[100%] block">Пароль</label>
+		<div>
+			<app-password-input [control]="passwordControl" placeholder="Введите пароль"></app-password-input>
+		</div>
+		@if(loginForm.invalid && loginForm.touched){
+		@if(loginForm.get('password')?.errors?.['required']){
+		<p class="text-[#FF0000] text-[14px] leading-[100%]">Пожалуйста, введите пароль</p>}
+		@if(loginForm.get('password')?.errors?.['minlength']) {
+		<p class="text-[#FF0000] text-[14px] leading-[100%]">Пароль должен содержать не менее 8 символов</p>}
+		@if(loginForm.get('password')?.errors?.['maxlength']) {
+		<p class="text-[#FF0000] text-[14px] leading-[100%]">Пароль не должен превышать 16 символов</p>}
+		}
 	</div>
 	<button type="submit" class="btn btn-primary" [disabled]="loginForm.invalid">Войти</button>
 	<!-- <div class="flex items-center gap-x-[5px] justify-center opacity-50">

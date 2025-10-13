@@ -1,0 +1,112 @@
+@if (comment(); as comment) {
+<div class="card border-1 border-[#E1E1E1] space-y-[10px] p-[10px]">
+	<div class="flex items-center justify-between">
+		<div class="flex items-center gap-x-[5px]">
+			<div class="avatar">
+				<div class="w-[50px] rounded-full">
+					<img
+						[src]="comment.user.avatar_url? comment.user.avatar_url: 'https://proccmarket.com/avatars/avatar10.svg'" />
+				</div>
+			</div>
+			<div>
+				<h4 class="text-lg font-[400] leading-[100%]">{{comment.user.name??'user' + comment.user.id}}</h4>
+				<p class="text-sm text-black/60">{{comment.user.role_name??'Гость'}}</p>
+			</div>
+		</div>
+		<b class="text-black text-[16px]">{{comment.user.balance | numeral: '$0,0'}}</b>
+	</div>
+	<div [innerHTML]="comment.content"></div>
+	<div>
+		<p class="text-sm text-black/50 block mb-[5px]">{{comment.created_at | amTimeAgo}}</p>
+		<div class="flex items-center justify-between">
+			<div class="flex items-center gap-x-[15px]">
+				<button type="button" class="text-base cursor-pointer text-black/50 flex items-center gap-x-[5px]"
+					(click)="commentLikeDislikToggle(comment.id, true)">
+					<lucide-icon [name]="ICONS.ThumbsUp" size="18"
+						[color]="comment.user_reaction === 'like'?'#030303':'#00000080'"></lucide-icon>
+					<span class="block"
+						[class.text-[#030303]]="comment.user_reaction === 'like'?'#030303':''">{{comment.likes_count |
+						numeral: '0a'}}</span>
+				</button>
+				<button type="button" class="text-base text-black/50 cursor-pointer flex items-center gap-x-[5px]"
+					(click)="commentLikeDislikToggle(comment.id, false)">
+					<lucide-icon [name]="ICONS.ThumbsDown" size="18"
+						[color]="comment.user_reaction === 'dislike'?'#030303':'#00000080'"></lucide-icon>
+					<span class="block"
+						[class.text-[#030303]]="comment.user_reaction === 'dislike'?'#030303':''">{{comment.dislikes_count |
+						numeral: '0a'}}</span>
+				</button>
+			</div>
+			<button type="button" class="flex items-center gap-x-[5px] text-base cursor-pointer text-black/50"
+				(click)="reply(comment.id)">
+				@if(commentContent().replay_id !== comment.id) {
+				<lucide-icon [name]="ICONS.CornerUpLeft" size="20"></lucide-icon>
+				} @else {
+				<lucide-icon [name]="ICONS.X" size="20"></lucide-icon>
+				}
+				<span>Ответить</span>
+			</button>
+		</div>
+	</div>
+</div>
+@if (commentContent().replay_id) {
+<div class="mt-[10px]">
+	<textarea placeholder="Ваш комментарий" class="textarea placeholder:text-black/50 textarea-primary mb-[10px] w-full"
+		[(ngModel)]="commentContent().content"></textarea>
+	<button type="button" class="btn btn-primary ml-auto block" (click)="createComment()"
+		[disabled]="commentContent().content ===''">Отправить</button>
+</div>
+}
+@for (item of comment.replies; track item.id) {
+<div class="card border-1 w-[100%] ml-auto border-[#E1E1E1] my-[10px] space-y-[10px] p-[10px]">
+	<div class="flex items-center justify-between">
+		<div class="flex items-center gap-x-[5px]">
+			<div class="avatar">
+				<div class="w-[50px] rounded-full">
+					<img [src]="item.user.avatar_url? item.user.avatar_url: 'https://proccmarket.com/avatars/avatar10.svg'" />
+				</div>
+			</div>
+			<div>
+				<h4 class="text-lg font-[400] leading-[100%]">{{item.user.name??'user' + item.user.id}}</h4>
+				<p class="text-sm text-black/60">{{item.user.role_name??'Гость'}}</p>
+			</div>
+		</div>
+		<b class="text-black text-[16px]">{{item.user.balance | numeral: '$0,0'}}</b>
+	</div>
+	<div class="border-l-[3px] border-[#818181] p-[5px] bg-[#F2F2F2]">
+		<h4 class="text-[#71839B] text-base">{{item.user.name??'user'+item.user.id}} -
+			{{comment.user.role_name??'Гость'}}</h4>
+		<p class="text-base truncate-text-2" [innerHTML]="comment.content"></p>
+	</div>
+	<div [innerHTML]="item.content"></div>
+	<div>
+		<p class="text-sm text-black/50 block mb-[5px]">{{item.created_at | amTimeAgo}}</p>
+		<div class="flex items-center justify-between">
+			<div class="flex items-center gap-x-[15px]">
+				<button type="button" class="text-base cursor-pointer text-black/50 flex items-center gap-x-[5px]"
+					(click)="commentLikeDislikToggle(item.id, true)">
+					<lucide-icon [name]="ICONS.ThumbsUp" size="18"
+						[color]="item.user_reaction === 'like'?'#030303':'#00000080'"></lucide-icon>
+					<span class="block" [class.text-[#030303]]="item.user_reaction === 'like'?'#030303':''">{{item.likes_count
+						|
+						numeral: '0a'}}</span>
+				</button>
+				<button type="button" class="text-base text-black/50 cursor-pointer flex items-center gap-x-[5px]"
+					(click)="commentLikeDislikToggle(item.id, false)">
+					<lucide-icon [name]="ICONS.ThumbsDown" size="18"
+						[color]="item.user_reaction === 'dislike'?'#030303':'#00000080'"></lucide-icon>
+					<span class="block"
+						[class.text-[#030303]]="item.user_reaction === 'dislike'?'#030303':''">{{item.dislikes_count | numeral:
+						'0a'}}</span>
+				</button>
+			</div>
+			<button type="button" class="flex items-center gap-x-[5px] text-base cursor-pointer text-black/50">
+				<lucide-icon [name]="ICONS.CornerUpLeft" size="20"></lucide-icon>
+				<span>Ответить</span>
+			</button>
+		</div>
+	</div>
+</div>
+<app-comment [comment]="item"></app-comment>
+}
+}

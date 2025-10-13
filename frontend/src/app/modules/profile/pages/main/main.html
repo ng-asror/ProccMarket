@@ -10,11 +10,13 @@
 					@if(profile.user.avatar_url !== null){
 					<img src="{{profile.user.avatar_url}}" alt="user face" class="w-full h-full block rounded-full">
 					}@else {
-					<img [src]="profile.user.avatar_url" alt="avatar10" class="w-full h-full block rounded-full">
+					<img src="https://proccmarket.com/avatars/avatar10.svg" alt="avatar10"
+						class="w-full h-full block rounded-full">
 					}
 				</div>
 				<div class="space-y-[10px]">
-					<h1 class=" text-[20px] text-[#030300] font-[500] mb-1 leading-[100%] text-center">{{profile.user.name}}</h1>
+					<h1 class=" text-[20px] text-[#030300] font-[500] mb-1 leading-[100%] text-center">{{profile.user.name??'user'
+						+ profile.user.id}}</h1>
 					<h2 class="text-[16px] lowercase text-[#030300] font-[500] leading-[100%] text-center">
 						[{{profile.user.role_name?
 						profile.user.role_name: 'Гость'}}]</h2>
@@ -34,7 +36,7 @@
 					<div class="flex-1 px-[10px]">
 						<h1 class="text-[16px] text-[#030300] leading-[100%] font-[400] mb-[4px]">{{profile.analytics.topics_count |
 							numeral: '0a'}}</h1>
-						<p class="text-[14px] text-[#030300] leading-[100%] font-[400]">Посты</p>
+						<p class="text-[14px] text-[#030300] leading-[100%] font-[400]">Темы</p>
 					</div>
 				</div>
 			</div>

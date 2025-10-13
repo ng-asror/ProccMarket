@@ -44,44 +44,73 @@ export interface INewsInfo {
   views_count: number;
   shares_count: number;
   comments_count: number;
-  user_reaction: 'like' | null;
+  user_reaction: 'like' | 'dislike' | null;
   user_shared: boolean;
   category: { id: number; name: string };
 }
 
-export interface INewsCommentsRes extends Result {
-  data: IDaum[];
+export interface ICommentsResponse {
+  success: boolean;
+  message: string;
+  data: IComment[];
+  pagination: IPagination;
+}
+export interface ICommentsCreateRes {
+  success: boolean;
+  message: string;
+  data: IComment;
+  pagination: IPagination;
 }
 
-export interface IDaum {
+export interface IComment {
   id: number;
   content: string;
   created_at: string;
   updated_at: string;
   user: ICommentUser;
   likes_count: number;
+  dislikes_count: number;
   shares_count: number;
   replies_count: number;
-  user_reaction: any;
+  user_reaction: 'like' | 'dislike' | null;
+  replies?: IComment[];
 }
+
 export interface ICommentUser {
   id: number;
   telegram_id: string;
   email: string;
-  role_id: any;
+  role_id: number;
   balance: string;
-  name: string;
-  avatar: any;
+  name: string | null;
+  avatar: string;
+  description: string;
   banned: boolean;
   last_deposit_at: string;
-  is_admin: number;
-  email_verified_at: any;
-  remember_token: any;
+  is_admin: boolean;
+  email_verified_at: string | null;
   created_at: string;
   updated_at: string;
-  deleted_at: any;
-  role_name: any;
-  role: any;
+  deleted_at: string | null;
+  role_name: string | null;
+  avatar_url: string;
+  role: ICommentRole;
+}
+
+export interface ICommentRole {
+  id: number;
+  name: string;
+  min_deposit: string;
+  created_at: string;
+  updated_at: string;
+  users_count: number;
+}
+
+export interface IPagination {
+  current_page: number;
+  per_page: number;
+  total: number;
+  last_page: number;
 }
 
 export interface IAuthorNewsInfo {

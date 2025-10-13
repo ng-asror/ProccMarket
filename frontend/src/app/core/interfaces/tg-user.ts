@@ -5,6 +5,7 @@ export interface ITgUser {
   auth_date: string;
   signature: string;
   hash: string;
+  start_param: string;
 }
 
 export interface User {

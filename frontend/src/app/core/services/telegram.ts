@@ -101,4 +101,14 @@ export class Telegram {
     this.BackButton.offClick(() => this.router.navigateByUrl(url));
     this.BackButton.hide();
   }
+
+  open(telegramLink: string): void {
+    if (this.tg) {
+      this.tg.openTelegramLink(telegramLink);
+    }
+  }
+
+  shareData(shareTxt: string): void {
+    this.tg.shareData({ text: shareTxt });
+  }
 }

@@ -15,10 +15,11 @@ import { firstValueFrom } from 'rxjs';
 import { MomentModule } from 'ngx-moment';
 import { AmDateFormatPipe, NumeralPipe } from '../../../../core/pipes';
 import { FormsModule } from '@angular/forms';
+import { Comment } from '../../../../components';
 
 @Component({
   selector: 'app-section',
-  imports: [LucideAngularModule, MomentModule, AmDateFormatPipe, NumeralPipe, FormsModule],
+  imports: [LucideAngularModule, MomentModule, AmDateFormatPipe, NumeralPipe, FormsModule, Comment],
   templateUrl: './section.html',
   styleUrl: './section.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -96,28 +97,5 @@ export class Section implements OnInit, OnDestroy {
         };
       });
     });
-  }
-  protected async commentLikeDislikToggle(comment_id: number, is_like: boolean): Promise<void> {
-    await firstValueFrom(this.newsService.newsCommentLikeDislik(comment_id, is_like)).then(
-      (res) => {
-        this.comments.update((current) => {
-          if (!current) return;
-          return {
-            ...current,
-            data: current.data.map((comment) => {
-              if (comment.id === comment_id) {
-                return {
-                  ...comment,
-                  likes_count: res.data.likes_count,
-                  user_reaction: res.data.user_reaction,
-                  dislikes_count: res.data.dislikes_count,
-                };
-              }
-              return comment;
-            }),
-          };
-        });
-      }
-    );
   }
 }

@@ -72,7 +72,8 @@ export interface IComment {
   dislikes_count: number;
   shares_count: number;
   replies_count: number;
-  user_reaction: any | null;
+  user_reaction: 'like' | 'dislike' | null;
+  replies?: IComment[];
 }
 
 export interface ICommentUser {

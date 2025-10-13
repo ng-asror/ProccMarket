@@ -23,9 +23,9 @@ use App\Http\Controllers\API\V1\UploadController;
 use App\Http\Controllers\API\V1\UserController;
 use App\Http\Controllers\API\V1\WebSocketController;
 use App\Http\Controllers\API\V1\WithdrawalController;
-use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Broadcast;
+use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function () {
 
@@ -219,16 +219,17 @@ Route::prefix('v1')->group(function () {
             // Message routes
             Route::post('/conversations/{conversation}/messages', [MessageController::class, 'store']);
             Route::get('/messages/{message}', [MessageController::class, 'show']);
+            Route::put('/messages/{message}', [MessageController::class, 'update']);
             Route::post('/messages/{message}/read', [MessageController::class, 'markAsRead']);
             Route::delete('/messages/{message}', [MessageController::class, 'destroy']);
 
             // Order Transaction routes
-            Route::prefix('conversations/{conversation}/transactions')->group(function () {
+            Route::prefix('conversations/{conversation}/orders')->group(function () {
                 Route::get('/', [OrderTransactionController::class, 'index']);
                 Route::post('/', [OrderTransactionController::class, 'store']);
             });
 
-            Route::prefix('transactions')->group(function () {
+            Route::prefix('orders')->group(function () {
                 Route::get('/{orderTransaction}', [OrderTransactionController::class, 'show']);
                 Route::post('/{orderTransaction}/accept', [OrderTransactionController::class, 'accept']);
                 Route::post('/{orderTransaction}/deliver', [OrderTransactionController::class, 'deliver']);

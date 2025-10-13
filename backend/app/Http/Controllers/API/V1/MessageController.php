@@ -5,6 +5,7 @@ namespace App\Http\Controllers\API\V1;
 use App\Events\MessageSent;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\SendMessageRequest;
+use App\Http\Requests\UpdateMessageRequest;
 use App\Http\Resources\MessageResource;
 use App\Models\Conversation;
 use App\Models\Message;
@@ -115,6 +116,43 @@ class MessageController extends Controller
 
         return response()->json([
             'message' => 'Message marked as read',
+            'data' => new MessageResource($message),
+        ]);
+    }
+
+    /**
+     * Update a message (only within 24 hours).
+     */
+    public function update(UpdateMessageRequest $request, Message $message): JsonResponse
+    {
+        $user = $request->user();
+        $conversation = $message->conversation;
+
+        // Check authorization: user must be the sender or admin
+        if (! $user->is_admin && $message->user_id !== $user->id) {
+            return response()->json([
+                'message' => 'Unauthorized to update this message',
+            ], 403);
+        }
+
+        // Check if message was created within 24 hours
+        if ($message->created_at->diffInHours(now()) > 24) {
+            return response()->json([
+                'message' => 'Messages can only be edited within 24 hours of creation',
+            ], 403);
+        }
+
+        // Update the message content
+        $validated = $request->validated();
+        $message->update([
+            'content' => $validated['content'],
+        ]);
+
+        // Load relationships
+        $message->load('user', 'replyTo.user');
+
+        return response()->json([
+            'message' => 'Message updated successfully',
             'data' => new MessageResource($message),
         ]);
     }

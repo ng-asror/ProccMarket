@@ -108,9 +108,9 @@ interface PageProps {
 const getStatusVariant = (color: string) => {
   const variants: Record<string, "outline" | "default"> = {
     yellow: "outline",
-    blue: "default",
-    purple: "default",
-    green: "default",
+    blue: "outline",
+    purple: "outline",
+    green: "outline",
     orange: "outline",
     red: "outline",
     gray: "outline",
@@ -203,11 +203,12 @@ const adminColumns: ColumnDef<OrderTransaction>[] = [
             <div className="flex h-7 w-7 items-center justify-center rounded-full bg-muted flex-shrink-0 text-xs">
               {user.name
                 ? user.name.charAt(0).toUpperCase()
-                : user.email.charAt(0).toUpperCase()}
+                : user.email?.charAt(0).toUpperCase()}
             </div>
           )}
           <div className="min-w-0 flex-1">
             <div className="text-sm truncate">{user.name || "No name"}</div>
+            <div className="text-xs text-muted-foreground truncate">{user.email}</div>
           </div>
         </div>
       )
@@ -230,11 +231,12 @@ const adminColumns: ColumnDef<OrderTransaction>[] = [
             <div className="flex h-7 w-7 items-center justify-center rounded-full bg-muted flex-shrink-0 text-xs">
               {user.name
                 ? user.name.charAt(0).toUpperCase()
-                : user.email.charAt(0).toUpperCase()}
+                : user.email?.charAt(0).toUpperCase()}
             </div>
           )}
           <div className="min-w-0 flex-1">
             <div className="text-sm truncate">{user.name || "No name"}</div>
+            <div className="text-xs text-muted-foreground truncate">{user.email}</div>
           </div>
         </div>
       )
@@ -322,7 +324,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 ]
 
 export default function AdminOrderTransactionIndex() {
-  const { transactions, pagination, filters, statuses } = usePage<PageProps>().props
+  const { transactions, pagination, filters, statuses } = usePage<PageProps>().props  
 
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])

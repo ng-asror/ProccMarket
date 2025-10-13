@@ -20,8 +20,8 @@ class OrderTransactionResource extends JsonResource
             'id' => $this->id,
             'conversation_id' => $this->conversation_id,
             'message_id' => $this->message_id,
-            'creator' => new UserResource($this->whenLoaded('creator')),
-            'executor' => new UserResource($this->whenLoaded('executor')),
+            'creator' => (new UserResource($this->whenLoaded('creator')))->toArray($request),
+            'executor' => (new UserResource($this->whenLoaded('executor')))->toArray($request),
             'title' => $this->title,
             'description' => $this->description,
             'amount' => $this->amount,
@@ -42,11 +42,11 @@ class OrderTransactionResource extends JsonResource
 
             // Cancellation info
             'cancellation_reason' => $this->cancellation_reason,
-            'cancelled_by' => $this->when($this->cancelled_by, fn () => new UserResource($this->cancelledBy)),
+            'cancelled_by' => $this->when($this->cancelled_by, fn () => (new UserResource($this->cancelledBy))->toArray($request)),
 
             // Dispute info
             'dispute_reason' => $this->dispute_reason,
-            'dispute_raised_by' => $this->when($this->dispute_raised_by, fn () => new UserResource($this->disputeRaisedBy)),
+            'dispute_raised_by' => $this->when($this->dispute_raised_by, fn () => (new UserResource($this->disputeRaisedBy))->toArray($request)),
 
             // User permissions
             'can_accept' => $this->canUserPerformAction($currentUserId, 'accept'),

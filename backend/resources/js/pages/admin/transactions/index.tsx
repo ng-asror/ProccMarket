@@ -15,6 +15,11 @@ import {
   IconArrowDown,
   IconArrowUp,
   IconCreditCard,
+  IconCalculator,
+  IconMoneybagPlus,
+  IconRecycle,
+  IconBrandCashapp,
+  IconShieldDollar,
 } from "@tabler/icons-react"
 import {
   ColumnDef,
@@ -65,7 +70,7 @@ import { BreadcrumbItem } from '@/types'
 
 interface Transaction {
   id: number
-  type: 'deposit' | 'withdrawal' | 'access_purchase' | 'admin_adjustment'
+  type: 'deposit' | 'withdrawal' | 'access_purchase' | 'admin_adjustment' | 'earning' | 'refund' | 'escrow'
   amount: number
   status: 'pending' | 'completed' | 'rejected'
   transaction_id: string | null
@@ -273,6 +278,9 @@ const adminColumns = (refreshData: () => void): ColumnDef<Transaction>[] => [
         deposit: { label: "Deposit", icon: IconArrowDown, color: "text-green-600" },
         withdrawal: { label: "Withdrawal", icon: IconArrowUp, color: "text-red-600" },
         access_purchase: { label: "Purchase", icon: IconCreditCard, color: "text-blue-600" },
+        escrow: { label: "Escrow", icon: IconShieldDollar, color: "text-blue-600" },
+        earning: { label: "Earning", icon: IconBrandCashapp, color: "text-green-600" },
+        refund: { label: "Refund", icon: IconRecycle, color: "text-red-600" },
         admin_adjustment: { label: "Adjustment", icon: IconCoins, color: "text-purple-600" }
       }
       
@@ -306,7 +314,7 @@ const adminColumns = (refreshData: () => void): ColumnDef<Transaction>[] => [
     ),
     cell: ({ row }) => {
       const transaction = row.original
-      const isPositive = transaction.type === "deposit" || 
+      const isPositive = (transaction.type === "deposit" || transaction.type === "earning" || transaction.type === "refund") ||
         (transaction.type === "admin_adjustment" && transaction.amount > 0)
       
       return (
@@ -567,6 +575,9 @@ export default function AdminTransactionIndex() {
                   <SelectItem value="withdrawal">Withdrawal</SelectItem>
                   <SelectItem value="access_purchase">Access Purchase</SelectItem>
                   <SelectItem value="admin_adjustment">Admin Adjustment</SelectItem>
+                  <SelectItem value="escrow">Escrow</SelectItem>
+                  <SelectItem value="earning">Earning</SelectItem>
+                  <SelectItem value="refund">Refund</SelectItem>
                 </SelectContent>
               </Select>
 
@@ -623,13 +634,15 @@ export default function AdminTransactionIndex() {
                   {table.getRowModel().rows?.length ? (
                     table.getRowModel().rows.map((row) => {
                       const transaction = row.original
-                      const isPositive = transaction.type === "deposit" || 
+                      const isPositive = (transaction.type === "deposit" || transaction.type === "earning" || transaction.type === "refund") || 
                         (transaction.type === "admin_adjustment" && transaction.amount > 0)
                       
                       return (
                         <TableRow
                           key={row.id}
                           className={`${
+                            transaction.type === "escrow" ? 
+                              "border-l-4 border-l-blue-500 hover:bg-green-50/30" :
                             isPositive
                               ? "border-l-4 border-l-green-500 hover:bg-green-50/30"
                               : "border-l-4 border-l-red-500 hover:bg-red-50/30"

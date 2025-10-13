@@ -1178,7 +1178,7 @@
 
             try {
                 const response = await axios.get(
-                    `${API_BASE_URL}/chat/conversations/${state.currentConversation.id}/transactions`,
+                    `${API_BASE_URL}/chat/conversations/${state.currentConversation.id}/orders`,
                     getAxiosConfig()
                 );
 
@@ -1244,7 +1244,7 @@
                 if (deadline) data.deadline = deadline;
 
                 await axios.post(
-                    `${API_BASE_URL}/chat/conversations/${state.currentConversation.id}/transactions`,
+                    `${API_BASE_URL}/chat/conversations/${state.currentConversation.id}/orders`,
                     data,
                     getAxiosConfig()
                 );
@@ -1266,7 +1266,7 @@
 
         async function acceptOrder(orderId) {
             try {
-                await axios.post(`${API_BASE_URL}/chat/transactions/${orderId}/accept`, {}, getAxiosConfig());
+                await axios.post(`${API_BASE_URL}/chat/orders/${orderId}/accept`, {}, getAxiosConfig());
                 showNotification('Order accepted! Funds escrowed. 💰');
                 loadOrders();
                 selectConversation(state.currentConversation.id);
@@ -1277,7 +1277,7 @@
 
         async function deliverOrder(orderId) {
             try {
-                await axios.post(`${API_BASE_URL}/chat/transactions/${orderId}/deliver`, {}, getAxiosConfig());
+                await axios.post(`${API_BASE_URL}/chat/orders/${orderId}/deliver`, {}, getAxiosConfig());
                 showNotification('Work marked as delivered! ✅');
                 loadOrders();
             } catch (error) {
@@ -1289,7 +1289,7 @@
             if (!confirm('This will release payment to the executor. Continue?')) return;
 
             try {
-                await axios.post(`${API_BASE_URL}/chat/transactions/${orderId}/complete`, {}, getAxiosConfig());
+                await axios.post(`${API_BASE_URL}/chat/orders/${orderId}/complete`, {}, getAxiosConfig());
                 showNotification('Order completed! Payment released. 💸');
                 loadOrders();
                 const response = await axios.get(`${API_BASE_URL}/auth/me`, getAxiosConfig());
@@ -1304,7 +1304,7 @@
             if (!reason) return;
 
             try {
-                await axios.post(`${API_BASE_URL}/chat/transactions/${orderId}/cancel`, { reason }, getAxiosConfig());
+                await axios.post(`${API_BASE_URL}/chat/orders/${orderId}/cancel`, { reason }, getAxiosConfig());
                 showNotification('Order cancelled. Refund processed. 🔄');
                 loadOrders();
             } catch (error) {
@@ -1320,7 +1320,7 @@
             }
 
             try {
-                await axios.post(`${API_BASE_URL}/chat/transactions/${orderId}/dispute`, { reason }, getAxiosConfig());
+                await axios.post(`${API_BASE_URL}/chat/orders/${orderId}/dispute`, { reason }, getAxiosConfig());
                 showNotification('Dispute raised. Admin will review. ⚠️', 'info');
                 loadOrders();
             } catch (error) {

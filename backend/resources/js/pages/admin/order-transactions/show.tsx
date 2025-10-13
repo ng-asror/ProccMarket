@@ -67,15 +67,19 @@ interface OrderTransaction {
 
 interface PageProps {
   transaction: OrderTransaction
+  flash?: {
+    success?: string
+    error?: string
+  }
 }
 
 // Get badge variant based on status color
 const getStatusVariant = (color: string) => {
   const variants: Record<string, "outline" | "default"> = {
     yellow: "outline",
-    blue: "default",
-    purple: "default",
-    green: "default",
+    blue: "outline",
+    purple: "outline",
+    green: "outline",
     orange: "outline",
     red: "outline",
     gray: "outline",
@@ -130,22 +134,29 @@ function ResolveDisputeDialog({ transaction }: { transaction: OrderTransaction }
   const [open, setOpen] = React.useState(false)
   const [resolution, setResolution] = React.useState<'refund' | 'release'>('refund')
   const [adminNote, setAdminNote] = React.useState('')
+  const [isSubmitting, setIsSubmitting] = React.useState(false)
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
+    setIsSubmitting(true)
 
-    router.post(route('admin.order-transactions.resolve-dispute', transaction.id), {
-      resolution,
-      admin_note: adminNote,
-    }, {
-      onSuccess: () => {
-        toast.success("Dispute resolved successfully")
-        setOpen(false)
-      },
-      onError: (errors) => {
-        toast.error(errors.message || "Failed to resolve dispute")
+    router.post(
+      route('admin.order-transactions.resolve-dispute', transaction.id), 
+      {
+        resolution,
+        admin_note: adminNote,
+      }, 
+      {
+        preserveScroll: true,
+        onSuccess: () => {
+          setOpen(false)
+          setIsSubmitting(false)
+        },
+        onError: () => {
+          setIsSubmitting(false)
+        }
       }
-    })
+    )
   }
 
   return (
@@ -173,6 +184,7 @@ function ResolveDisputeDialog({ transaction }: { transaction: OrderTransaction }
                   variant={resolution === 'refund' ? 'default' : 'outline'}
                   className="h-auto flex-col items-start p-4"
                   onClick={() => setResolution('refund')}
+                  disabled={isSubmitting}
                 >
                   <div className="flex items-center gap-2 mb-2">
                     <IconX className="h-4 w-4" />
@@ -188,6 +200,7 @@ function ResolveDisputeDialog({ transaction }: { transaction: OrderTransaction }
                   variant={resolution === 'release' ? 'default' : 'outline'}
                   className="h-auto flex-col items-start p-4"
                   onClick={() => setResolution('release')}
+                  disabled={isSubmitting}
                 >
                   <div className="flex items-center gap-2 mb-2">
                     <IconCheck className="h-4 w-4" />
@@ -208,15 +221,21 @@ function ResolveDisputeDialog({ transaction }: { transaction: OrderTransaction }
                 onChange={(e) => setAdminNote(e.target.value)}
                 placeholder="Add a note explaining your decision..."
                 rows={4}
+                disabled={isSubmitting}
               />
             </div>
           </div>
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => setOpen(false)}>
+            <Button 
+              type="button" 
+              variant="outline" 
+              onClick={() => setOpen(false)}
+              disabled={isSubmitting}
+            >
               Cancel
             </Button>
-            <Button type="submit">
-              Confirm Resolution
+            <Button type="submit" disabled={isSubmitting}>
+              {isSubmitting ? 'Processing...' : 'Confirm Resolution'}
             </Button>
           </DialogFooter>
         </form>
@@ -229,6 +248,7 @@ function ResolveDisputeDialog({ transaction }: { transaction: OrderTransaction }
 function ForceCancelDialog({ transaction }: { transaction: OrderTransaction }) {
   const [open, setOpen] = React.useState(false)
   const [reason, setReason] = React.useState('')
+  const [isSubmitting, setIsSubmitting] = React.useState(false)
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -238,17 +258,24 @@ function ForceCancelDialog({ transaction }: { transaction: OrderTransaction }) {
       return
     }
 
-    router.post(route('admin.order-transactions.force-cancel', transaction.id), {
-      reason,
-    }, {
-      onSuccess: () => {
-        toast.success("Transaction cancelled successfully")
-        setOpen(false)
-      },
-      onError: (errors) => {
-        toast.error(errors.message || "Failed to cancel transaction")
+    setIsSubmitting(true)
+
+    router.post(
+      route('admin.order-transactions.force-cancel', transaction.id), 
+      {
+        reason,
+      }, 
+      {
+        preserveScroll: true,
+        onSuccess: () => {
+          setOpen(false)
+          setIsSubmitting(false)
+        },
+        onError: () => {
+          setIsSubmitting(false)
+        }
       }
-    })
+    )
   }
 
   return (
@@ -277,6 +304,7 @@ function ForceCancelDialog({ transaction }: { transaction: OrderTransaction }) {
                 placeholder="Explain why you are cancelling this transaction..."
                 rows={4}
                 required
+                disabled={isSubmitting}
               />
               <p className="text-xs text-muted-foreground">
                 Minimum 10 characters. This will be visible to both users.
@@ -284,11 +312,16 @@ function ForceCancelDialog({ transaction }: { transaction: OrderTransaction }) {
             </div>
           </div>
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => setOpen(false)}>
+            <Button 
+              type="button" 
+              variant="outline" 
+              onClick={() => setOpen(false)}
+              disabled={isSubmitting}
+            >
               Cancel
             </Button>
-            <Button type="submit" variant="destructive">
-              Confirm Cancellation
+            <Button type="submit" variant="destructive" disabled={isSubmitting}>
+              {isSubmitting ? 'Processing...' : 'Confirm Cancellation'}
             </Button>
           </DialogFooter>
         </form>
@@ -309,7 +342,17 @@ const breadcrumbs: BreadcrumbItem[] = [
 ]
 
 export default function AdminOrderTransactionShow() {
-  const { transaction } = usePage<PageProps>().props
+  const { transaction, flash } = usePage<PageProps>().props
+
+  // Show flash messages
+  React.useEffect(() => {
+    if (flash?.success) {
+      toast.success(flash.success)
+    }
+    if (flash?.error) {
+      toast.error(flash.error)
+    }
+  }, [flash])
 
   const breadcrumbsWithCurrent: BreadcrumbItem[] = [
     ...breadcrumbs,

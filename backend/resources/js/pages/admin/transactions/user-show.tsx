@@ -13,6 +13,9 @@ import {
   IconClock,
   IconCheck,
   IconX,
+  IconShieldDollar,
+  IconBrandCashapp,
+  IconRecycle,
 } from "@tabler/icons-react"
 import { format } from "date-fns"
 
@@ -25,7 +28,7 @@ import { BreadcrumbItem } from '@/types'
 
 interface Transaction {
   id: number
-  type: 'deposit' | 'withdrawal' | 'access_purchase' | 'admin_adjustment'
+  type: 'deposit' | 'withdrawal' | 'access_purchase' | 'admin_adjustment' | 'earning' | 'refund' | 'escrow'
   amount: number
   status: 'pending' | 'completed' | 'rejected'
   transaction_id: string | null
@@ -97,7 +100,7 @@ function TransactionTypeBadge({ type }: { type: string }) {
     },
     withdrawal: {
       icon: IconArrowUp,
-      label: "Withdrawal", 
+      label: "Withdrawal",
       color: "text-red-600",
       bgColor: "bg-red-50"
     },
@@ -112,7 +115,25 @@ function TransactionTypeBadge({ type }: { type: string }) {
       label: "Admin Adjustment",
       color: "text-purple-600",
       bgColor: "bg-purple-50"
-    }
+    },
+    escrow: {
+      label: "Escrow",
+      icon: IconShieldDollar,
+      color: "text-blue-600",
+      bgColor: "bg-blue-50"
+    },
+    earning: {
+      label: "Earning",
+      icon: IconBrandCashapp,
+      color: "text-green-600",
+      bgColor: "bg-green-50"
+    },
+    refund: {
+      label: "Refund",
+      icon: IconRecycle,
+      color: "text-red-600",
+      bgColor: "bg-red-50"
+    },
   }
 
   const config = typeConfig[type as keyof typeof typeConfig] || typeConfig.deposit
@@ -143,26 +164,26 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 export default function TransactionShow() {
   const { transaction } = usePage<PageProps>().props
-  
-  const isPositive = transaction.type === "deposit" || 
+
+  const isPositive = (transaction.type === "deposit" || transaction.type === "earning" || transaction.type === "refund") ||
     (transaction.type === "admin_adjustment" && transaction.amount > 0)
 
   return (
     <AppLayout breadcrumbs={breadcrumbs}>
       <Head title={`Transaction #${transaction.id}`} />
-      
+
       <div className="flex h-full flex-1 flex-col gap-6 p-4">
         {/* Header */}
         <div className="flex flex-col gap-4">
           <div>
             <Button
-            variant="outline"
-            size="sm"
-            onClick={() => router.visit(route('admin.transactions.index'))}
-          >
-            <IconArrowLeft className="h-4 w-4 mr-2" />
-            Back to Transactions
-          </Button>
+              variant="outline"
+              size="sm"
+              onClick={() => router.visit(route('admin.transactions.index'))}
+            >
+              <IconArrowLeft className="h-4 w-4 mr-2" />
+              Back to Transactions
+            </Button>
           </div>
           <div>
             <h1 className="text-2xl font-bold">Transaction Details</h1>
@@ -196,9 +217,8 @@ export default function TransactionShow() {
               {/* Amount */}
               <div>
                 <label className="text-sm font-medium text-muted-foreground">Amount</label>
-                <div className={`mt-1 text-3xl font-bold ${
-                  isPositive ? "text-green-600" : "text-red-600"
-                }`}>
+                <div className={`mt-1 text-3xl font-bold ${isPositive ? "text-green-600" : "text-red-600"
+                  }`}>
                   {isPositive ? "+" : "-"}${Math.abs(transaction.amount).toLocaleString()}
                 </div>
               </div>
@@ -255,8 +275,8 @@ export default function TransactionShow() {
                     />
                   ) : (
                     <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted">
-                      {transaction.user.name 
-                        ? transaction.user.name.charAt(0).toUpperCase() 
+                      {transaction.user.name
+                        ? transaction.user.name.charAt(0).toUpperCase()
                         : transaction.user.email.charAt(0).toUpperCase()}
                     </div>
                   )}
@@ -299,7 +319,7 @@ export default function TransactionShow() {
                   <label className="text-sm font-medium text-muted-foreground">Processing Time</label>
                   <div className="mt-1 text-sm">
                     {(() => {
-                    console.log(transaction.payable?.created_at);
+                      console.log(transaction.payable?.created_at);
                       const created = new Date((transaction.payable?.created_at ?? transaction.created_at))
                       const paid = new Date(transaction.paid_at)
                       const diffMs = paid.getTime() - created.getTime()
@@ -328,10 +348,9 @@ export default function TransactionShow() {
             </CardHeader>
             <CardContent>
               <div className="flex items-center gap-4">
-                <div className={`flex h-12 w-12 items-center justify-center rounded-full ${
-                  transaction.status === 'completed' ? 'bg-green-100' :
+                <div className={`flex h-12 w-12 items-center justify-center rounded-full ${transaction.status === 'completed' ? 'bg-green-100' :
                   transaction.status === 'rejected' ? 'bg-red-100' : 'bg-yellow-100'
-                }`}>
+                  }`}>
                   {transaction.status === 'completed' ? (
                     <IconCheck className="h-6 w-6 text-green-600" />
                   ) : transaction.status === 'rejected' ? (

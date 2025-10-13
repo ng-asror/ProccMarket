@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\OrderTransactionResource;
 use App\Models\OrderTransaction;
+use App\Models\Transaction;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
@@ -17,11 +18,6 @@ class OrderTransactionAdminController extends Controller
      */
     public function index(Request $request): Response
     {
-        // Authorization check
-        if (! $request->user()->is_admin) {
-            abort(403, 'Unauthorized - Admin access required');
-        }
-
         $query = OrderTransaction::query()
             ->with(['creator', 'executor', 'cancelledBy', 'disputeRaisedBy', 'conversation']);
 
@@ -55,7 +51,7 @@ class OrderTransactionAdminController extends Controller
         $transactions = $query->paginate(20);
 
         return Inertia::render('admin/order-transactions/index', [
-            'transactions' => OrderTransactionResource::collection($transactions),
+            'transactions' => OrderTransactionResource::collection($transactions)->resolve(),
             'pagination' => [
                 'current_page' => $transactions->currentPage(),
                 'last_page' => $transactions->lastPage(),
@@ -86,11 +82,6 @@ class OrderTransactionAdminController extends Controller
      */
     public function show(Request $request, OrderTransaction $orderTransaction): Response
     {
-        // Authorization check
-        if (! $request->user()->is_admin) {
-            abort(403, 'Unauthorized - Admin access required');
-        }
-
         $orderTransaction->load([
             'creator',
             'executor',
@@ -102,7 +93,7 @@ class OrderTransactionAdminController extends Controller
         ]);
 
         return Inertia::render('admin/order-transactions/show', [
-            'transaction' => new OrderTransactionResource($orderTransaction),
+            'transaction' => (new OrderTransactionResource($orderTransaction))->toArray($request),
         ]);
     }
 
@@ -112,18 +103,9 @@ class OrderTransactionAdminController extends Controller
      */
     public function resolveDispute(Request $request, OrderTransaction $orderTransaction)
     {
-        // Authorization check
-        if (! $request->user()->is_admin) {
-            return response()->json([
-                'message' => 'Unauthorized - Admin access required',
-            ], 403);
-        }
-
         // Validate that transaction is in dispute status
         if ($orderTransaction->status !== OrderTransaction::STATUS_DISPUTE) {
-            return response()->json([
-                'message' => 'Transaction is not in dispute status',
-            ], 422);
+            return back()->with('error', 'Transaction is not in dispute status');
         }
 
         $validated = $request->validate([
@@ -136,13 +118,40 @@ class OrderTransactionAdminController extends Controller
                 if ($validated['resolution'] === 'refund') {
                     // Refund to creator
                     $orderTransaction->creator->increment('balance', $orderTransaction->amount);
+
+                    // Create refund transaction record
+                    Transaction::create([
+                        'user_id' => $orderTransaction->creator_id,
+                        'type' => 'refund',
+                        'amount' => $orderTransaction->amount,
+                        'status' => 'completed',
+                        'payable_type' => OrderTransaction::class,
+                        'payable_id' => $orderTransaction->id,
+                        'description' => "Возврат средств администратора - Спор разрешен: {$orderTransaction->title}",
+                        'paid_at' => now(),
+                    ]);
+
                     $orderTransaction->update([
                         'status' => OrderTransaction::STATUS_REFUNDED,
                         'admin_note' => $validated['admin_note'] ?? 'Dispute resolved in favor of creator',
+                        'cancelled_at' => now(),
                     ]);
                 } else {
                     // Release to executor
                     $orderTransaction->executor->increment('balance', $orderTransaction->amount);
+
+                    // Create payment transaction record
+                    Transaction::create([
+                        'user_id' => $orderTransaction->executor_id,
+                        'type' => 'earning',
+                        'amount' => $orderTransaction->amount,
+                        'status' => 'completed',
+                        'payable_type' => OrderTransaction::class,
+                        'payable_id' => $orderTransaction->id,
+                        'description' => "Выпуск администратора - Спор разрешен: {$orderTransaction->title}",
+                        'paid_at' => now(),
+                    ]);
+
                     $orderTransaction->update([
                         'status' => OrderTransaction::STATUS_RELEASED,
                         'admin_note' => $validated['admin_note'] ?? 'Dispute resolved in favor of executor',
@@ -151,17 +160,9 @@ class OrderTransactionAdminController extends Controller
                 }
             });
 
-            $orderTransaction->load(['creator', 'executor']);
-
-            return response()->json([
-                'message' => 'Dispute resolved successfully',
-                'data' => new OrderTransactionResource($orderTransaction),
-            ]);
+            return back()->with('success', 'Dispute resolved successfully');
         } catch (\Exception $e) {
-            return response()->json([
-                'message' => 'Failed to resolve dispute',
-                'error' => $e->getMessage(),
-            ], 500);
+            return back()->with('error', 'Failed to resolve dispute: ' . $e->getMessage());
         }
     }
 
@@ -170,13 +171,6 @@ class OrderTransactionAdminController extends Controller
      */
     public function forceCancel(Request $request, OrderTransaction $orderTransaction)
     {
-        // Authorization check
-        if (! $request->user()->is_admin) {
-            return response()->json([
-                'message' => 'Unauthorized - Admin access required',
-            ], 403);
-        }
-
         $validated = $request->validate([
             'reason' => ['required', 'string', 'min:10', 'max:2000'],
         ]);
@@ -184,33 +178,40 @@ class OrderTransactionAdminController extends Controller
         try {
             DB::transaction(function () use ($orderTransaction, $validated, $request) {
                 // If funds were escrowed, refund them
-                if (in_array($orderTransaction->status, [
-                    OrderTransaction::STATUS_ACCEPTED,
-                    OrderTransaction::STATUS_IN_PROGRESS,
-                    OrderTransaction::STATUS_DELIVERED,
-                ])) {
+                if (
+                    in_array($orderTransaction->status, [
+                        OrderTransaction::STATUS_ACCEPTED,
+                        OrderTransaction::STATUS_IN_PROGRESS,
+                        OrderTransaction::STATUS_DELIVERED,
+                        OrderTransaction::STATUS_DISPUTE,
+                    ])
+                ) {
                     $orderTransaction->creator->increment('balance', $orderTransaction->amount);
+
+                    // Create refund transaction record
+                    Transaction::create([
+                        'user_id' => $orderTransaction->creator_id,
+                        'type' => 'refund',
+                        'amount' => $orderTransaction->amount,
+                        'status' => 'completed',
+                        'payable_type' => OrderTransaction::class,
+                        'payable_id' => $orderTransaction->id,
+                        'description' => "Возврат отмены администратора: {$orderTransaction->title}",
+                        'paid_at' => now(),
+                    ]);
                 }
 
                 $orderTransaction->update([
                     'status' => OrderTransaction::STATUS_CANCELLED,
                     'cancelled_at' => now(),
                     'cancelled_by' => $request->user()->id,
-                    'cancellation_reason' => 'Admin action: '.$validated['reason'],
+                    'cancellation_reason' => 'Admin action: ' . $validated['reason'],
                 ]);
             });
 
-            $orderTransaction->load(['creator', 'executor', 'cancelledBy']);
-
-            return response()->json([
-                'message' => 'Transaction cancelled successfully',
-                'data' => new OrderTransactionResource($orderTransaction),
-            ]);
+            return back()->with('success', 'Transaction cancelled successfully');
         } catch (\Exception $e) {
-            return response()->json([
-                'message' => 'Failed to cancel transaction',
-                'error' => $e->getMessage(),
-            ], 500);
+            return back()->with('error', 'Failed to cancel transaction: ' . $e->getMessage());
         }
     }
 }

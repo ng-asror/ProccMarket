@@ -147,7 +147,7 @@ class OrderTransaction extends Model
                 'status' => 'completed',
                 'payable_type' => OrderTransaction::class,
                 'payable_id' => $this->id,
-                'description' => "Escrowed funds for order: {$this->title}",
+                'description' => "Зачисленные средства для заказа: {$this->title}",
                 'paid_at' => now(),
             ]);
 
@@ -217,7 +217,7 @@ class OrderTransaction extends Model
                 'status' => 'completed',
                 'payable_type' => OrderTransaction::class,
                 'payable_id' => $this->id,
-                'description' => "Payment received for order: {$this->title}",
+                'description' => "Плата за заказ получена: {$this->title}",
                 'paid_at' => now(),
             ]);
 
@@ -264,7 +264,7 @@ class OrderTransaction extends Model
                 'status' => 'completed',
                 'payable_type' => OrderTransaction::class,
                 'payable_id' => $this->id,
-                'description' => "Refund for cancelled order: {$this->title}",
+                'description' => "Возврат за отмененный заказ: {$this->title}",
                 'paid_at' => now(),
             ]);
 

@@ -89,7 +89,7 @@ class OrderTransactionController extends Controller
                 $message = Message::create([
                     'conversation_id' => $conversation->id,
                     'user_id' => $user->id,
-                    'content' => "Created order: {$validated['title']}",
+                    'content' => "Созданный заказ: {$validated['title']}",
                 ]);
 
                 // Update the order with the message ID

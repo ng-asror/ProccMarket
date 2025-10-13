@@ -11,6 +11,9 @@ import {
   IconSearch,
   IconUser,
   IconEye,
+  IconShieldDollar,
+  IconBrandCashapp,
+  IconRecycle,
 } from "@tabler/icons-react"
 import {
   ColumnDef,
@@ -46,11 +49,12 @@ import {
 } from "@/components/ui/table"
 import AppLayout from '@/layouts/app-layout'
 import { BreadcrumbItem } from '@/types'
+import { esc } from "node_modules/zod/v4/core/util.cjs"
 
 // Transaction type definition
 interface Transaction {
   id: number
-  type: 'deposit' | 'withdrawal' | 'access_purchase' | 'admin_adjustment'
+  type: 'deposit' | 'withdrawal' | 'access_purchase' | 'admin_adjustment' | 'earning' | 'refund' | 'escrow'
   amount: number
   status: 'pending' | 'completed' | 'rejected'
   transaction_id: string | null
@@ -93,7 +97,7 @@ interface PageProps {
 function TransactionStatusBadge({ status }: { status: string }) {
   const variants = {
     pending: "outline",
-    completed: "default",
+    completed: "outline",
     rejected: "destructive",
   } as const
 
@@ -118,6 +122,9 @@ function TransactionTypeBadge({ type }: { type: string }) {
     deposit: "Deposit",
     withdrawal: "Withdrawal", 
     access_purchase: "Access Purchase",
+    escrow: "Escrow",
+    earning: "Earning",
+    refund: "Refund",
     admin_adjustment: "Admin Adjustment"
   }
 
@@ -125,7 +132,10 @@ function TransactionTypeBadge({ type }: { type: string }) {
     deposit: IconArrowDown,
     withdrawal: IconArrowUp,
     access_purchase: IconCreditCard,
-    admin_adjustment: IconCoins
+    admin_adjustment: IconCoins,
+    escrow: IconShieldDollar,
+    earning: IconBrandCashapp,
+    refund: IconRecycle,
   }
 
   const Icon = typeIcons[type as keyof typeof typeIcons] || IconCoins
@@ -185,7 +195,7 @@ const columns: ColumnDef<Transaction>[] = [
     cell: ({ row }) => {
       const transaction = row.original
       const isPositive = transaction.type === "deposit" || 
-        (transaction.type === "admin_adjustment" && transaction.amount > 0)
+        ((transaction.type === "admin_adjustment" || transaction.type === "earning" || transaction.type === "refund") && transaction.amount > 0)
       
       return (
         <div className={`text-right font-medium ${
@@ -394,6 +404,9 @@ export default function TransactionIndex() {
                     <SelectItem value="withdrawal">Withdrawal</SelectItem>
                     <SelectItem value="access_purchase">Access Purchase</SelectItem>
                     <SelectItem value="admin_adjustment">Admin Adjustment</SelectItem>
+                    <SelectItem value="escrow">Escrow</SelectItem>
+                    <SelectItem value="earning">Earning</SelectItem>
+                    <SelectItem value="refund">Refund</SelectItem>
                   </SelectContent>
                 </Select>
 
@@ -436,13 +449,15 @@ export default function TransactionIndex() {
                   {table.getRowModel().rows?.length ? (
                     table.getRowModel().rows.map((row) => {
                       const transaction = row.original
-                      const isPositive = transaction.type === "deposit" || 
+                      const isPositive = (transaction.type === "deposit" || transaction.type === "earning" || transaction.type === "refund") || 
                         (transaction.type === "admin_adjustment" && transaction.amount > 0)
                       
                       return (
                         <TableRow
                           key={row.id}
                           className={`${
+                            transaction.type === "escrow" ? 
+                              "border-l-4 border-l-blue-500" :
                             isPositive
                               ? "border-l-4 border-l-green-500"
                               : "border-l-4 border-l-red-500"

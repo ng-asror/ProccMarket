@@ -44,7 +44,7 @@ export interface INewsInfo {
   views_count: number;
   shares_count: number;
   comments_count: number;
-  user_reaction: 'like' | null;
+  user_reaction: 'like' | 'dislike' | null;
   user_shared: boolean;
   category: { id: number; name: string };
 }

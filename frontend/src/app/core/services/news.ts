@@ -28,9 +28,21 @@ export class News {
     return this.http.get<ICommentsResponse>(`${environment.apiUrl}/news/${id}/comments`);
   }
 
-  newsToggleLike(news_id: number): Observable<ILikeDislikeRes> {
+  newsCommentLikeDislik(comment_id: number, is_like: boolean): Observable<any> {
+    return this.http.post<any>(`${environment.apiUrl}/comments/${comment_id}/like`, {
+      is_like,
+    });
+  }
+
+  newsShare(news_id: number): Observable<any> {
+    return this.http.post<any>(`${environment.apiUrl}/news/${news_id}/share`, {
+      platform: 'telegram',
+    });
+  }
+
+  newsToggleLike(news_id: number, is_like: boolean): Observable<ILikeDislikeRes> {
     return this.http.post<ILikeDislikeRes>(`${environment.apiUrl}/news/${news_id}/like`, {
-      is_like: true,
+      is_like,
     });
   }
 

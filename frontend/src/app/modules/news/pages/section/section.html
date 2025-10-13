@@ -2,6 +2,7 @@
 	@if(!news.isLoading()) {
 	<div class="space-y-[20px]">
 		@if (news.value(); as news) {
+		@let newsData = news.data;
 		<div class="space-y-[15px]">
 			<div class="flex text-black/50 text-sm gap-x-[10px]">
 				<p class="capitalize text-[16px]">{{news.data.created_at | dateFormat: 'MMMM DD, HH:MM'}}</p>
@@ -15,19 +16,22 @@
 		<div [innerHTML]="news.data.description"></div>
 		<div class="flex items-center gap-x-[20px]">
 			<button type="button" class="text-black/50 text-[18px] flex items-center gap-x-[5px] cursor-pointer"
-				(click)="newToggleLike(news.data.id)">
+				(click)="newToggleLike(newsData.id, true)">
 				<lucide-icon [name]="ICONS.ThumbsUp"
-					[color]="newsCounts().user_reaction === 'like'?'#030303':'#00000080'"></lucide-icon>
+					[color]="newsData.user_reaction === 'like'?'#030303':'#00000080'"></lucide-icon>
 				<span class="block"
-					[class.text-[#030303]]="newsCounts().user_reaction === 'like'?'#030303':''">{{newsCounts().likes_count}}</span>
+					[class.text-[#030303]]="newsData.user_reaction === 'like'?'#030303':''">{{newsData.likes_count}}</span>
 			</button>
-			<button type="button" class="text-black/50 text-[18px] flex items-center gap-x-[5px] cursor-pointer">
-				<lucide-icon [name]="ICONS.Share"></lucide-icon>
-				<span class="block">{{newsCounts().share_count}}</span>
+			<button type="button" class="text-black/50 text-[18px] flex items-center gap-x-[5px] cursor-pointer"
+				(click)="newToggleLike(newsData.id, false)">
+				<lucide-icon [name]="ICONS.ThumbsDown"
+					[color]="newsData.user_reaction === 'dislike'?'#030303':'#00000080'"></lucide-icon>
+				<span class="block"
+					[class.text-[#030303]]="newsData.user_reaction === 'dislike'?'#030303':''">{{newsData.dislikes_count}}</span>
 			</button>
 			<button type="button" class="text-black/50 text-[18px] flex items-center gap-x-[5px]">
 				<lucide-icon [name]="ICONS.MessagesSquare"></lucide-icon>
-				<span class="block">{{newsCounts().comments}}</span>
+				<span class="block">{{newsData.comments_count}}</span>
 			</button>
 		</div>
 		<div class="space-y-[10px]">
@@ -68,7 +72,6 @@
 							</button>
 							<button type="button" class="text-base text-black/50 cursor-pointer flex items-center gap-x-[5px]">
 								<lucide-icon [name]="ICONS.ThumbsDown" size="18"></lucide-icon>
-								<!-- <span>{{item}}</span> -->
 							</button>
 						</div>
 						<button type="button" class="flex items-center gap-x-[5px] text-base cursor-pointer text-black/50">
@@ -79,7 +82,7 @@
 				</div>
 			</div>
 			}
-			<div class="card border-1 w-[95%] ml-auto border-[#E1E1E1] space-y-[10px] p-[10px]">
+			<!-- <div class="card border-1 w-[95%] ml-auto border-[#E1E1E1] space-y-[10px] p-[10px]">
 				<div class="flex items-center justify-between">
 					<div class="flex items-center gap-x-[5px]">
 						<div class="avatar">
@@ -164,7 +167,7 @@
 						</button>
 					</div>
 				</div>
-			</div>
+			</div> -->
 		</div>
 		}}
 	</div>

@@ -27,38 +27,22 @@ export class Section implements OnInit, OnDestroy {
   private telegram = inject(Telegram);
   private newsService = inject(News);
   private cdr = inject(ChangeDetectorRef);
+  private route = inject(ActivatedRoute);
 
   protected ICONS = icons;
   protected comment = signal<{ content: string; replay_id?: number }>({
     content: '',
   });
-  protected newsCounts = signal<{
-    user_reaction: 'like' | null;
-    likes_count: number;
-    dislikes_count: number;
-    comments: number;
-    share_count: number;
-  }>({ user_reaction: null, likes_count: 0, dislikes_count: 0, comments: 0, share_count: 0 });
 
   news_id: string = '';
-  constructor(private route: ActivatedRoute) {
+  constructor() {
     this.route.paramMap.subscribe((params) => {
       this.news_id = params.get('id')!;
     });
   }
 
   news = resource({
-    loader: async () =>
-      await firstValueFrom(this.newsService.getNews(this.news_id)).then((res) => {
-        this.newsCounts.set({
-          user_reaction: res.data.user_reaction,
-          likes_count: res.data.likes_count,
-          dislikes_count: res.data.dislikes_count,
-          comments: res.data.comments_count,
-          share_count: res.data.shares_count,
-        });
-        return res;
-      }),
+    loader: async () => await firstValueFrom(this.newsService.getNews(this.news_id)),
   });
 
   comments = resource({
@@ -72,13 +56,20 @@ export class Section implements OnInit, OnDestroy {
     this.telegram.hiddeBackButton('/news');
   }
 
-  async newToggleLike(id: number): Promise<void> {
-    await firstValueFrom(this.newsService.newsToggleLike(id)).then((res) => {
-      this.newsCounts.update((current) => ({
-        ...current,
-        likes_count: res.data.likes_count,
-        user_reaction: res.data.user_reaction,
-      }));
+  async newToggleLike(id: number, is_like: boolean): Promise<void> {
+    await firstValueFrom(this.newsService.newsToggleLike(id, is_like)).then((res) => {
+      this.news.update((current) => {
+        if (!current) return;
+        return {
+          ...current,
+          data: {
+            ...current.data,
+            user_reaction: res.data.user_reaction,
+            likes_count: res.data.likes_count,
+            dislikes_count: res.data.dislikes_count,
+          },
+        };
+      });
     });
   }
 
@@ -94,10 +85,16 @@ export class Section implements OnInit, OnDestroy {
           data: [res.data, ...(comments.data ?? [])],
         };
       });
-      this.newsCounts.update((current) => ({
-        ...current,
-        comments: this.newsCounts().comments + 1,
-      }));
+      this.news.update((current) => {
+        if (!current) return;
+        return {
+          ...current,
+          data: {
+            ...current.data,
+            comments_count: current.data.comments_count + 1,
+          },
+        };
+      });
     });
   }
 }

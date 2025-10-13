@@ -20,18 +20,20 @@
 				<lucide-icon [name]="ICONS.ThumbsUp"
 					[color]="newsData.user_reaction === 'like'?'#030303':'#00000080'"></lucide-icon>
 				<span class="block"
-					[class.text-[#030303]]="newsData.user_reaction === 'like'?'#030303':''">{{newsData.likes_count}}</span>
+					[class.text-[#030303]]="newsData.user_reaction === 'like'?'#030303':''">{{newsData.likes_count | numeral:
+					'0a'}}</span>
 			</button>
 			<button type="button" class="text-black/50 text-[18px] flex items-center gap-x-[5px] cursor-pointer"
 				(click)="newToggleLike(newsData.id, false)">
 				<lucide-icon [name]="ICONS.ThumbsDown"
 					[color]="newsData.user_reaction === 'dislike'?'#030303':'#00000080'"></lucide-icon>
 				<span class="block"
-					[class.text-[#030303]]="newsData.user_reaction === 'dislike'?'#030303':''">{{newsData.dislikes_count}}</span>
+					[class.text-[#030303]]="newsData.user_reaction === 'dislike'?'#030303':''">{{newsData.dislikes_count |
+					numeral: '0a'}}</span>
 			</button>
 			<button type="button" class="text-black/50 text-[18px] flex items-center gap-x-[5px]">
 				<lucide-icon [name]="ICONS.MessagesSquare"></lucide-icon>
-				<span class="block">{{newsData.comments_count}}</span>
+				<span class="block">{{newsData.comments_count | numeral: '0a'}}</span>
 			</button>
 		</div>
 		<div class="space-y-[10px]">
@@ -66,12 +68,21 @@
 					<p class="text-sm text-black/50 block mb-[5px]">{{item.created_at | amTimeAgo}}</p>
 					<div class="flex items-center justify-between">
 						<div class="flex items-center gap-x-[15px]">
-							<button type="button" class="text-base cursor-pointer text-black/50 flex items-center gap-x-[5px]">
-								<lucide-icon [name]="ICONS.ThumbsUp" size="18"></lucide-icon>
-								<span>{{item.likes_count}}</span>
+							<button type="button" class="text-base cursor-pointer text-black/50 flex items-center gap-x-[5px]"
+								(click)="commentLikeDislikToggle(item.id, true)">
+								<lucide-icon [name]="ICONS.ThumbsUp" size="18"
+									[color]="item.user_reaction === 'like'?'#030303':'#00000080'"></lucide-icon>
+								<span class="block"
+									[class.text-[#030303]]="item.user_reaction === 'like'?'#030303':''">{{item.likes_count |
+									numeral: '0a'}}</span>
 							</button>
-							<button type="button" class="text-base text-black/50 cursor-pointer flex items-center gap-x-[5px]">
-								<lucide-icon [name]="ICONS.ThumbsDown" size="18"></lucide-icon>
+							<button type="button" class="text-base text-black/50 cursor-pointer flex items-center gap-x-[5px]"
+								(click)="commentLikeDislikToggle(item.id, false)">
+								<lucide-icon [name]="ICONS.ThumbsDown" size="18"
+									[color]="item.user_reaction === 'dislike'?'#030303':'#00000080'"></lucide-icon>
+								<span class="block"
+									[class.text-[#030303]]="item.user_reaction === 'dislike'?'#030303':''">{{item.dislikes_count |
+									numeral: '0a'}}</span>
 							</button>
 						</div>
 						<button type="button" class="flex items-center gap-x-[5px] text-base cursor-pointer text-black/50">

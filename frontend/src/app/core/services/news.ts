@@ -28,8 +28,8 @@ export class News {
     return this.http.get<ICommentsResponse>(`${environment.apiUrl}/news/${id}/comments`);
   }
 
-  newsCommentLikeDislik(comment_id: number, is_like: boolean): Observable<any> {
-    return this.http.post<any>(`${environment.apiUrl}/comments/${comment_id}/like`, {
+  newsCommentLikeDislik(comment_id: number, is_like: boolean): Observable<ILikeDislikeRes> {
+    return this.http.post<ILikeDislikeRes>(`${environment.apiUrl}/comments/${comment_id}/like`, {
       is_like,
     });
   }

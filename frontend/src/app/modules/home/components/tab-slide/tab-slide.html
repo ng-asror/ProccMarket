@@ -1,7 +1,9 @@
 <div class="flex gap-x-[10px] overflow-x-scroll px-[15px]">
-	<a routerLink="/home" *ngFor="let item of formsTap" [queryParams]="{forms: item.type}" routerLinkActive="active"
+	@for (item of formsTap; track $index) {
+	<a routerLink="/home" [queryParams]="{forms: item.type}" routerLinkActive="active"
 		class="flex flex-col items-center justify-between shrink-[0] p-[10px] rounded-[6px] bg-[#F2F2F2] gap-y-[4px] forms-tab leading-[100%] text-[12px] font-[500]">
 		<lucide-icon [name]="item.icon" size="24"></lucide-icon>
 		{{item.name}}
 	</a>
+	}
 </div>

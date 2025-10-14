@@ -75,7 +75,10 @@ class PublicApiController extends Controller
     public function allPublicData(): JsonResponse
     {
         $roles = Role::withCount('users')->get();
-        $settings = Setting::all(['key', 'name', 'value']);
+        $excludedKeys = ['crypto_bot_token', 'bot_token'];
+
+        $settings = Setting::whereNotIn('key', $excludedKeys)
+            ->get(['key', 'name', 'value']);
 
         return response()->json([
             "success" => true,

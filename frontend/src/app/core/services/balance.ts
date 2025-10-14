@@ -2,7 +2,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment.development';
-import { ITransactionRes, TTransactionTypes } from '../interfaces';
+import { ICreateInvoiceRes, ITransactionRes, TTransactionTypes } from '../interfaces';
 @Injectable({
   providedIn: 'root',
 })
@@ -43,9 +43,12 @@ export class BalanceService {
     return this.http.post<any>(`${environment.apiUrl}/withdrawals`, data);
   }
 
-  createInvoice(amount: number): Observable<any> {
-    return this.http.post<any>(`${environment.apiUrl}/pay/crypto-bot/create-invoice`, {
-      amount,
-    });
+  createInvoice(amount: number): Observable<ICreateInvoiceRes> {
+    return this.http.post<ICreateInvoiceRes>(
+      `${environment.apiUrl}/pay/crypto-bot/create-invoice`,
+      {
+        amount,
+      }
+    );
   }
 }

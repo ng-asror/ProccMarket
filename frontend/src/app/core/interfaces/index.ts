@@ -8,3 +8,4 @@ export * from './profile';
 export * from './role';
 export * from './sections';
 export * from './topic';
+export * from './balance';

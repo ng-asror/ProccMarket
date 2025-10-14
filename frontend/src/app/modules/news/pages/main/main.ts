@@ -18,5 +18,5 @@ export class Main {
 
   news = resource({
     loader: () => firstValueFrom(this.newsService.getAllNews()),
-  });
+  }).asReadonly();
 }

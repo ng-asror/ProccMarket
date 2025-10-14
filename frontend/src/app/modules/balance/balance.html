@@ -4,8 +4,13 @@
 			<h2 class="text-[22px] font-[600] text-[#030303] leading-[100%]">Баланс</h2>
 			<div class="border-1 border-[#E1E1E1] p-[15px] rounded-[12px] mb-[20px]">
 				@if(getMe.value(); as me) {
-				<h1 class="text-[40px] text-[#030300] font-[800] price leading-[100%] mb-[10px]">{{me.user.balance | numeral:
-					'$0,0[.]00'}}</h1>
+				<div class="flex items-center justify-between mb-[10px]">
+					<h1 class="text-[40px] text-[#030300] font-[800] price leading-[100%]">{{me.user.balance | numeral:
+						'$0,0[.]00'}}</h1>
+					<button type="button" class="btn" (click)="onReloadClick()">
+						<lucide-icon [name]="ICONS.RefreshCcw" size="20" [class.animate-spin]="isSpinning"></lucide-icon>
+					</button>
+				</div>
 				}@else {
 				<div class="skeleton h-[40px] mb-[10px] w-full"></div>
 				}
@@ -151,19 +156,19 @@
 							@if(withdrawalsForm.get('amount')?.dirty && withdrawalsForm.get('amount')?.invalid) {
 							<div>
 								@if (withdrawalsForm.get('amount')?.errors?.['required']) {
-								<p class="text-[#FF0000]">Сумма обязательна
+								<p class="text-[#FF0000] leading-[100%] text-[14px]">Сумма обязательна
 								</p>
 								}
 								@if(withdrawalsForm.get('amount')?.errors?.['max']) {
-								<p class="text-[#FF0000]">Сумма не может превышать баланс
+								<p class="text-[#FF0000] leading-[100%] text-[14px]">Сумма не может превышать баланс
 								</p>
 								}
 								@if(withdrawalsForm.get('amount')?.errors?.['min']) {
-								<p class="text-[#FF0000]">Сумма не может быть меньше 20$
+								<p class="text-[#FF0000] leading-[100%] text-[14px]">Сумма не может быть меньше 20$
 								</p>
 								}
 								@if(withdrawalsForm.get('amount')?.errors?.['maxlength']) {
-								<p class="text-[#FF0000]">Слишком длинное значение
+								<p class="text-[#FF0000] leading-[100%] text-[14px]">Слишком длинное значение
 								</p>
 								}
 							</div>
@@ -175,7 +180,7 @@
 								maxlength="60" placeholder="токен" />
 							@if(withdrawalsForm.get('requisites')?.dirty && withdrawalsForm.get('requisites')?.invalid) {
 							@if(withdrawalsForm.get('amount')?.errors?.['required']) {
-							<p class="text-[#FF0000]">Крипто-токен обязателен
+							<p class="text-[#FF0000] leading-[100%] text-[14px]">Крипто-токен обязателен
 							</p>}}
 						</fieldset>
 						<div class="flex justify-end gap-x-[10px]">
@@ -192,12 +197,20 @@
 				<h3 class="text-lg font-bold">Пополнить баланс</h3>
 				<p>Вывод средств возможен только через 30 дней после вашего последнего депозита.</p>
 				<div class="space-y-[5px] my-[15px]">
-					<label for="amount" class="text-black text-[14px] leading-[100%] block">Сумма (USDT)*</label>
-					<input type="number" placeholder="Введите сумму" class="input placeholder:text-black/50 w-full" id="amount" />
+					<label for="amount" class="text-black text-[14px] leading-[100%] font-semibold cursor-pointer block">Сумма
+						(USDT)*</label>
+					<input type="number" placeholder="Введите сумму" class="input placeholder:text-black/50 w-full" id="amount"
+						[(ngModel)]="topUpAmount" min="20" max="10000" />
+					@if(topUpAmount < 20) { <p class="text-[#FF0000] leading-[100%] text-[14px]">Мин. сумма — 20 USDT</p>}
+						@if(topUpAmount > 10000) { <p class="text-[#FF0000] leading-[100%] text-[14px]">Макс. сумма — 10 000 USDT
+						</p>}
 				</div>
 				<div class="modal-action mt-0">
 					<form method="dialog">
-						<button type="button" class="btn btn-primary" (click)="createInvoice()">Пополнить</button>
+						<button type="button" class="btn btn-primary" (click)="createInvoice()"
+							[disabled]="!(topUpAmount >= 20 && topUpAmount <= 10000)">
+							Пополнить
+						</button>
 						<button class="btn ml-[10px]">Отмена</button>
 					</form>
 				</div>

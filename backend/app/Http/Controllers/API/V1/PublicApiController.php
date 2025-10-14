@@ -28,7 +28,10 @@ class PublicApiController extends Controller
      */
     public function getSettings(): JsonResponse
     {
-        $settings = Setting::all(['key', 'name', 'value']);
+        $excludedKeys = ['crypto_bot_token', 'bot_token'];
+
+        $settings = Setting::whereNotIn('key', $excludedKeys)
+            ->get(['key', 'name', 'value']);
 
         return response()->json([
             "success" => true,
@@ -37,11 +40,21 @@ class PublicApiController extends Controller
         ], 200);
     }
 
+
     /**
      * Get a specific setting by key.
      */
     public function getSettingByKey(string $key): JsonResponse
     {
+        $excludedKeys = ['crypto_bot_token', 'bot_token'];
+
+        if (in_array($key, $excludedKeys)) {
+            return response()->json([
+                "success" => false,
+                'message' => 'Access to this setting is restricted',
+            ], 403);
+        }
+
         $setting = Setting::where('key', $key)->first(['key', 'name', 'value']);
 
         if (!$setting) {
@@ -58,10 +71,14 @@ class PublicApiController extends Controller
         ], 200);
     }
 
+
     public function allPublicData(): JsonResponse
     {
         $roles = Role::withCount('users')->get();
-        $settings = Setting::all(['key', 'name', 'value']);
+        $excludedKeys = ['crypto_bot_token', 'bot_token'];
+
+        $settings = Setting::whereNotIn('key', $excludedKeys)
+            ->get(['key', 'name', 'value']);
 
         return response()->json([
             "success" => true,

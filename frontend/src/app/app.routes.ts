@@ -4,6 +4,7 @@ import { newsRoutes } from './modules/news/news.routes';
 import { notificationRoutes } from './modules/notifications/notifications.routes';
 import { authGuard } from './core';
 import { profileRoutes } from './modules/profile/profile.routes';
+import { homeRoutes } from './modules/home/home.routes';
 
 export const routes: Routes = [
   {
@@ -11,10 +12,7 @@ export const routes: Routes = [
     canActivate: [authGuard],
     children: [
       { path: '', redirectTo: 'home', pathMatch: 'full' },
-      {
-        path: 'home',
-        loadComponent: () => import('./modules').then((m) => m.Home),
-      },
+      ...homeRoutes,
       ...newsRoutes,
       ...notificationRoutes,
       ...profileRoutes,

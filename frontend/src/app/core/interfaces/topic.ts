@@ -74,3 +74,12 @@ export interface ITopicRes extends Result {
     user_shared: boolean;
   };
 }
+
+export interface ITopicLikeDislikRes extends Result {
+  data: {
+    action: string;
+    likes_count: number;
+    dislikes_count: number;
+    user_reaction: 'like' | 'dislike';
+  };
+}

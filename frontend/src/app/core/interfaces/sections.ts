@@ -76,8 +76,8 @@ export interface ITopic {
   image: string;
   image_url: string;
   closed: boolean;
-  created_at: string;
-  updated_at: string;
+  created_at: Date;
+  updated_at: Date;
   author: {
     id: number;
     telegram_id: string;
@@ -112,6 +112,6 @@ export interface ITopic {
   dislikes_count: number;
   shares_count: number;
   views_count: number;
-  user_reaction: any;
+  user_reaction: 'like' | 'dislike';
   user_shared: boolean;
 }

@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment.development';
-import { ITopicRes, ResultData } from '../interfaces';
+import { ITopicLikeDislikRes, ITopicRes, ResultData } from '../interfaces';
 import { Result } from '../interfaces/result';
 
 @Injectable({
@@ -35,8 +35,13 @@ export class Topic {
     }
     return this.http.put<Result>(`${environment.apiUrl}/topics/${topic_id}`, formData);
   }
-
   info(topic_id: number): Observable<ITopicRes> {
     return this.http.get<ITopicRes>(`${environment.apiUrl}/topics/${topic_id}`);
+  }
+
+  topicLikeDislike(topic_id: number, is_like: boolean): Observable<ITopicLikeDislikRes> {
+    return this.http.post<ITopicLikeDislikRes>(`${environment.apiUrl}/likes/topic/${topic_id}`, {
+      is_like,
+    });
   }
 }

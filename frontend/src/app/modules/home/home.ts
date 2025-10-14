@@ -1,9 +1,9 @@
-import { Component, inject, resource, signal } from '@angular/core';
+import { Component, inject, OnInit, resource, signal } from '@angular/core';
 import { HomeSlide, TabContent, TabSlide } from './components';
 import { Layout } from '../../layout/layout';
 import { ISectionsDashboard, Section } from '../../core';
 import { firstValueFrom } from 'rxjs';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-home',
@@ -11,17 +11,34 @@ import { ActivatedRoute, Router } from '@angular/router';
   templateUrl: './home.html',
   styleUrl: './home.scss',
 })
-export class Home {
+export class Home implements OnInit {
   private sectionService = inject(Section);
-  private router = inject(Router);
-  private activRoute = inject(ActivatedRoute);
+  private route = inject(ActivatedRoute);
 
-  section = signal<ISectionsDashboard | null>(null);
-
-  private sections = resource({
-    loader: async () =>
-      await firstValueFrom(this.sectionService.forumsDashboard()).then((res) => {}),
+  sections = this.sectionService.sections.asReadonly();
+  sectionBlog = signal<ISectionsDashboard[] | null>(null);
+  protected sectionsDashboard = resource({
+    loader: () =>
+      firstValueFrom(this.sectionService.forumsDashboard()).then((res) => {
+        const paramValue = this.route.snapshot.queryParamMap.get('forms');
+        const sortSection = res.sections.filter(
+          (item) => item.parent_id === Number(paramValue) && item.topics_count !== 0
+        );
+        this.sectionBlog.set(sortSection.length ? sortSection : null);
+        return res;
+      }),
   }).asReadonly();
 
-  constructor() {}
+  ngOnInit(): void {
+    this.route.queryParamMap.subscribe((params) => {
+      const paramValue = params.get('forms');
+      const data = this.sectionsDashboard.value();
+      if (data && paramValue) {
+        const sortSection = data.sections.filter(
+          (item) => item.parent_id === Number(paramValue) && item.topics_count !== 0
+        );
+        this.sectionBlog.set(sortSection.length ? sortSection : null);
+      }
+    });
+  }
 }

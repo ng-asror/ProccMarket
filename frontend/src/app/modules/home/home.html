@@ -1,7 +1,23 @@
 <app-layout>
 	<div class="grid grid-cols-1 gap-y-[15px]" content>
 		<app-home-slide class="px-[15px] max-w-[768px] w-full mx-auto"></app-home-slide>
-		<app-tab-slide></app-tab-slide>
-		<app-tab-content />
+		@if(sections.value(); as sections){
+		<app-tab-slide [sections]="sections"></app-tab-slide>
+		}
+		@if(!sectionsDashboard.isLoading()) {
+		@if(sectionBlog(); as data) {
+		@for (item of data; track item.id) {
+		<app-tab-content [section-blog]="item" />
+		}
+		} @else{
+		<div class="flex flex-col items-center justify-center gap-4 p-6 text-center">
+			<p class="text-gray-700 text-[14px]">
+				Форумы пока не созданы. Создайте первый форум, чтобы начать.
+			</p>
+			<a routerLink="/profile/my-topics/create" class="btn btn-primary">
+				Создать форум
+			</a>
+		</div>
+		}}
 	</div>
 </app-layout>

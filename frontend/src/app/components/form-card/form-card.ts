@@ -4,7 +4,7 @@ import { icons, LucideAngularModule } from 'lucide-angular';
 
 @Component({
   selector: 'app-form-card',
-  imports: [LucideAngularModule, RouterLink],
+  imports: [LucideAngularModule],
   templateUrl: './form-card.html',
   styleUrl: './form-card.scss',
 })

@@ -50,7 +50,7 @@ export interface ISectionsDashboard {
   topics_count: number;
   has_access: boolean;
   is_purchased: boolean;
-  parent_id?: number;
+  parent_id?: number | null;
   parent?: ISectionsDashSecParent;
   position: number;
   topics: ITopic[];

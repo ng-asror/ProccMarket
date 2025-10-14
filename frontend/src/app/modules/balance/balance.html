@@ -28,17 +28,23 @@
 							<p>От</p>
 							<input type="text" id="ot" autocomplete="off" class="w-full" (change)="getAllTransactions.reload()"
 								[(ngModel)]="sortFilter.start_date" appDateFocus readonly />
-							<lucide-icon *ngIf="sortFilter.start_date === ''" [name]="ICONS.Calendar" size="18"></lucide-icon>
-							<lucide-icon *ngIf="sortFilter.start_date !== ''" [name]="ICONS.X" size="20"
+							@if (sortFilter.start_date === '') {
+							<lucide-icon [name]="ICONS.Calendar" size="18"></lucide-icon>
+							} @else{
+							<lucide-icon [name]="ICONS.X" size="20"
 								(click)="sortFilter.start_date = ''; getAllTransactions.reload()"></lucide-icon>
+							}
 						</div>
 						<div class="input w-full cursor-pointer">
 							<p>До</p>
 							<input type="text" autocomplete="off" [(ngModel)]="sortFilter.end_date"
 								(change)="getAllTransactions.reload()" class="w-full" id="do" appDateFocus readonly />
-							<lucide-icon *ngIf="sortFilter.end_date === ''" [name]="ICONS.Calendar" size="18"></lucide-icon>
-							<lucide-icon *ngIf="sortFilter.end_date !== ''" [name]="ICONS.X" size="20"
+							@if (sortFilter.end_date === '') {
+							<lucide-icon [name]="ICONS.Calendar" size="18"></lucide-icon>
+							}@else {
+							<lucide-icon [name]="ICONS.X" size="20"
 								(click)="sortFilter.end_date = ''; getAllTransactions.reload()"></lucide-icon>
+							}
 						</div>
 					</div>
 					<select class="select w-full cursor-pointer" [(ngModel)]="sortFilter.status"

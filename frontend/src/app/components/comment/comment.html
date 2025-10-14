@@ -1,5 +1,6 @@
 @if (comment(); as comment) {
-<div class="card border-1 border-[#E1E1E1] space-y-[10px] p-[10px]">
+<div [id]="comment.created_at + comment.user.telegram_id"
+	class="card border-1 border-[#E1E1E1] space-y-[10px] p-[10px]">
 	<div class="flex items-center justify-between">
 		<div class="flex items-center gap-x-[5px]">
 			<div class="avatar">
@@ -48,16 +49,16 @@
 			</button>
 		</div>
 	</div>
+	@if (commentContent().replay_id === comment.id) {
+	<div class="mt-[10px]">
+		<textarea placeholder="Ваш комментарий" class="textarea placeholder:text-black/50 textarea-primary mb-[10px] w-full"
+			[(ngModel)]="commentContent().content"></textarea>
+		<button type="button" class="btn btn-primary ml-auto block" (click)="createComment()"
+			[disabled]="commentContent().content ===''">Отправить</button>
+	</div>
+	}
 </div>
-@if (commentContent().replay_id) {
-<div class="mt-[10px]">
-	<textarea placeholder="Ваш комментарий" class="textarea placeholder:text-black/50 textarea-primary mb-[10px] w-full"
-		[(ngModel)]="commentContent().content"></textarea>
-	<button type="button" class="btn btn-primary ml-auto block" (click)="createComment()"
-		[disabled]="commentContent().content ===''">Отправить</button>
-</div>
-}
-@for (item of comment.replies; track item.id) {
+@for (item of comment.replies?.slice()?.reverse(); track item.id) {
 <div class="card border-1 w-[100%] ml-auto border-[#E1E1E1] my-[10px] space-y-[10px] p-[10px]">
 	<div class="flex items-center justify-between">
 		<div class="flex items-center gap-x-[5px]">
@@ -73,11 +74,12 @@
 		</div>
 		<b class="text-black text-[16px]">{{item.user.balance | numeral: '$0,0'}}</b>
 	</div>
-	<div class="border-l-[3px] border-[#818181] p-[5px] bg-[#F2F2F2]">
+	<a [href]="'#'+comment.created_at + comment.user.telegram_id"
+		class="border-l-[3px] border-[#818181] p-[5px] bg-[#F2F2F2]">
 		<h4 class="text-[#71839B] text-base">{{item.user.name??'user'+item.user.id}} -
 			{{comment.user.role_name??'Гость'}}</h4>
 		<p class="text-base truncate-text-2" [innerHTML]="comment.content"></p>
-	</div>
+	</a>
 	<div [innerHTML]="item.content"></div>
 	<div>
 		<p class="text-sm text-black/50 block mb-[5px]">{{item.created_at | amTimeAgo}}</p>
@@ -100,13 +102,26 @@
 						'0a'}}</span>
 				</button>
 			</div>
-			<button type="button" class="flex items-center gap-x-[5px] text-base cursor-pointer text-black/50">
+			<button type="button" class="flex items-center gap-x-[5px] text-base cursor-pointer text-black/50"
+				(click)="reply(item.id)">
+				@if(commentContent().replay_id !== item.id) {
 				<lucide-icon [name]="ICONS.CornerUpLeft" size="20"></lucide-icon>
+				} @else {
+				<lucide-icon [name]="ICONS.X" size="20"></lucide-icon>
+				}
 				<span>Ответить</span>
 			</button>
 		</div>
+		@if (commentContent().replay_id === item.id) {
+		<div class="mt-[10px]">
+			<textarea placeholder="Ваш комментарий"
+				class="textarea placeholder:text-black/50 textarea-primary mb-[10px] w-full"
+				[(ngModel)]="commentContent().content"></textarea>
+			<button type="button" class="btn btn-primary ml-auto block" (click)="createComment()"
+				[disabled]="commentContent().content ===''">Отправить</button>
+		</div>
+		}
 	</div>
 </div>
-<app-comment [comment]="item"></app-comment>
 }
 }

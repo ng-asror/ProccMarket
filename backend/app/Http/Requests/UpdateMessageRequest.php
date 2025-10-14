@@ -4,7 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class CancelOrderTransactionRequest extends FormRequest
+class UpdateMessageRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -22,7 +22,7 @@ class CancelOrderTransactionRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'reason' => ['nullable', 'string', 'max:1000'],
+            'content' => ['required', 'string', 'max:10000'],
         ];
     }
 
@@ -34,15 +34,8 @@ class CancelOrderTransactionRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'reason.string' => 'Причина отмены должна быть строкой.',
-            'reason.max' => 'Причина отмены не должна превышать 1000 символов.',
-        ];
-    }
-
-    public function attributes(): array
-    {
-        return [
-            'reason' => 'причина отмены',
+            'content.required' => 'Message content is required.',
+            'content.max' => 'Message content must not exceed 10,000 characters.',
         ];
     }
 }

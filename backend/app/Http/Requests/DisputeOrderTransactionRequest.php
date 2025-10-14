@@ -34,9 +34,17 @@ class DisputeOrderTransactionRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'reason.required' => 'Dispute reason is required.',
-            'reason.min' => 'Dispute reason must be at least 10 characters.',
-            'reason.max' => 'Dispute reason must not exceed 2,000 characters.',
+            'reason.required' => 'Причина спора обязательна.',
+            'reason.string' => 'Причина спора должна быть строкой.',
+            'reason.min' => 'Причина спора должна содержать минимум 10 символов.',
+            'reason.max' => 'Причина спора не должна превышать 2000 символов.',
+        ];
+    }
+
+    public function attributes(): array
+    {
+        return [
+            'reason' => 'причина спора',
         ];
     }
 }

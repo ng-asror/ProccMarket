@@ -23,9 +23,9 @@ use App\Http\Controllers\API\V1\UploadController;
 use App\Http\Controllers\API\V1\UserController;
 use App\Http\Controllers\API\V1\WebSocketController;
 use App\Http\Controllers\API\V1\WithdrawalController;
-use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Broadcast;
+use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function () {
 
@@ -43,11 +43,13 @@ Route::prefix('v1')->group(function () {
         Route::post('/register', [AuthController::class, 'register']);
         Route::post('/login', [AuthController::class, 'login']);
         Route::post('/google', [AuthController::class, 'googleLogin']);
+        Route::post('/validate-referral', [AuthController::class, 'validateReferralCode']);
 
         Route::middleware('auth:sanctum')->group(function () {
             Route::get('/me', [AuthController::class, 'me']);
             Route::get('/profile', [AuthController::class, 'profile']);
             Route::get('/my-topics', [AuthController::class, 'myTopics']);
+            Route::get('/referrals', [AuthController::class, 'referralList']);
             Route::put('/update', [AuthController::class, 'update']);
             Route::post('/logout', [AuthController::class, 'logout']);
         });
@@ -219,21 +221,34 @@ Route::prefix('v1')->group(function () {
             // Message routes
             Route::post('/conversations/{conversation}/messages', [MessageController::class, 'store']);
             Route::get('/messages/{message}', [MessageController::class, 'show']);
+            Route::put('/messages/{message}', [MessageController::class, 'update']);
             Route::post('/messages/{message}/read', [MessageController::class, 'markAsRead']);
             Route::delete('/messages/{message}', [MessageController::class, 'destroy']);
 
             // Order Transaction routes
-            Route::prefix('conversations/{conversation}/transactions')->group(function () {
+            
+            Route::prefix('conversations/{conversation}/orders')->group(function () {
                 Route::get('/', [OrderTransactionController::class, 'index']);
                 Route::post('/', [OrderTransactionController::class, 'store']);
             });
 
-            Route::prefix('transactions')->group(function () {
+            Route::prefix('orders')->group(function () {
                 Route::get('/{orderTransaction}', [OrderTransactionController::class, 'show']);
                 Route::post('/{orderTransaction}/accept', [OrderTransactionController::class, 'accept']);
                 Route::post('/{orderTransaction}/deliver', [OrderTransactionController::class, 'deliver']);
                 Route::post('/{orderTransaction}/complete', [OrderTransactionController::class, 'complete']);
+                
+                // Pending orders uchun cancel
                 Route::post('/{orderTransaction}/cancel', [OrderTransactionController::class, 'cancel']);
+                
+                // YANGI: Qayta ishlashga yuborish (delivered -> in_progress)
+                Route::post('/{orderTransaction}/request-revision', [OrderTransactionController::class, 'requestRevision']);
+                
+                // Accepted orders uchun cancellation request flow
+                Route::post('/{orderTransaction}/request-cancellation', [OrderTransactionController::class, 'requestCancellation']);
+                Route::post('/{orderTransaction}/approve-cancellation', [OrderTransactionController::class, 'approveCancellation']);
+                Route::post('/{orderTransaction}/reject-cancellation', [OrderTransactionController::class, 'rejectCancellation']);
+                
                 Route::post('/{orderTransaction}/dispute', [OrderTransactionController::class, 'dispute']);
             });
         });

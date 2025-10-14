@@ -106,7 +106,7 @@
             font-weight: 500;
         }
 
-        .form-group input {
+        .form-group input, .form-group select {
             width: 100%;
             padding: 12px 15px;
             border: 2px solid #e0e0e0;
@@ -115,7 +115,7 @@
             transition: border-color 0.3s;
         }
 
-        .form-group input:focus {
+        .form-group input:focus, .form-group select:focus {
             outline: none;
             border-color: #667eea;
         }
@@ -423,6 +423,9 @@
         .order-status.completed { background: #d4edda; color: #155724; }
         .order-status.dispute { background: #f8d7da; color: #721c24; }
         .order-status.released { background: #d4edda; color: #155724; }
+        .order-status.cancellation_requested { background: #fff3cd; color: #856404; }
+        .order-status.cancelled { background: #f8d7da; color: #721c24; }
+        .order-status.refunded { background: #f8d7da; color: #721c24; }
 
         .order-title {
             font-weight: 600;
@@ -445,6 +448,16 @@
             line-height: 1.4;
         }
 
+        .order-meta {
+            font-size: 12px;
+            color: #999;
+            margin-bottom: 12px;
+        }
+
+        .order-meta strong {
+            color: #666;
+        }
+
         .order-actions {
             display: flex;
             flex-direction: column;
@@ -459,7 +472,27 @@
 
         .btn-success { background: #28a745; }
         .btn-primary { background: #007bff; }
+        .btn-warning { background: #ffc107; color: #333; }
         .btn-danger { background: #dc3545; }
+        .btn-info { background: #17a2b8; }
+
+        .cancellation-notice {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            font-size: 12px;
+        }
+
+        .revision-notice {
+            background: #d1ecf1;
+            border: 1px solid #17a2b8;
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            font-size: 12px;
+        }
 
         .modal {
             display: none;
@@ -588,6 +621,29 @@
 
         .ws-status.connected { background: #28a745; }
         .ws-status.disconnected { background: #dc3545; }
+
+        .role-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 600;
+            margin-left: 6px;
+        }
+
+        .role-badge.client { background: #007bff; color: white; }
+        .role-badge.freelancer { background: #28a745; color: white; }
+
+        .revision-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 600;
+            margin-left: 6px;
+            background: #17a2b8;
+            color: white;
+        }
     </style>
 </head>
 <body>
@@ -699,6 +755,13 @@
             </div>
             <div class="modal-body">
                 <div class="form-group">
+                    <label>Who is creating this order?</label>
+                    <select id="order-type">
+                        <option value="true">I'm the Client (I will pay)</option>
+                        <option value="false">I'm the Freelancer (I will receive payment)</option>
+                    </select>
+                </div>
+                <div class="form-group">
                     <label>Title</label>
                     <input type="text" id="order-title" placeholder="e.g., Build a website">
                 </div>
@@ -712,12 +775,30 @@
                 </div>
                 <div class="form-group">
                     <label>Deadline (Optional)</label>
-                    <input type="date" id="order-deadline">
+                    <input type="datetime-local" id="order-deadline">
                 </div>
             </div>
             <div class="modal-footer">
                 <button class="btn-secondary" onclick="closeModal('create-order-modal')">Cancel</button>
                 <button class="btn-success" onclick="createOrder()">Create Order</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="reason-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="reason-modal-title">Enter Reason</h3>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label id="reason-modal-label">Reason:</label>
+                    <textarea id="reason-modal-input" placeholder="Enter your reason..." rows="4"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="closeModal('reason-modal')">Cancel</button>
+                <button id="reason-modal-submit" onclick="submitReason()">Submit</button>
             </div>
         </div>
     </div>
@@ -731,7 +812,8 @@
             conversations: [],
             currentConversation: null,
             echo: null,
-            wsConnected: false
+            wsConnected: false,
+            reasonCallback: null
         };
 
         // Utility Functions
@@ -797,11 +879,7 @@
                 document.getElementById('user-avatar').textContent = (user.name || user.email).charAt(0).toUpperCase();
 
                 showNotification('Logged in successfully! 🎉');
-
-                // Try to initialize WebSocket (non-blocking)
                 initializeWebSocket();
-
-                // Load conversations
                 await loadConversations();
             } catch (error) {
                 showNotification(error.response?.data?.message || 'Login failed', 'error');
@@ -813,7 +891,7 @@
                 try { state.echo.disconnect(); } catch(e) {}
             }
             
-            state = { token: null, user: null, conversations: [], currentConversation: null, echo: null, wsConnected: false };
+            state = { token: null, user: null, conversations: [], currentConversation: null, echo: null, wsConnected: false, reasonCallback: null };
             
             document.getElementById('login-screen').style.display = 'flex';
             document.getElementById('main-app').style.display = 'none';
@@ -823,22 +901,17 @@
             showNotification('Logged out successfully');
         }
 
-        // WebSocket (Non-blocking)
+        // WebSocket
         function initializeWebSocket() {
             console.log('🔌 Attempting WebSocket connection...');
-            console.log('🔑 Token:', state.token ? 'Present' : 'Missing');
-            console.log('🌐 WS Host: 127.0.0.1:8080');
             
-            // Enable Pusher logging
             if (typeof Pusher !== 'undefined') {
                 Pusher.logToConsole = true;
             }
             
             try {
-                // IMPORTANT: Use 'pusher' broadcaster for Reverb (not 'reverb')
-                // Reverb uses Pusher protocol
                 const echoConfig = {
-                    broadcaster: 'pusher', // ← CHANGED from 'reverb' to 'pusher'
+                    broadcaster: 'pusher',
                     key: 'pfhvoct1m3qrpxulyis8',
                     wsHost: '127.0.0.1',
                     wsPort: 8080,
@@ -846,7 +919,7 @@
                     forceTLS: false,
                     enabledTransports: ['ws'],
                     disableStats: true,
-                    cluster: 'mt1', // Dummy cluster (required by Pusher, ignored by Reverb)
+                    cluster: 'mt1',
                     authEndpoint: 'http://127.0.0.1:8000/api/v1/broadcasting/auth',
                     auth: {
                         headers: {
@@ -856,43 +929,24 @@
                     }
                 };
                 
-                console.log('📡 Creating Echo instance with Pusher broadcaster...');
-                
                 state.echo = new Echo(echoConfig);
 
-                // Check if Echo created successfully
-                if (!state.echo) {
-                    throw new Error('Echo instance not created');
-                }
-
-                console.log('✅ Echo instance created');
-
-                // Access pusher after a short delay to ensure it's initialized
                 setTimeout(() => {
                     if (state.echo && state.echo.connector && state.echo.connector.pusher) {
-                        console.log('✅ Echo pusher accessible');
-                        
                         const pusher = state.echo.connector.pusher;
                         
                         pusher.connection.bind('state_change', function(states) {
                             console.log('🔄 WebSocket State:', states.previous, '->', states.current);
                         });
                         
-                        pusher.connection.bind('connecting', function() {
-                            console.log('🔌 Connecting to WebSocket...');
-                        });
-                        
                         if (pusher.connection.state === 'connected') {
                             console.log('✅ WebSocket already connected!');
-                            console.log('📍 Socket ID:', pusher.connection.socket_id);
                             updateWSStatus(true);
                             showNotification('Real-time chat enabled! 🔔', 'success');
                         }
 
-                        // `connected` hodisasini bog'lash
                         pusher.connection.bind('connected', function() {
                             console.log('✅ WebSocket connected successfully!');
-                            console.log('📍 Socket ID:', pusher.connection.socket_id);
                             updateWSStatus(true);
                             showNotification('Real-time chat enabled! 🔔', 'success');
                         });
@@ -912,18 +966,8 @@
                             console.warn('⚠️ WebSocket disconnected');
                             updateWSStatus(false);
                         });
-
-                        pusher.connection.bind('error', function(err) {
-                            console.error('❌ WebSocket error:', err);
-                            updateWSStatus(false);
-                        });
-                        
                     } else {
-                        console.error('❌ Echo pusher not accessible:', {
-                            echo: !!state.echo,
-                            connector: !!state.echo?.connector,
-                            pusher: !!state.echo?.connector?.pusher
-                        });
+                        console.error('❌ Echo pusher not accessible');
                         state.echo = null;
                         updateWSStatus(false);
                         showNotification('WebSocket not available - using manual refresh', 'warning');
@@ -949,7 +993,6 @@
                 
                 const channel = state.echo.private(`conversation.${conversationId}`);
                 
-                // Listen for new messages
                 channel.listen('.message.sent', (e) => {
                     console.log('📨 New message received:', e);
                     handleNewMessage(e, conversationId);
@@ -958,16 +1001,6 @@
                 channel.listen('MessageSent', (e) => {
                     console.log('📨 New message received (format 2):', e);
                     handleNewMessage(e, conversationId);
-                });
-                
-                // Also listen to notification event for debugging
-                channel.notification((notification) => {
-                    console.log('🔔 Notification received:', notification);
-                });
-
-                // Listen for errors
-                channel.error((error) => {
-                    console.error('❌ Channel subscription error:', error);
                 });
 
                 console.log('✅ Successfully subscribed to conversation channel');
@@ -980,18 +1013,16 @@
         function handleNewMessage(event, conversationId) {
             console.log('📥 Processing new message:', event);
             
-            // If we're viewing this conversation, just append the new message
             if (state.currentConversation?.id === conversationId) {
                 const message = event.message || event;
                 appendMessage(message);
             }
             
-            // Update conversations list (only once, not multiple times)
             if (!state.conversationsRefreshTimeout) {
                 state.conversationsRefreshTimeout = setTimeout(() => {
                     loadConversations();
                     state.conversationsRefreshTimeout = null;
-                }, 1000); // Debounce: only refresh once per second
+                }, 1000);
             }
             
             showNotification('💬 New message received!', 'info');
@@ -1000,7 +1031,6 @@
         function appendMessage(msg) {
             const container = document.getElementById('messages-container');
             
-            // Check if empty state exists, remove it
             const emptyState = container.querySelector('.empty-state');
             if (emptyState) {
                 emptyState.remove();
@@ -1033,9 +1063,6 @@
                 renderConversations();
             } catch (error) {
                 console.error('Failed to load conversations:', error);
-                if (!error.message.includes('socketId')) {
-                    showNotification('Failed to load conversations', 'error');
-                }
             }
         }
 
@@ -1166,7 +1193,6 @@
                 );
 
                 input.value = '';
-                // setTimeout(() => selectConversation(state.currentConversation.id), 300);
             } catch (error) {
                 showNotification('Failed to send message', 'error');
             }
@@ -1178,7 +1204,7 @@
 
             try {
                 const response = await axios.get(
-                    `${API_BASE_URL}/chat/conversations/${state.currentConversation.id}/transactions`,
+                    `${API_BASE_URL}/chat/conversations/${state.currentConversation.id}/orders`,
                     getAxiosConfig()
                 );
 
@@ -1196,21 +1222,76 @@
                 return;
             }
 
-            container.innerHTML = orders.map(order => `
-                <div class="order-card">
-                    <span class="order-status ${order.status}">${order.status.replace(/_/g, ' ')}</span>
-                    <div class="order-title">${order.title}</div>
-                    <div class="order-amount">${order.amount.toLocaleString()}</div>
-                    <div class="order-description">${order.description}</div>
-                    <div class="order-actions">
-                        ${order.can_accept ? `<button class="btn-success" onclick="acceptOrder(${order.id})">✓ Accept Order</button>` : ''}
-                        ${order.can_deliver ? `<button class="btn-primary" onclick="deliverOrder(${order.id})">📦 Mark Delivered</button>` : ''}
-                        ${order.can_complete ? `<button class="btn-success" onclick="completeOrder(${order.id})">✓ Complete & Pay</button>` : ''}
-                        ${order.can_cancel ? `<button class="btn-danger" onclick="cancelOrder(${order.id})">✗ Cancel</button>` : ''}
-                        ${order.can_dispute ? `<button class="btn-danger" onclick="disputeOrder(${order.id})">⚠ Dispute</button>` : ''}
+            container.innerHTML = orders.map(order => {
+                let roleInfo = '';
+                if (order.is_client) {
+                    roleInfo = '<span class="role-badge client">Client</span>';
+                } else if (order.is_freelancer) {
+                    roleInfo = '<span class="role-badge freelancer">Freelancer</span>';
+                }
+
+                // Revision badge
+                let revisionBadge = '';
+                if (order.has_revisions && order.revision_count > 0) {
+                    revisionBadge = `<span class="revision-badge">🔄 ${order.revision_count}x revised</span>`;
+                }
+
+                let cancellationNotice = '';
+                if (order.waiting_for_my_approval) {
+                    cancellationNotice = `
+                        <div class="cancellation-notice">
+                            ⚠️ <strong>Cancellation Request</strong><br>
+                            Other party wants to cancel this order.
+                            ${order.cancellation_reason ? `<br>Reason: ${order.cancellation_reason}` : ''}
+                        </div>
+                    `;
+                } else if (order.i_requested_cancellation) {
+                    cancellationNotice = `
+                        <div class="cancellation-notice">
+                            ⏳ <strong>Waiting for Approval</strong><br>
+                            Your cancellation request is pending approval.
+                            ${order.cancellation_reason ? `<br>Reason: ${order.cancellation_reason}` : ''}
+                        </div>
+                    `;
+                }
+
+                // Revision notice
+                let revisionNotice = '';
+                if (order.revision_reason && order.status === 'in_progress') {
+                    revisionNotice = `
+                        <div class="revision-notice">
+                            🔄 <strong>Qayta ishlash so'ralgan</strong><br>
+                            ${order.revision_reason}
+                            ${order.revision_requested_at ? `<br><small>So'ralgan vaqt: ${formatTime(order.revision_requested_at)}</small>` : ''}
+                        </div>
+                    `;
+                }
+
+                return `
+                    <div class="order-card">
+                        <span class="order-status ${order.status}">${order.status.replace(/_/g, ' ')}</span>
+                        ${roleInfo}
+                        ${revisionBadge}
+                        <div class="order-title">${order.title}</div>
+                        <div class="order-amount">${parseFloat(order.amount).toFixed(2)}</div>
+                        <div class="order-description">${order.description}</div>
+                        ${order.deadline ? `<div class="order-meta"><strong>Deadline:</strong> ${new Date(order.deadline).toLocaleDateString()}</div>` : ''}
+                        ${revisionNotice}
+                        ${cancellationNotice}
+                        <div class="order-actions">
+                            ${order.can_accept ? `<button class="btn-success" onclick="acceptOrder(${order.id})">✓ Accept Order</button>` : ''}
+                            ${order.can_deliver ? `<button class="btn-primary" onclick="deliverOrder(${order.id})">📦 Mark Delivered</button>` : ''}
+                            ${order.can_request_revision ? `<button class="btn-warning" onclick="requestRevision(${order.id})">🔄 Request Changes</button>` : ''}
+                            ${order.can_complete ? `<button class="btn-success" onclick="completeOrder(${order.id})">✓ Complete & Pay</button>` : ''}
+                            ${order.can_cancel ? `<button class="btn-danger" onclick="cancelOrder(${order.id})">✗ Cancel</button>` : ''}
+                            ${order.can_request_cancellation ? `<button class="btn-warning" onclick="requestCancellation(${order.id})">🚫 Request Cancellation</button>` : ''}
+                            ${order.can_approve_cancellation ? `<button class="btn-success" onclick="approveCancellation(${order.id})">✓ Approve Cancellation</button>` : ''}
+                            ${order.can_reject_cancellation ? `<button class="btn-danger" onclick="rejectCancellation(${order.id})">✗ Reject Cancellation</button>` : ''}
+                            ${order.can_dispute ? `<button class="btn-danger" onclick="disputeOrder(${order.id})">⚠ Open Dispute</button>` : ''}
+                        </div>
                     </div>
-                </div>
-            `).join('');
+                `;
+            }).join('');
         }
 
         function showCreateOrderModal() {
@@ -1226,6 +1307,7 @@
             const description = document.getElementById('order-description').value.trim();
             const amount = document.getElementById('order-amount').value;
             const deadline = document.getElementById('order-deadline').value;
+            const isClientOrder = document.getElementById('order-type').value === 'true';
 
             if (!title || !description || !amount) {
                 showNotification('Please fill in all required fields', 'error');
@@ -1235,16 +1317,16 @@
             try {
                 const data = {
                     conversation_id: state.currentConversation.id,
-                    executor_id: state.currentConversation.other_participant.id,
                     title,
                     description,
-                    amount: parseFloat(amount)
+                    amount: parseFloat(amount),
+                    is_client_order: isClientOrder
                 };
 
                 if (deadline) data.deadline = deadline;
 
                 await axios.post(
-                    `${API_BASE_URL}/chat/conversations/${state.currentConversation.id}/transactions`,
+                    `${API_BASE_URL}/chat/conversations/${state.currentConversation.id}/orders`,
                     data,
                     getAxiosConfig()
                 );
@@ -1266,10 +1348,13 @@
 
         async function acceptOrder(orderId) {
             try {
-                await axios.post(`${API_BASE_URL}/chat/transactions/${orderId}/accept`, {}, getAxiosConfig());
+                await axios.post(`${API_BASE_URL}/chat/orders/${orderId}/accept`, {}, getAxiosConfig());
                 showNotification('Order accepted! Funds escrowed. 💰');
                 loadOrders();
                 selectConversation(state.currentConversation.id);
+                
+                const response = await axios.get(`${API_BASE_URL}/auth/me`, getAxiosConfig());
+                document.getElementById('user-balance').textContent = response.data.balance || 0;
             } catch (error) {
                 showNotification(error.response?.data?.message || 'Failed to accept order', 'error');
             }
@@ -1277,7 +1362,7 @@
 
         async function deliverOrder(orderId) {
             try {
-                await axios.post(`${API_BASE_URL}/chat/transactions/${orderId}/deliver`, {}, getAxiosConfig());
+                await axios.post(`${API_BASE_URL}/chat/orders/${orderId}/deliver`, {}, getAxiosConfig());
                 showNotification('Work marked as delivered! ✅');
                 loadOrders();
             } catch (error) {
@@ -1286,12 +1371,13 @@
         }
 
         async function completeOrder(orderId) {
-            if (!confirm('This will release payment to the executor. Continue?')) return;
+            if (!confirm('This will release payment to the freelancer. Continue?')) return;
 
             try {
-                await axios.post(`${API_BASE_URL}/chat/transactions/${orderId}/complete`, {}, getAxiosConfig());
+                await axios.post(`${API_BASE_URL}/chat/orders/${orderId}/complete`, {}, getAxiosConfig());
                 showNotification('Order completed! Payment released. 💸');
                 loadOrders();
+                
                 const response = await axios.get(`${API_BASE_URL}/auth/me`, getAxiosConfig());
                 document.getElementById('user-balance').textContent = response.data.balance || 0;
             } catch (error) {
@@ -1300,12 +1386,88 @@
         }
 
         async function cancelOrder(orderId) {
-            const reason = prompt('Enter cancellation reason:');
-            if (!reason) return;
+            showReasonModal(
+                'Cancel Order',
+                'Enter cancellation reason (optional):',
+                async (reason) => {
+                    try {
+                        await axios.post(`${API_BASE_URL}/chat/orders/${orderId}/cancel`, 
+                            reason ? { reason } : {}, 
+                            getAxiosConfig()
+                        );
+                        showNotification('Order cancelled. ❌');
+                        loadOrders();
+                    } catch (error) {
+                        showNotification(error.response?.data?.message || 'Failed', 'error');
+                    }
+                }
+            );
+        }
+
+        async function requestCancellation(orderId) {
+            showReasonModal(
+                'Request Cancellation',
+                'Why do you want to cancel? (optional):',
+                async (reason) => {
+                    try {
+                        await axios.post(`${API_BASE_URL}/chat/orders/${orderId}/request-cancellation`, 
+                            reason ? { reason } : {}, 
+                            getAxiosConfig()
+                        );
+                        showNotification('Cancellation request sent. Waiting for approval... ⏳', 'info');
+                        loadOrders();
+                    } catch (error) {
+                        showNotification(error.response?.data?.message || 'Failed', 'error');
+                    }
+                }
+            );
+        }
+
+        async function requestRevision(orderId) {
+            showReasonModal(
+                '🔄 Qayta ishlashga yuborish',
+                'Nima o\'zgartirilishi kerak? (kamida 10 ta belgi):',
+                async (reason) => {
+                    if (!reason || reason.length < 10) {
+                        showNotification('Sabab kamida 10 ta belgidan iborat bo\'lishi kerak', 'error');
+                        return;
+                    }
+
+                    try {
+                        await axios.post(`${API_BASE_URL}/chat/orders/${orderId}/request-revision`, 
+                            { reason }, 
+                            getAxiosConfig()
+                        );
+                        showNotification('Ish freelancerga qayta ishlashga yuborildi! 🔄', 'info');
+                        loadOrders();
+                    } catch (error) {
+                        showNotification(error.response?.data?.message || 'Failed', 'error');
+                    }
+                }
+            );
+        }
+
+        async function approveCancellation(orderId) {
+            if (!confirm('Are you sure you want to approve this cancellation? Funds will be refunded.')) return;
 
             try {
-                await axios.post(`${API_BASE_URL}/chat/transactions/${orderId}/cancel`, { reason }, getAxiosConfig());
-                showNotification('Order cancelled. Refund processed. 🔄');
+                await axios.post(`${API_BASE_URL}/chat/orders/${orderId}/approve-cancellation`, {}, getAxiosConfig());
+                showNotification('Cancellation approved. Funds refunded. 🔄');
+                loadOrders();
+                
+                const response = await axios.get(`${API_BASE_URL}/auth/me`, getAxiosConfig());
+                document.getElementById('user-balance').textContent = response.data.balance || 0;
+            } catch (error) {
+                showNotification(error.response?.data?.message || 'Failed', 'error');
+            }
+        }
+
+        async function rejectCancellation(orderId) {
+            if (!confirm('Are you sure you want to reject this cancellation request?')) return;
+
+            try {
+                await axios.post(`${API_BASE_URL}/chat/orders/${orderId}/reject-cancellation`, {}, getAxiosConfig());
+                showNotification('Cancellation request rejected. Order continues. ▶️', 'info');
                 loadOrders();
             } catch (error) {
                 showNotification(error.response?.data?.message || 'Failed', 'error');
@@ -1313,24 +1475,48 @@
         }
 
         async function disputeOrder(orderId) {
-            const reason = prompt('Enter dispute reason (min 10 characters):');
-            if (!reason || reason.length < 10) {
-                showNotification('Dispute reason must be at least 10 characters', 'error');
-                return;
-            }
+            showReasonModal(
+                'Open Dispute',
+                'Describe the issue (min 10 characters):',
+                async (reason) => {
+                    if (!reason || reason.length < 10) {
+                        showNotification('Dispute reason must be at least 10 characters', 'error');
+                        return;
+                    }
 
-            try {
-                await axios.post(`${API_BASE_URL}/chat/transactions/${orderId}/dispute`, { reason }, getAxiosConfig());
-                showNotification('Dispute raised. Admin will review. ⚠️', 'info');
-                loadOrders();
-            } catch (error) {
-                showNotification(error.response?.data?.message || 'Failed', 'error');
+                    try {
+                        await axios.post(`${API_BASE_URL}/chat/orders/${orderId}/dispute`, { reason }, getAxiosConfig());
+                        showNotification('Dispute opened. Admin will review. ⚠️', 'warning');
+                        loadOrders();
+                    } catch (error) {
+                        showNotification(error.response?.data?.message || 'Failed', 'error');
+                    }
+                }
+            );
+        }
+
+        // Reason Modal Helper
+        function showReasonModal(title, label, callback) {
+            document.getElementById('reason-modal-title').textContent = title;
+            document.getElementById('reason-modal-label').textContent = label;
+            document.getElementById('reason-modal-input').value = '';
+            state.reasonCallback = callback;
+            document.getElementById('reason-modal').classList.add('active');
+        }
+
+        function submitReason() {
+            const reason = document.getElementById('reason-modal-input').value.trim();
+            if (state.reasonCallback) {
+                state.reasonCallback(reason);
+                state.reasonCallback = null;
             }
+            closeModal('reason-modal');
         }
 
         console.log('💬 ProccMarket Chat Ready!');
         console.log('📝 Note: Real-time updates require Reverb server running on port 8080');
         console.log('🔄 Use the refresh button (↻) to manually update messages');
+        console.log('✨ NEW: Request revisions on delivered work before completion!');
     </script>
 </body>
 </html>

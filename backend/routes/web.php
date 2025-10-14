@@ -105,8 +105,11 @@ Route::middleware(['auth', 'verified', 'admin'])->group(function () {
     Route::prefix('order-transactions')->name('admin.order-transactions.')->group(function () {
         Route::get('/', [OrderTransactionAdminController::class, 'index'])->name('index');
         Route::get('/{orderTransaction}', [OrderTransactionAdminController::class, 'show'])->name('show');
+        
+        // Admin actions
         Route::post('/{orderTransaction}/resolve-dispute', [OrderTransactionAdminController::class, 'resolveDispute'])->name('resolve-dispute');
         Route::post('/{orderTransaction}/force-cancel', [OrderTransactionAdminController::class, 'forceCancel'])->name('force-cancel');
+        Route::post('/{orderTransaction}/force-complete', [OrderTransactionAdminController::class, 'forceComplete'])->name('force-complete');
     });
 
 });

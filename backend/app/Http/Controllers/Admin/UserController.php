@@ -59,7 +59,7 @@ class UserController extends Controller
             }
         }
 
-        $users = $query->paginate(10)->withQueryString();
+        $users = $query->paginate(15)->withQueryString();
         $roles = Role::all();
 
         return Inertia::render('admin/users/index', [

@@ -16,7 +16,7 @@ use Illuminate\Support\Facades\Storage;
 class AuthController extends Controller
 {
     /**
-     * Existing user.
+     * Check if user exists.
      */
     public function existUser(Request $request): JsonResponse
     {
@@ -46,6 +46,7 @@ class AuthController extends Controller
             'email' => 'required|email|unique:users,email',
             'telegram_id' => 'nullable|string',
             'password' => 'required|string|min:6|confirmed',
+            'referral_code' => 'nullable|string|exists:users,referral_code',
         ]);
 
         if ($validator->fails()) {
@@ -55,10 +56,21 @@ class AuthController extends Controller
             ], 422);
         }
 
+        // Find referrer if referral code provided
+        $referrerId = null;
+        if ($request->filled('referral_code')) {
+            $referrer = User::where('referral_code', $request->referral_code)->first();
+            
+            if ($referrer) {
+                $referrerId = $referrer->id;
+            }
+        }
+
         $user = User::create([
             'email' => $request->email,
             'telegram_id' => $request->telegram_id,
             'password' => Hash::make($request->password),
+            'referred_by' => $referrerId,
         ]);
 
         $token = $user->createToken('auth_token')->plainTextToken;
@@ -66,8 +78,9 @@ class AuthController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'User registered successfully',
-            'user' => $user,
+            'user' => $user->load('role'),
             'token' => $token,
+            'referred_by' => $referrerId ? $user->referrer->only(['id', 'name', 'email']) : null,
         ], 201);
     }
 
@@ -101,7 +114,7 @@ class AuthController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Login successful',
-            'user' => $user,
+            'user' => $user->load('role'),
             'token' => $token,
         ], 200);
     }
@@ -117,6 +130,9 @@ class AuthController extends Controller
         ], 200);
     }
 
+    /**
+     * Get user topics.
+     */
     public function myTopics(Request $request): JsonResponse
     {
         $user = $request->user();
@@ -188,8 +204,6 @@ class AuthController extends Controller
         ], 200);
     }
 
-
-
     /**
      * Update user profile.
      */
@@ -218,15 +232,12 @@ class AuthController extends Controller
             $data['password'] = Hash::make($request->password);
         }
 
-        // Handle avatar (URL or file upload)
         if ($request->filled('avatar')) {
             $avatar = $request->avatar;
             
-            // Check if it's a URL
             if (filter_var($avatar, FILTER_VALIDATE_URL)) {
                 $data['avatar'] = $avatar;
             } 
-            // Check if it's a base64 image
             elseif (preg_match('/^data:image\/(\w+);base64,/', $avatar, $matches)) {
                 $imageData = substr($avatar, strpos($avatar, ',') + 1);
                 $imageData = base64_decode($imageData);
@@ -249,7 +260,7 @@ class AuthController extends Controller
     }
 
     /**
-     * Get user profile with analytics.
+     * Get user profile with analytics and referral data.
      */
     public function profile(Request $request): JsonResponse
     {
@@ -272,6 +283,32 @@ class AuthController extends Controller
             ->get()
             ->sum('likes_count');
 
+        // Get referral statistics
+        $referralStats = $user->getReferralStats();
+
+        // If $user->referral_code is null, generate one
+        if (!$user->referral_code) {
+            $user->referral_code = $user->generateUniqueReferralCode();
+            $user->save();
+        }
+
+        // Get recent referrals with limited data
+        // $recentReferrals = $user->referrals()
+        //     ->select(['id', 'name', 'email', 'avatar', 'created_at', 'banned'])
+        //     ->latest()
+        //     ->limit(10)
+        //     ->get()
+        //     ->map(function ($referral) {
+        //         return [
+        //             'id' => $referral->id,
+        //             'name' => $referral->name,
+        //             'email' => $referral->email,
+        //             'avatar_url' => $referral->avatar_url,
+        //             'joined_at' => $referral->created_at,
+        //             'status' => $referral->banned ? 'banned' : 'active',
+        //         ];
+        //     });
+
         return response()->json([
             'success' => true,
             'user' => $user,
@@ -279,6 +316,90 @@ class AuthController extends Controller
                 'topics_count' => $topicsCount,
                 'views_count' => $viewsCount,
                 'likes_count' => $likesCount,
+            ],
+            'referral' => [
+                'code' => $user->referral_code,
+                'stats' => $referralStats,
+                // 'recent_referrals' => $recentReferrals,
+                'referred_by' => $user->hasReferrer() 
+                    ? $user->referrer->only(['id', 'name', 'email', 'avatar_url'])
+                    : null,
+            ]
+        ], 200);
+    }
+
+    /**
+     * Get detailed referral list.
+     */
+    public function referralList(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        
+        $perPage = $request->input('per_page', 15);
+        $status = $request->input('status'); // 'active', 'banned', or null for all
+
+        $query = $user->referrals()
+            ->select(['id', 'name', 'email', 'avatar', 'created_at', 'banned'])
+            ->latest();
+
+        if ($status === 'active') {
+            $query->where('banned', false);
+        } elseif ($status === 'banned') {
+            $query->where('banned', true);
+        }
+
+        $referrals = $query->paginate($perPage);
+
+        return response()->json([
+            'success' => true,
+            'referrals' => $referrals->through(function ($referral) {
+                return [
+                    'id' => $referral->id,
+                    'name' => $referral->name,
+                    'email' => $referral->email,
+                    'avatar_url' => $referral->avatar_url,
+                    'joined_at' => $referral->created_at,
+                    'status' => $referral->banned ? 'banned' : 'active',
+                ];
+            }),
+            'stats' => $user->getReferralStats(),
+        ], 200);
+    }
+
+    /**
+     * Validate referral code.
+     */
+    public function validateReferralCode(Request $request): JsonResponse
+    {
+        $validator = Validator::make($request->all(), [
+            'referral_code' => 'required|string',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        $referrer = User::where('referral_code', $request->referral_code)
+            ->where('banned', false)
+            ->first();
+
+        if (!$referrer) {
+            return response()->json([
+                'success' => false,
+                'valid' => false,
+                'message' => 'Invalid or inactive referral code'
+            ], 200);
+        }
+
+        return response()->json([
+            'success' => true,
+            'valid' => true,
+            'referrer' => [
+                'name' => $referrer->name,
+                'email' => $referrer->email,
             ]
         ], 200);
     }
@@ -296,12 +417,15 @@ class AuthController extends Controller
         ], 200);
     }
 
-
+    /**
+     * Google login with referral support.
+     */
     public function googleLogin(Request $request): JsonResponse
     {
         $validator = Validator::make($request->all(), [
             'id_token' => 'required|string',
             'telegram_id' => 'required|string',
+            'referral_code' => 'nullable|string|exists:users,referral_code',
         ]);
 
         if ($validator->fails()) {
@@ -311,7 +435,6 @@ class AuthController extends Controller
             ], 422);
         }
 
-        // Google'dan tokenni verify qilish
         $response = Http::get("https://oauth2.googleapis.com/tokeninfo", [
             'id_token' => $request->id_token
         ]);
@@ -325,7 +448,6 @@ class AuthController extends Controller
 
         $googleUser = $response->json();
 
-        // Google qaytargan foydalanuvchi ma'lumotlari
         $email = $googleUser['email'] ?? null;
         $name = $googleUser['name'] ?? null;
         $avatar = $googleUser['picture'] ?? null;
@@ -337,17 +459,26 @@ class AuthController extends Controller
             ], 400);
         }
 
-        // User mavjudligini tekshirish yoki yaratish
+        // Find referrer if referral code provided
+        $referrerId = null;
+        if ($request->filled('referral_code')) {
+            $referrer = User::where('referral_code', $request->referral_code)->first();
+            
+            if ($referrer) {
+                $referrerId = $referrer->id;
+            }
+        }
+
         $user = User::firstOrCreate(
             ['email' => $email],
             [
                 'name' => $name,
-                'password' => Hash::make(uniqid()), // random password
+                'password' => Hash::make(uniqid()),
                 'avatar' => $avatar ?? null,
+                'referred_by' => $referrerId,
             ]
         )->fresh();
 
-        // Token yaratish
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([

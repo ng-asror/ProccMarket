@@ -3,7 +3,6 @@ import { icons, LucideAngularModule } from 'lucide-angular';
 import { DateFocus } from '../../shared';
 import { AmDateFormatPipe, Auth, BalanceService, Telegram, TTransactionTypes } from '../../core';
 import { firstValueFrom } from 'rxjs';
-import { NgFor, NgIf } from '@angular/common';
 import { NumeralPipe } from '../../core';
 import {
   FormGroup,
@@ -19,7 +18,6 @@ import { Layout } from '../../layout/layout';
   imports: [
     LucideAngularModule,
     DateFocus,
-    NgIf,
     NumeralPipe,
     FormsModule,
     AmDateFormatPipe,
@@ -33,8 +31,11 @@ export class Balance {
   private balanceService = inject(BalanceService);
   private authService = inject(Auth);
   private telegram = inject(Telegram);
+
+  protected isSpinning = false;
   protected ICONS = icons;
   protected withdrawalsForm: FormGroup;
+  protected topUpAmount!: number;
   protected pagination = signal<{ current_page: number; last_page?: number }>({ current_page: 1 });
   protected sortFilter: {
     status: TTransactionTypes | 'all';
@@ -97,6 +98,7 @@ export class Balance {
       firstValueFrom(this.authService.getMe()).then((res) => {
         this.withdrawalsForm.get('amount')?.addValidators(Validators.max(Number(res.user.balance)));
         this.withdrawalsForm.get('amount')?.updateValueAndValidity();
+        this.isSpinning = false;
         return res;
       }),
   });
@@ -128,5 +130,20 @@ export class Balance {
     } else {
       this.withdrawalsForm.markAllAsTouched();
     }
+  }
+  protected async createInvoice(): Promise<void> {
+    if (!this.topUpAmount) return;
+    await firstValueFrom(this.balanceService.createInvoice(this.topUpAmount)).then((res) => {
+      const dialog: HTMLDialogElement | null = document.getElementById(
+        'topUpModal'
+      ) as HTMLDialogElement;
+      this.telegram.open(res.data.invoice.mini_app_invoice_url);
+      dialog?.close();
+    });
+  }
+
+  onReloadClick() {
+    this.isSpinning = true;
+    this.getMe.reload();
   }
 }

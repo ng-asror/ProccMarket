@@ -1,11 +1,10 @@
-import { NgForOf, NgIf } from '@angular/common';
 import { Component, input } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { INewBlog } from '../../../../core';
 
 @Component({
   selector: 'app-accordion-item',
-  imports: [RouterLink, NgForOf, NgIf],
+  imports: [RouterLink],
   templateUrl: './accordion-item.html',
   styleUrl: './accordion-item.scss',
 })

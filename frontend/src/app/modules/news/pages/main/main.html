@@ -6,7 +6,9 @@
 		</div>
 		<div class="mt-[20px] px-[15px] flex flex-col space-y-[10px]">
 			@if(news.value(); as news) {
-			<app-accordion-item *ngFor="let item of news.data" [news-blog]="item"></app-accordion-item>
+			@for (item of news.data; track item.id) {
+			<app-accordion-item [news-blog]="item"></app-accordion-item>
+			}
 			}@else {
 			<div class="border-1 border-[#ebebeb] p-[16px] rounded-[0.5rem]">
 				<div class="flex w-full flex-col gap-4">

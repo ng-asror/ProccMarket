@@ -10,10 +10,10 @@
 			<label for="name" class="text-black text-[14px] mb-1 block">Имя и Фамилия*</label>
 			<input type="text" id="name" formControlName="name" placeholder="Ваше имя"
 				class="input placeholder:text-[#030303]/50 input-bordered w-full" />
-			<span class="text-xs text-[#FF0000]"
-				*ngIf="updateForm.get('name')?.hasError('required') && updateForm.get('name')?.touched">
-				Поле обязательно.
-			</span>
+			@if(updateForm.get('name')?.hasError('required') &&
+			updateForm.get('name')?.touched){
+			<span class="text-xs text-[#FF0000]">Поле обязательно.</span>
+			}
 			<span class="text-xs text-[#FF0000]"
 				*ngIf="updateForm.get('name')?.hasError('minlength') && updateForm.get('name')?.touched">
 				Минимум 2 символа.

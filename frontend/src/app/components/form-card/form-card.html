@@ -1,0 +1,41 @@
+<div class="p-[10px] border-1 border-[#E1E1E1] rounded-[12px] grid grid-cols-1 gap-y-[10px]">
+	<div class="flex items-center justify-between">
+		<div class="flex items-center gap-x-[5px]">
+			<div class="avatar">
+				<div class="w-[50px] rounded-full">
+					<img
+						[src]="item().author.avatar_url? item().author.avatar_url: 'https://proccmarket.com/avatars/avatar10.svg'" />
+				</div>
+			</div>
+			<div>
+				<h4 class="text-lg font-[400] leading-[100%]">{{item().author.name??'user' + item().author.id}}</h4>
+				<p class="text-sm text-black/60">{{item().author.role_name??'Гость'}}</p>
+			</div>
+		</div>
+		<b class="text-black text-[16px]">{{item().author.balance | numeral: '$0,0'}}</b>
+	</div>
+	<img [src]="item().image_url" alt="form img" class="w-full object-cover object-center h-[100px] rounded-[12px] block">
+	<a routerLink="/"
+		class="text-[20px] block hover:underline text-[#030303] font-[400] leading-[120%] cursor-pointer">{{item().title}}
+	</a>
+	<div class="flex items-end justify-between">
+		<div class="grid grid-cols-3 gap-x-[10px]">
+			<button type="button"
+				class="flex flex-col items-center justify-between cursor-pointer h-[45px] text-[black] leading-[100%] text-[18px] font-[400] text-[#A8A8A8]">
+				<lucide-icon [name]="ICONS.ThumbsUp" size="22"></lucide-icon>
+				8
+			</button>
+			<button type="button"
+				class="flex flex-col items-center justify-between cursor-pointer h-[45px] leading-[100%] text-[18px] font-[400] text-[#A8A8A8]">
+				<lucide-icon [name]="ICONS.ThumbsDown" size="22"></lucide-icon>
+				8
+			</button>
+			<a
+				class="flex flex-col items-center justify-between cursor-pointer h-[45px] leading-[100%] text-[18px] font-[400] text-[#A8A8A8]">
+				<lucide-icon [name]="ICONS.MessageSquare" size="22"></lucide-icon>
+				8
+			</a>
+		</div>
+		<p class="text-[#A8A8A8] text-[12px] font-[400] leading-[100%] text-end">26 апреля 2024</p>
+	</div>
+</div>

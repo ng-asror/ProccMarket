@@ -1,14 +1,14 @@
 import { Component, input } from '@angular/core';
-import { RouterLink } from '@angular/router';
 import { icons, LucideAngularModule } from 'lucide-angular';
+import { ITopic, NumeralPipe } from '../../core';
 
 @Component({
   selector: 'app-form-card',
-  imports: [LucideAngularModule],
+  imports: [LucideAngularModule, NumeralPipe],
   templateUrl: './form-card.html',
   styleUrl: './form-card.scss',
 })
 export class FormCard {
-  protected icons = icons;
-  navigateLink = input.required<string>({ alias: 'navigate' });
+  protected ICONS = icons;
+  item = input.required<ITopic>({ alias: 'topic' });
 }

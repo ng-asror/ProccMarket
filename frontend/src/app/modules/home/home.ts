@@ -3,11 +3,11 @@ import { HomeSlide, TabContent, TabSlide } from './components';
 import { Layout } from '../../layout/layout';
 import { ISectionsDashboard, Section } from '../../core';
 import { firstValueFrom } from 'rxjs';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-home',
-  imports: [TabContent, HomeSlide, TabSlide, Layout],
+  imports: [TabContent, HomeSlide, TabSlide, Layout, RouterLink],
   templateUrl: './home.html',
   styleUrl: './home.scss',
 })

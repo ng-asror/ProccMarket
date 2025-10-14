@@ -42,4 +42,10 @@ export class BalanceService {
   withdrawals(data: { amount: number; requisites: string }): Observable<any> {
     return this.http.post<any>(`${environment.apiUrl}/withdrawals`, data);
   }
+
+  createInvoice(amount: number): Observable<any> {
+    return this.http.post<any>(`${environment.apiUrl}/pay/crypto-bot/create-invoice`, {
+      amount,
+    });
+  }
 }

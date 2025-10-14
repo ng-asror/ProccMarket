@@ -19,7 +19,6 @@ import { Layout } from '../../layout/layout';
   imports: [
     LucideAngularModule,
     DateFocus,
-    NgIf,
     NumeralPipe,
     FormsModule,
     AmDateFormatPipe,
@@ -35,6 +34,7 @@ export class Balance {
   private telegram = inject(Telegram);
   protected ICONS = icons;
   protected withdrawalsForm: FormGroup;
+  protected topUpAmount!: number;
   protected pagination = signal<{ current_page: number; last_page?: number }>({ current_page: 1 });
   protected sortFilter: {
     status: TTransactionTypes | 'all';
@@ -129,4 +129,6 @@ export class Balance {
       this.withdrawalsForm.markAllAsTouched();
     }
   }
+
+  protected async createInvoice(): Promise<void> {}
 }

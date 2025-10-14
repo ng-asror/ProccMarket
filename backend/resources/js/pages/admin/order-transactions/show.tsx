@@ -7,7 +7,7 @@ import {
   IconCheck,
   IconClock,
   IconFileText,
-  IconMessageCircle,
+  IconRefresh,
   IconUser,
   IconX,
 } from "@tabler/icons-react"
@@ -56,10 +56,17 @@ interface OrderTransaction {
   cancelled_at: string | null
   released_at: string | null
   dispute_raised_at: string | null
+  revision_count: number
+  revision_reason: string | null
+  revision_requested_at: string | null
+  has_revisions: boolean
   creator: User
   executor: User
+  client: User
+  freelancer: User
   cancelled_by: User | null
   dispute_raised_by: User | null
+  revision_requested_by: User | null
   cancellation_reason: string | null
   dispute_reason: string | null
   admin_note: string | null
@@ -73,7 +80,6 @@ interface PageProps {
   }
 }
 
-// Get badge variant based on status color
 const getStatusVariant = (color: string) => {
   const variants: Record<string, "outline" | "default"> = {
     yellow: "outline",
@@ -87,7 +93,6 @@ const getStatusVariant = (color: string) => {
   return variants[color] || "outline"
 }
 
-// Get text color class based on status color
 const getStatusColorClass = (color: string) => {
   const colors: Record<string, string> = {
     yellow: "text-yellow-600",
@@ -101,8 +106,7 @@ const getStatusColorClass = (color: string) => {
   return colors[color] || "text-gray-600"
 }
 
-// User Display Component
-function UserDisplay({ user, label }: { user: User; label: string }) {
+function UserDisplay({ user, label, roleColor }: { user: User; label: string; roleColor?: string }) {
   return (
     <div>
       <Label className="text-muted-foreground">{label}</Label>
@@ -114,10 +118,12 @@ function UserDisplay({ user, label }: { user: User; label: string }) {
             className="h-10 w-10 rounded-full"
           />
         ) : (
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted">
-            {user.name
-              ? user.name.charAt(0).toUpperCase()
-              : user.email.charAt(0).toUpperCase()}
+          <div className={`flex h-10 w-10 items-center justify-center rounded-full ${roleColor || 'bg-muted'}`}>
+            <span className="font-semibold">
+              {user.name
+                ? user.name.charAt(0).toUpperCase()
+                : user.email.charAt(0).toUpperCase()}
+            </span>
           </div>
         )}
         <div>
@@ -129,7 +135,6 @@ function UserDisplay({ user, label }: { user: User; label: string }) {
   )
 }
 
-// Resolve Dispute Dialog
 function ResolveDisputeDialog({ transaction }: { transaction: OrderTransaction }) {
   const [open, setOpen] = React.useState(false)
   const [resolution, setResolution] = React.useState<'refund' | 'release'>('refund')
@@ -188,10 +193,10 @@ function ResolveDisputeDialog({ transaction }: { transaction: OrderTransaction }
                 >
                   <div className="flex items-center gap-2 mb-2">
                     <IconX className="h-4 w-4" />
-                    <span className="font-semibold">Refund Creator</span>
+                    <span className="font-semibold">Refund Client</span>
                   </div>
                   <span className="text-xs text-left">
-                    Return ${transaction.amount.toLocaleString()} to {transaction.creator.name}
+                    Return ${transaction.amount.toLocaleString()} to {transaction.client.name || transaction.client.email}
                   </span>
                 </Button>
 
@@ -204,10 +209,10 @@ function ResolveDisputeDialog({ transaction }: { transaction: OrderTransaction }
                 >
                   <div className="flex items-center gap-2 mb-2">
                     <IconCheck className="h-4 w-4" />
-                    <span className="font-semibold">Release to Executor</span>
+                    <span className="font-semibold">Release to Freelancer</span>
                   </div>
                   <span className="text-xs text-left">
-                    Pay ${transaction.amount.toLocaleString()} to {transaction.executor.name}
+                    Pay ${transaction.amount.toLocaleString()} to {transaction.freelancer.name || transaction.freelancer.email}
                   </span>
                 </Button>
               </div>
@@ -244,7 +249,6 @@ function ResolveDisputeDialog({ transaction }: { transaction: OrderTransaction }
   )
 }
 
-// Force Cancel Dialog
 function ForceCancelDialog({ transaction }: { transaction: OrderTransaction }) {
   const [open, setOpen] = React.useState(false)
   const [reason, setReason] = React.useState('')
@@ -290,7 +294,7 @@ function ForceCancelDialog({ transaction }: { transaction: OrderTransaction }) {
         <DialogHeader>
           <DialogTitle>Force Cancel Transaction</DialogTitle>
           <DialogDescription>
-            This will cancel the transaction and refund any escrowed funds to the creator.
+            This will cancel the transaction and refund any escrowed funds to the client.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit}>
@@ -330,6 +334,81 @@ function ForceCancelDialog({ transaction }: { transaction: OrderTransaction }) {
   )
 }
 
+function ForceCompleteDialog({ transaction }: { transaction: OrderTransaction }) {
+  const [open, setOpen] = React.useState(false)
+  const [adminNote, setAdminNote] = React.useState('')
+  const [isSubmitting, setIsSubmitting] = React.useState(false)
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    setIsSubmitting(true)
+
+    router.post(
+      route('admin.order-transactions.force-complete', transaction.id), 
+      {
+        admin_note: adminNote,
+      }, 
+      {
+        preserveScroll: true,
+        onSuccess: () => {
+          setOpen(false)
+          setIsSubmitting(false)
+        },
+        onError: () => {
+          setIsSubmitting(false)
+        }
+      }
+    )
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button variant="default">
+          <IconCheck className="h-4 w-4 mr-2" />
+          Force Complete
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Force Complete Transaction</DialogTitle>
+          <DialogDescription>
+            This will mark the order as completed and release payment to the freelancer.
+          </DialogDescription>
+        </DialogHeader>
+        <form onSubmit={handleSubmit}>
+          <div className="grid gap-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="admin_note">Admin Note (Optional)</Label>
+              <Textarea
+                id="admin_note"
+                value={adminNote}
+                onChange={(e) => setAdminNote(e.target.value)}
+                placeholder="Add a note explaining why you're completing this order..."
+                rows={4}
+                disabled={isSubmitting}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button 
+              type="button" 
+              variant="outline" 
+              onClick={() => setOpen(false)}
+              disabled={isSubmitting}
+            >
+              Cancel
+            </Button>
+            <Button type="submit" disabled={isSubmitting}>
+              {isSubmitting ? 'Processing...' : 'Confirm Completion'}
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
+  )
+}
+
 const breadcrumbs: BreadcrumbItem[] = [
   {
     title: 'Admin Dashboard',
@@ -344,7 +423,6 @@ const breadcrumbs: BreadcrumbItem[] = [
 export default function AdminOrderTransactionShow() {
   const { transaction, flash } = usePage<PageProps>().props
 
-  // Show flash messages
   React.useEffect(() => {
     if (flash?.success) {
       toast.success(flash.success)
@@ -365,6 +443,7 @@ export default function AdminOrderTransactionShow() {
   const isDispute = transaction.status === 'dispute'
   const canResolve = isDispute
   const canCancel = !['cancelled', 'refunded', 'released', 'completed'].includes(transaction.status)
+  const canComplete = ['delivered', 'in_progress', 'accepted'].includes(transaction.status)
 
   return (
     <AppLayout breadcrumbs={breadcrumbsWithCurrent}>
@@ -385,6 +464,12 @@ export default function AdminOrderTransactionShow() {
                 {transaction.status.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
               </span>
             </Badge>
+            {transaction.has_revisions && (
+              <Badge variant="outline" className="text-sm px-3 py-1 bg-cyan-50 text-cyan-700 border-cyan-300">
+                <IconRefresh className="h-4 w-4 mr-1" />
+                {transaction.revision_count} Revision{transaction.revision_count > 1 ? 's' : ''}
+              </Badge>
+            )}
           </div>
         </div>
 
@@ -427,6 +512,51 @@ export default function AdminOrderTransactionShow() {
                     <Label className="text-muted-foreground">Reason</Label>
                     <p className="mt-1 text-sm bg-white p-3 rounded-md border">
                       {transaction.dispute_reason}
+                    </p>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Revision Alert */}
+        {transaction.has_revisions && transaction.revision_count > 0 && (
+          <Card className="border-cyan-500 bg-cyan-50/30">
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <IconRefresh className="h-5 w-5 text-cyan-600" />
+                <CardTitle className="text-cyan-600">Revision History</CardTitle>
+              </div>
+              <CardDescription>
+                This order has been revised {transaction.revision_count} time{transaction.revision_count > 1 ? 's' : ''}.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2">
+                {transaction.revision_requested_by && (
+                  <div>
+                    <Label className="text-muted-foreground">Last Requested By</Label>
+                    <div className="flex items-center gap-2 mt-1">
+                      <IconUser className="h-4 w-4" />
+                      <span>{transaction.revision_requested_by.name || transaction.revision_requested_by.email}</span>
+                    </div>
+                  </div>
+                )}
+                {transaction.revision_requested_at && (
+                  <div>
+                    <Label className="text-muted-foreground">Last Revision Date</Label>
+                    <div className="flex items-center gap-2 mt-1">
+                      <IconCalendar className="h-4 w-4" />
+                      <span>{format(new Date(transaction.revision_requested_at), "dd MMM yyyy HH:mm")}</span>
+                    </div>
+                  </div>
+                )}
+                {transaction.revision_reason && (
+                  <div>
+                    <Label className="text-muted-foreground">Last Revision Reason</Label>
+                    <p className="mt-1 text-sm bg-white p-3 rounded-md border">
+                      {transaction.revision_reason}
                     </p>
                   </div>
                 )}
@@ -497,9 +627,22 @@ export default function AdminOrderTransactionShow() {
               <CardTitle>Participants</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <UserDisplay user={transaction.creator} label="Creator (Client)" />
+              <UserDisplay 
+                user={transaction.client} 
+                label="Client (Paying)" 
+                roleColor="bg-blue-100 text-blue-700"
+              />
               <Separator />
-              <UserDisplay user={transaction.executor} label="Executor (Freelancer)" />
+              <UserDisplay 
+                user={transaction.freelancer} 
+                label="Freelancer (Working)" 
+                roleColor="bg-green-100 text-green-700"
+              />
+              <Separator />
+              <div className="text-xs text-muted-foreground pt-2">
+                <p><strong>Creator:</strong> {transaction.creator.name || transaction.creator.email}</p>
+                <p><strong>Executor:</strong> {transaction.executor.name || transaction.executor.email}</p>
+              </div>
             </CardContent>
           </Card>
         </div>
@@ -539,6 +682,29 @@ export default function AdminOrderTransactionShow() {
                     <p className="text-sm text-muted-foreground">
                       {format(new Date(transaction.accepted_at), "dd MMM yyyy HH:mm")}
                     </p>
+                  </div>
+                </div>
+              )}
+
+              {transaction.has_revisions && transaction.revision_count > 0 && (
+                <div className="flex gap-4">
+                  <div className="flex flex-col items-center">
+                    <div className="rounded-full bg-cyan-500 p-2">
+                      <IconRefresh className="h-4 w-4 text-white" />
+                    </div>
+                    <div className="h-full w-px bg-border" />
+                  </div>
+                  <div className="flex-1 pb-4">
+                    <p className="font-medium">Revision{transaction.revision_count > 1 ? 's' : ''} Requested</p>
+                    <p className="text-sm text-muted-foreground">
+                      {transaction.revision_count} time{transaction.revision_count > 1 ? 's' : ''}
+                      {transaction.revision_requested_at && ` - Last: ${format(new Date(transaction.revision_requested_at), "dd MMM yyyy HH:mm")}`}
+                    </p>
+                    {transaction.revision_reason && (
+                      <p className="text-sm mt-2 bg-cyan-50 p-2 rounded border border-cyan-200">
+                        {transaction.revision_reason}
+                      </p>
+                    )}
                   </div>
                 </div>
               )}
@@ -624,9 +790,9 @@ export default function AdminOrderTransactionShow() {
 
         {/* Admin Notes */}
         {transaction.admin_note && (
-          <Card>
+          <Card className="border-purple-200 bg-purple-50/30">
             <CardHeader>
-              <CardTitle>Admin Note</CardTitle>
+              <CardTitle className="text-purple-900">Admin Note</CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-sm whitespace-pre-wrap">{transaction.admin_note}</p>
@@ -642,8 +808,9 @@ export default function AdminOrderTransactionShow() {
               Take action on this order transaction
             </CardDescription>
           </CardHeader>
-          <CardContent className="flex gap-4">
+          <CardContent className="flex flex-wrap gap-4">
             {canResolve && <ResolveDisputeDialog transaction={transaction} />}
+            {canComplete && <ForceCompleteDialog transaction={transaction} />}
             {canCancel && <ForceCancelDialog transaction={transaction} />}
             <Button
               variant="outline"

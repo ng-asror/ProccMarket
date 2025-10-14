@@ -19,7 +19,7 @@ class OrderTransactionAdminController extends Controller
     public function index(Request $request): Response
     {
         $query = OrderTransaction::query()
-            ->with(['creator', 'executor', 'cancelledBy', 'disputeRaisedBy', 'conversation']);
+            ->with(['creator', 'executor', 'client', 'freelancer', 'cancelledBy', 'disputeRaisedBy', 'revisionRequestedBy', 'conversation']);
 
         // Filter by status
         if ($request->has('status') && $request->status !== 'all') {
@@ -31,16 +31,23 @@ class OrderTransactionAdminController extends Controller
             $query->where('status', OrderTransaction::STATUS_DISPUTE);
         }
 
+        // Filter by revisions
+        if ($request->boolean('has_revisions')) {
+            $query->where('revision_count', '>', 0);
+        }
+
         // Search by title or creator/executor name
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function ($q) use ($search) {
                 $q->where('title', 'like', "%{$search}%")
                     ->orWhereHas('creator', function ($q) use ($search) {
-                        $q->where('name', 'like', "%{$search}%");
+                        $q->where('name', 'like', "%{$search}%")
+                          ->orWhere('email', 'like', "%{$search}%");
                     })
                     ->orWhereHas('executor', function ($q) use ($search) {
-                        $q->where('name', 'like', "%{$search}%");
+                        $q->where('name', 'like', "%{$search}%")
+                          ->orWhere('email', 'like', "%{$search}%");
                     });
             });
         }
@@ -49,6 +56,27 @@ class OrderTransactionAdminController extends Controller
         $query->orderBy('created_at', 'desc');
 
         $transactions = $query->paginate(20);
+
+        // Calculate statistics
+        $stats = [
+            'total' => OrderTransaction::count(),
+            'active' => OrderTransaction::whereIn('status', [
+                OrderTransaction::STATUS_PENDING,
+                OrderTransaction::STATUS_ACCEPTED,
+                OrderTransaction::STATUS_IN_PROGRESS,
+                OrderTransaction::STATUS_DELIVERED,
+            ])->count(),
+            'disputes' => OrderTransaction::where('status', OrderTransaction::STATUS_DISPUTE)->count(),
+            'completed' => OrderTransaction::whereIn('status', [
+                OrderTransaction::STATUS_COMPLETED,
+                OrderTransaction::STATUS_RELEASED,
+            ])->count(),
+            'with_revisions' => OrderTransaction::where('revision_count', '>', 0)->count(),
+            'total_volume' => OrderTransaction::whereIn('status', [
+                OrderTransaction::STATUS_COMPLETED,
+                OrderTransaction::STATUS_RELEASED,
+            ])->sum('amount'),
+        ];
 
         return Inertia::render('admin/order-transactions/index', [
             'transactions' => OrderTransactionResource::collection($transactions)->resolve(),
@@ -61,6 +89,7 @@ class OrderTransactionAdminController extends Controller
             'filters' => [
                 'status' => $request->status ?? 'all',
                 'disputes_only' => $request->boolean('disputes_only'),
+                'has_revisions' => $request->boolean('has_revisions'),
                 'search' => $request->search ?? '',
             ],
             'statuses' => [
@@ -73,7 +102,9 @@ class OrderTransactionAdminController extends Controller
                 'cancelled' => OrderTransaction::STATUS_CANCELLED,
                 'refunded' => OrderTransaction::STATUS_REFUNDED,
                 'released' => OrderTransaction::STATUS_RELEASED,
+                'cancellation_requested' => OrderTransaction::STATUS_CANCELLATION_REQUESTED,
             ],
+            'stats' => $stats,
         ]);
     }
 
@@ -85,8 +116,12 @@ class OrderTransactionAdminController extends Controller
         $orderTransaction->load([
             'creator',
             'executor',
+            'client',
+            'freelancer',
             'cancelledBy',
             'disputeRaisedBy',
+            'cancellationRequestedBy',
+            'revisionRequestedBy',
             'conversation.userOne',
             'conversation.userTwo',
             'message',
@@ -116,45 +151,45 @@ class OrderTransactionAdminController extends Controller
         try {
             DB::transaction(function () use ($orderTransaction, $validated) {
                 if ($validated['resolution'] === 'refund') {
-                    // Refund to creator
-                    $orderTransaction->creator->increment('balance', $orderTransaction->amount);
+                    // Refund to client
+                    $orderTransaction->client->increment('balance', $orderTransaction->amount);
 
                     // Create refund transaction record
                     Transaction::create([
-                        'user_id' => $orderTransaction->creator_id,
+                        'user_id' => $orderTransaction->client_id,
                         'type' => 'refund',
                         'amount' => $orderTransaction->amount,
                         'status' => 'completed',
                         'payable_type' => OrderTransaction::class,
                         'payable_id' => $orderTransaction->id,
-                        'description' => "Возврат средств администратора - Спор разрешен: {$orderTransaction->title}",
+                        'description' => "Admin refund - Dispute resolved: {$orderTransaction->title}",
                         'paid_at' => now(),
                     ]);
 
                     $orderTransaction->update([
                         'status' => OrderTransaction::STATUS_REFUNDED,
-                        'admin_note' => $validated['admin_note'] ?? 'Dispute resolved in favor of creator',
+                        'admin_note' => $validated['admin_note'] ?? 'Dispute resolved in favor of client',
                         'cancelled_at' => now(),
                     ]);
                 } else {
-                    // Release to executor
-                    $orderTransaction->executor->increment('balance', $orderTransaction->amount);
+                    // Release to freelancer
+                    $orderTransaction->freelancer->increment('balance', $orderTransaction->amount);
 
                     // Create payment transaction record
                     Transaction::create([
-                        'user_id' => $orderTransaction->executor_id,
+                        'user_id' => $orderTransaction->freelancer_id,
                         'type' => 'earning',
                         'amount' => $orderTransaction->amount,
                         'status' => 'completed',
                         'payable_type' => OrderTransaction::class,
                         'payable_id' => $orderTransaction->id,
-                        'description' => "Выпуск администратора - Спор разрешен: {$orderTransaction->title}",
+                        'description' => "Admin release - Dispute resolved: {$orderTransaction->title}",
                         'paid_at' => now(),
                     ]);
 
                     $orderTransaction->update([
                         'status' => OrderTransaction::STATUS_RELEASED,
-                        'admin_note' => $validated['admin_note'] ?? 'Dispute resolved in favor of executor',
+                        'admin_note' => $validated['admin_note'] ?? 'Dispute resolved in favor of freelancer',
                         'released_at' => now(),
                     ]);
                 }
@@ -177,7 +212,7 @@ class OrderTransactionAdminController extends Controller
 
         try {
             DB::transaction(function () use ($orderTransaction, $validated, $request) {
-                // If funds were escrowed, refund them
+                // If funds were escrowed, refund them to client
                 if (
                     in_array($orderTransaction->status, [
                         OrderTransaction::STATUS_ACCEPTED,
@@ -186,17 +221,17 @@ class OrderTransactionAdminController extends Controller
                         OrderTransaction::STATUS_DISPUTE,
                     ])
                 ) {
-                    $orderTransaction->creator->increment('balance', $orderTransaction->amount);
+                    $orderTransaction->client->increment('balance', $orderTransaction->amount);
 
                     // Create refund transaction record
                     Transaction::create([
-                        'user_id' => $orderTransaction->creator_id,
+                        'user_id' => $orderTransaction->client_id,
                         'type' => 'refund',
                         'amount' => $orderTransaction->amount,
                         'status' => 'completed',
                         'payable_type' => OrderTransaction::class,
                         'payable_id' => $orderTransaction->id,
-                        'description' => "Возврат отмены администратора: {$orderTransaction->title}",
+                        'description' => "Admin cancellation refund: {$orderTransaction->title}",
                         'paid_at' => now(),
                     ]);
                 }
@@ -212,6 +247,47 @@ class OrderTransactionAdminController extends Controller
             return back()->with('success', 'Transaction cancelled successfully');
         } catch (\Exception $e) {
             return back()->with('error', 'Failed to cancel transaction: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Force complete a transaction (Admin only)
+     * Useful when users can't complete normally
+     */
+    public function forceComplete(Request $request, OrderTransaction $orderTransaction)
+    {
+        $validated = $request->validate([
+            'admin_note' => ['nullable', 'string', 'max:2000'],
+        ]);
+
+        try {
+            DB::transaction(function () use ($orderTransaction, $validated) {
+                // Release payment to freelancer
+                $orderTransaction->freelancer->increment('balance', $orderTransaction->amount);
+
+                // Create payment transaction record
+                Transaction::create([
+                    'user_id' => $orderTransaction->freelancer_id,
+                    'type' => 'earning',
+                    'amount' => $orderTransaction->amount,
+                    'status' => 'completed',
+                    'payable_type' => OrderTransaction::class,
+                    'payable_id' => $orderTransaction->id,
+                    'description' => "Admin completion: {$orderTransaction->title}",
+                    'paid_at' => now(),
+                ]);
+
+                $orderTransaction->update([
+                    'status' => OrderTransaction::STATUS_RELEASED,
+                    'admin_note' => $validated['admin_note'] ?? 'Completed by admin',
+                    'completed_at' => now(),
+                    'released_at' => now(),
+                ]);
+            });
+
+            return back()->with('success', 'Transaction completed successfully');
+        } catch (\Exception $e) {
+            return back()->with('error', 'Failed to complete transaction: ' . $e->getMessage());
         }
     }
 }

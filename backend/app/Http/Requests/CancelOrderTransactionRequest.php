@@ -34,7 +34,15 @@ class CancelOrderTransactionRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'reason.max' => 'Cancellation reason must not exceed 1,000 characters.',
+            'reason.string' => 'Причина отмены должна быть строкой.',
+            'reason.max' => 'Причина отмены не должна превышать 1000 символов.',
+        ];
+    }
+
+    public function attributes(): array
+    {
+        return [
+            'reason' => 'причина отмены',
         ];
     }
 }

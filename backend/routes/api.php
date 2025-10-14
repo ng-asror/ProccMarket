@@ -224,6 +224,7 @@ Route::prefix('v1')->group(function () {
             Route::delete('/messages/{message}', [MessageController::class, 'destroy']);
 
             // Order Transaction routes
+            
             Route::prefix('conversations/{conversation}/orders')->group(function () {
                 Route::get('/', [OrderTransactionController::class, 'index']);
                 Route::post('/', [OrderTransactionController::class, 'store']);
@@ -234,7 +235,18 @@ Route::prefix('v1')->group(function () {
                 Route::post('/{orderTransaction}/accept', [OrderTransactionController::class, 'accept']);
                 Route::post('/{orderTransaction}/deliver', [OrderTransactionController::class, 'deliver']);
                 Route::post('/{orderTransaction}/complete', [OrderTransactionController::class, 'complete']);
+                
+                // Pending orders uchun cancel
                 Route::post('/{orderTransaction}/cancel', [OrderTransactionController::class, 'cancel']);
+                
+                // YANGI: Qayta ishlashga yuborish (delivered -> in_progress)
+                Route::post('/{orderTransaction}/request-revision', [OrderTransactionController::class, 'requestRevision']);
+                
+                // Accepted orders uchun cancellation request flow
+                Route::post('/{orderTransaction}/request-cancellation', [OrderTransactionController::class, 'requestCancellation']);
+                Route::post('/{orderTransaction}/approve-cancellation', [OrderTransactionController::class, 'approveCancellation']);
+                Route::post('/{orderTransaction}/reject-cancellation', [OrderTransactionController::class, 'rejectCancellation']);
+                
                 Route::post('/{orderTransaction}/dispute', [OrderTransactionController::class, 'dispute']);
             });
         });

@@ -137,7 +137,7 @@ export class Balance {
       const dialog: HTMLDialogElement | null = document.getElementById(
         'topUpModal'
       ) as HTMLDialogElement;
-      this.telegram.open(res.data.invoice.mini_app_invoice_url);
+      this.telegram.open(res.data.invoice.pay_url);
       dialog?.close();
     });
   }

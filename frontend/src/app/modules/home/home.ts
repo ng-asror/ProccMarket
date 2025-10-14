@@ -1,7 +1,9 @@
-import { Component } from '@angular/core';
+import { Component, inject, resource, signal } from '@angular/core';
 import { HomeSlide, TabContent, TabSlide } from './components';
-import { ActivatedRoute, Router } from '@angular/router';
 import { Layout } from '../../layout/layout';
+import { ISectionsDashboard, Section } from '../../core';
+import { firstValueFrom } from 'rxjs';
+import { ActivatedRoute, Router } from '@angular/router';
 
 @Component({
   selector: 'app-home',
@@ -10,14 +12,16 @@ import { Layout } from '../../layout/layout';
   styleUrl: './home.scss',
 })
 export class Home {
-  constructor(private router: Router, private route: ActivatedRoute) {
-    route.queryParamMap.subscribe((params) => {
-      const param = params.get('forms');
-      if (!param) {
-        router.navigate([], {
-          queryParams: { forms: 'proc' },
-        });
-      }
-    });
-  }
+  private sectionService = inject(Section);
+  private router = inject(Router);
+  private activRoute = inject(ActivatedRoute);
+
+  section = signal<ISectionsDashboard | null>(null);
+
+  private sections = resource({
+    loader: async () =>
+      await firstValueFrom(this.sectionService.forumsDashboard()).then((res) => {}),
+  }).asReadonly();
+
+  constructor() {}
 }

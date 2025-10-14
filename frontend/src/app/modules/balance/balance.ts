@@ -135,7 +135,7 @@ export class Balance {
     if (!this.topUpAmount) return;
     await firstValueFrom(this.balanceService.createInvoice(this.topUpAmount)).then((res) => {
       const dialog: HTMLDialogElement | null = document.getElementById(
-        'topUpModal'
+        'topUp'
       ) as HTMLDialogElement;
       this.telegram.open(res.data.invoice.pay_url);
       dialog?.close();

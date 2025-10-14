@@ -4,9 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use Illuminate\Support\Str;
 
 class User extends Authenticatable
 {
@@ -24,6 +26,8 @@ class User extends Authenticatable
         'last_deposit_at',
         'password',
         'is_admin',
+        'referral_code',
+        'referred_by',
     ];
 
     protected $hidden = [
@@ -44,6 +48,29 @@ class User extends Authenticatable
     }
 
     protected $appends = ['role_name', 'avatar_url'];
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($user) {
+            if (!$user->referral_code) {
+                $user->referral_code = self::generateUniqueReferralCode();
+            }
+        });
+    }
+
+    /**
+     * Generate a unique referral code
+     */
+    public static function generateUniqueReferralCode(): string
+    {
+        do {
+            $code = strtoupper(Str::random(8));
+        } while (self::where('referral_code', $code)->exists());
+
+        return $code;
+    }
 
     public function getAvatarUrlAttribute()
     {
@@ -148,26 +175,20 @@ class User extends Authenticatable
             'next_withdrawal_date' => null,
         ];
 
-        // Check if user has made a deposit
         if (! $this->last_deposit_at) {
             $result['message'] = 'You must make at least one deposit before requesting withdrawal.';
-
             return $result;
         }
 
-        // Check 30 days rule
         $daysSinceLastDeposit = $this->last_deposit_at->diffInDays(now());
         if ($daysSinceLastDeposit < 30) {
             $nextWithdrawalDate = $this->last_deposit_at->addDays(30);
-
             $result['message'] = 'Withdrawal is only available 30 days after your last deposit.';
             $result['days_remaining'] = 30 - $daysSinceLastDeposit;
             $result['next_withdrawal_date'] = $nextWithdrawalDate;
-
             return $result;
         }
 
-        // Check for pending requests
         $pendingWithdrawal = $this->withdrawalRequests()
             ->where('status', 'pending')
             ->first();
@@ -175,27 +196,19 @@ class User extends Authenticatable
         if ($pendingWithdrawal) {
             $result['message'] = 'You already have a pending withdrawal request.';
             $result['pending_request'] = $pendingWithdrawal;
-
             return $result;
         }
 
-        // Check balance
         if ($this->balance <= 0) {
             $result['message'] = 'Insufficient balance for withdrawal.';
-
             return $result;
         }
 
-        // All checks passed
         $result['eligible'] = true;
         $result['message'] = 'You are eligible for withdrawal.';
-
         return $result;
     }
 
-    /**
-     * Get user's pending withdrawal request
-     */
     public function getPendingWithdrawalRequest()
     {
         return $this->withdrawalRequests()
@@ -203,83 +216,111 @@ class User extends Authenticatable
             ->first();
     }
 
-    /**
-     * Check if user has sufficient balance for withdrawal
-     */
     public function hasSufficientBalance(float $amount): bool
     {
         return $this->balance >= $amount;
     }
 
-    /**
-     * Get days since last deposit
-     */
     public function getDaysSinceLastDeposit(): ?int
     {
         if (! $this->last_deposit_at) {
             return null;
         }
-
         return $this->last_deposit_at->diffInDays(now());
     }
 
-    /**
-     * Get next withdrawal available date
-     */
     public function getNextWithdrawalDate(): ?\Carbon\Carbon
     {
         if (! $this->last_deposit_at) {
             return null;
         }
-
         return $this->last_deposit_at->addDays(30);
     }
 
-    /**
-     * Update last deposit date (call this when user makes a deposit)
-     */
     public function updateLastDepositDate(): void
     {
         $this->update(['last_deposit_at' => now()]);
     }
 
-    /**
-     * Get the reviews for the user.
-     */
     public function reviews(): HasMany
     {
         return $this->hasMany(Review::class);
     }
 
-    /**
-     * Get the user's latest review.
-     */
     public function latestReview()
     {
         return $this->hasOne(Review::class)->latestOfMany();
     }
 
-    /**
-     * Get all conversations where this user is participant one
-     */
     public function conversationsAsUserOne(): HasMany
     {
         return $this->hasMany(Conversation::class, 'user_one_id');
     }
 
-    /**
-     * Get all conversations where this user is participant two
-     */
     public function conversationsAsUserTwo(): HasMany
     {
         return $this->hasMany(Conversation::class, 'user_two_id');
     }
 
-    /**
-     * Get all messages sent by this user
-     */
     public function messages(): HasMany
     {
         return $this->hasMany(Message::class);
+    }
+
+    // ==================== REFERRAL SYSTEM ====================
+
+    /**
+     * Get the user who referred this user
+     */
+    public function referrer(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'referred_by');
+    }
+
+    /**
+     * Get all users referred by this user
+     */
+    public function referrals(): HasMany
+    {
+        return $this->hasMany(User::class, 'referred_by');
+    }
+
+    /**
+     * Get count of active referrals (not banned)
+     */
+    public function getActiveReferralsCount(): int
+    {
+        return $this->referrals()->where('banned', false)->count();
+    }
+
+    /**
+     * Get total referrals count
+     */
+    public function getTotalReferralsCount(): int
+    {
+        return $this->referrals()->count();
+    }
+
+    /**
+     * Check if this user was referred by another user
+     */
+    public function hasReferrer(): bool
+    {
+        return !is_null($this->referred_by);
+    }
+
+    /**
+     * Get referral statistics
+     */
+    public function getReferralStats(): array
+    {
+        return [
+            'total_referrals' => $this->getTotalReferralsCount(),
+            'active_referrals' => $this->getActiveReferralsCount(),
+            'banned_referrals' => $this->referrals()->where('banned', true)->count(),
+            'recent_referrals' => $this->referrals()
+                ->where('created_at', '>=', now()->subDays(30))
+                ->count(),
+        ];
     }
 }

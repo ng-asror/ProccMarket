@@ -43,11 +43,13 @@ Route::prefix('v1')->group(function () {
         Route::post('/register', [AuthController::class, 'register']);
         Route::post('/login', [AuthController::class, 'login']);
         Route::post('/google', [AuthController::class, 'googleLogin']);
+        Route::post('/validate-referral', [AuthController::class, 'validateReferralCode']);
 
         Route::middleware('auth:sanctum')->group(function () {
             Route::get('/me', [AuthController::class, 'me']);
             Route::get('/profile', [AuthController::class, 'profile']);
             Route::get('/my-topics', [AuthController::class, 'myTopics']);
+            Route::get('/referrals', [AuthController::class, 'referralList']);
             Route::put('/update', [AuthController::class, 'update']);
             Route::post('/logout', [AuthController::class, 'logout']);
         });

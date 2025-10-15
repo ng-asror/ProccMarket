@@ -8,10 +8,11 @@ import {
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
-import { Auth } from '../../../core';
+import { Auth, Telegram } from '../../../core';
 import { firstValueFrom } from 'rxjs';
 import { Router } from '@angular/router';
 import { PasswordInputComponent } from '../../../components';
+import { HttpErrorResponse } from '@angular/common/http';
 
 @Component({
   selector: 'app-login',
@@ -21,11 +22,12 @@ import { PasswordInputComponent } from '../../../components';
 })
 export class Login implements OnInit {
   private authService = inject(Auth);
+  private telegram = inject(Telegram);
 
   passwordToggle = signal(false);
   protected ICONS = icons;
   loginForm!: FormGroup;
-
+  isLoading = signal<boolean>(false);
   constructor(private fb: NonNullableFormBuilder, private router: Router) {}
 
   ngOnInit(): void {
@@ -48,14 +50,19 @@ export class Login implements OnInit {
     return this.loginForm.get('password') as FormControl;
   }
   async login(): Promise<void> {
-    if (this.loginForm.invalid) {
-      return;
-    }
+    if (this.loginForm.invalid || this.isLoading()) return;
     try {
+      this.isLoading.set(true);
       const { email, password } = this.loginForm.getRawValue();
       await firstValueFrom(this.authService.login(email, password));
     } catch (error) {
-      console.error('Login error:', error);
+      if (error instanceof HttpErrorResponse) {
+        if (error.status === 401) {
+          this.telegram.showAlert('Пользователь не зарегистрирован');
+        }
+      }
+    } finally {
+      this.isLoading.set(false);
     }
   }
 }

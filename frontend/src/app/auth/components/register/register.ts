@@ -13,6 +13,7 @@ import { icons, LucideAngularModule } from 'lucide-angular';
 import { Auth, Telegram } from '../../../core';
 import { firstValueFrom } from 'rxjs';
 import { PasswordInputComponent } from '../../../components';
+import { HttpErrorResponse } from '@angular/common/http';
 
 @Component({
   selector: 'app-register',
@@ -26,8 +27,6 @@ export class Register implements OnInit {
   private fb = inject(NonNullableFormBuilder);
   protected ICONS = icons;
 
-  passwordToggle = signal(false);
-  confirmPasswordToggle = signal(false);
   isLoading = signal(false);
   registerForm: FormGroup;
 
@@ -58,26 +57,21 @@ export class Register implements OnInit {
   ngOnInit(): void {}
 
   async register(): Promise<void> {
-    if (this.registerForm.invalid || this.isLoading()) {
-      return;
-    }
+    if (this.registerForm.invalid || this.isLoading()) return;
     const tgUser = await this.telegram.getTgUser();
     if (!tgUser) return;
     const tg_id = tgUser.user.id;
     const { email, password, confirmPassword } = this.registerForm.getRawValue();
-
-    if (password !== confirmPassword) {
-      alert('Пароли не совпадают');
-      return;
-    }
     try {
       this.isLoading.set(true);
       await firstValueFrom(
         this.authService.register(email, tg_id.toString(), password, confirmPassword)
       );
-    } catch (err) {
-      console.error('Registration error:', err);
-      alert('Регистрация не удалась. Пожалуйста, попробуйте ещё раз.');
+    } catch (error) {
+      if (error instanceof HttpErrorResponse) {
+        if (error.status === 422)
+          return this.telegram.showAlert('Этот адрес электронной почты уже зарегистрирован');
+      }
     } finally {
       this.isLoading.set(false);
     }

@@ -7,10 +7,10 @@
 		@if(loginForm.get('email')?.errors?.['required']){
 		<p class="text-[#FF0000] text-[14px] leading-[100%]">Введите адрес электронной почты</p>}
 		@if(loginForm.get('email')?.errors?.['email']) {
-		<p class="text-[#FF0000] text-[14px] leading-[100%]">Введите адрес электронной почты</p>}}
+		<p class="text-[#FF0000] text-[14px] leading-[100%]">Некорректный формат электронной почты</p>}}
 	</div>
 	<div class="space-y-[5px]">
-		<label for="email" class="text-black text-[16px] leading-[100%] block">Пароль</label>
+		<label for="email" class="text-black text-[16px] leading-[100%] block">Пароль*</label>
 		<div>
 			<app-password-input [control]="passwordControl" placeholder="Введите пароль"></app-password-input>
 		</div>
@@ -23,12 +23,11 @@
 		<p class="text-[#FF0000] text-[14px] leading-[100%]">Пароль не должен превышать 16 символов</p>}
 		}
 	</div>
-	<button type="submit" class="btn btn-primary" [disabled]="loginForm.invalid">Войти</button>
-	<!-- <div class="flex items-center gap-x-[5px] justify-center opacity-50">
-		<hr class="w-[64.07px]">
-		<span class="text-[14px]">или</span>
-		<hr class="w-[64.07px]">
-	</div> -->
-	<!-- Google -->
-	<!-- <google-btn class="w-full"></google-btn>  -->
+	<button type="submit" class="btn btn-primary" [disabled]="loginForm.invalid">
+		@if(isLoading()) {
+		<span class="loading loading-dots loading-md"></span>
+		}@else {
+		Войти
+		}
+	</button>
 </form>

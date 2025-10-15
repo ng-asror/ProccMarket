@@ -33,7 +33,7 @@ export class Auth {
           await this.telegram.setCloudItem('email', res.user.email);
           await this.telegram.setCloudItem('token', res.token);
           if (res.success) {
-            this.router.navigateByUrl('/porfile');
+            this.router.navigateByUrl('/profile');
           }
         })
       );
@@ -46,7 +46,7 @@ export class Auth {
         await this.telegram.setCloudItem('email', res.user.email);
         await this.telegram.setCloudItem('token', res.token);
         if (res.success) {
-          this.router.navigateByUrl('/porfile');
+          this.router.navigateByUrl('/profile');
         }
       })
     );

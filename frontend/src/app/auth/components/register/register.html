@@ -1,23 +1,46 @@
 <form class="card space-y-[15px]" [formGroup]="registerForm" (ngSubmit)="register()">
 	<div>
-		<label for="email" class="text-black text-[14px] leading-[100%] mb-[5px] block">Электронная почта</label>
-		<input type="email" placeholder="example@gmail.com" class="input placeholder:text-black/50 w-full" id="email"
-			formControlName="email" />
+		<label for="email" class="text-black text-[16px] leading-[100%] block">Электронная почта</label>
+		<input type="email" placeholder="example@gmail.com" class="input my-[5px] placeholder:text-black/50 w-full"
+			id="email" formControlName="email" />
+		@if(registerForm.invalid && registerForm.touched){
+		@if(registerForm.get('email')?.errors?.['required']){
+		<p class="text-[#FF0000] text-[14px] leading-[100%]">Введите адрес электронной почты</p>}
+		@if(registerForm.get('email')?.errors?.['email']) {
+		<p class="text-[#FF0000] text-[14px] leading-[100%]">Некорректный формат электронной почты</p>}}
 	</div>
 
 	<div>
-		<label for="password" class="text-black text-[14px] leading-[100%] mb-[5px] block">Пароль</label>
-		<app-password-input [control]="passwordControl" placeholder="Введите пароль">
-		</app-password-input>
+		<label for="password" class="text-black text-[16px] leading-[100%] block">Пароль</label>
+		<div class="my-[5px]">
+			<app-password-input [control]="passwordControl" placeholder="Введите пароль" />
+		</div>
+		@if(registerForm.invalid && registerForm.touched){
+		@if(registerForm.get('password')?.errors?.['required']){
+		<p class="text-[#FF0000] text-[14px] leading-[100%]">Пожалуйста, введите пароль</p>}
+		@if(registerForm.get('password')?.errors?.['minlength']) {
+		<p class="text-[#FF0000] text-[14px] leading-[100%]">Пароль должен содержать не менее 8 символов</p>}
+		@if(registerForm.get('password')?.errors?.['maxlength']) {
+		<p class="text-[#FF0000] text-[14px] leading-[100%]">Пароль не должен превышать 16 символов</p>}
+		}
 	</div>
 
 	<div>
-		<label for="replay_password" class="text-black text-[14px] leading-[100%] mb-[5px] block">Повторите пароль</label>
-		<app-password-input [control]="repeatPasswordControl" placeholder="Повторите пароль">
-		</app-password-input>
-	</div>
+		<label for="replay_password" class="text-black block text-[16px] leading-[100%] block">Повторите пароль</label>
+		<div class="my-[5px]">
+			<app-password-input [control]="repeatPasswordControl" placeholder="Повторите пароль" />
+		</div>
+		@if(registerForm.invalid && registerForm.touched) {
+		@if (registerForm.hasError('mismatch')) {
+		<p class="text-red-500 text-sm block">Пароли не совпадают</p>
+		}}
 
-	<button type="submit" class="btn btn-primary w-full" [disabled]="isLoading() || registerForm.invalid">
-		{{ isLoading() ? 'Загрузка...' : 'Зарегистрироваться' }}
+	</div>
+	<button type="submit" class="btn btn-primary w-full" [disabled]="registerForm.invalid">
+		@if(isLoading()) {
+		<span class="loading loading-dots loading-md"></span>
+		}@else {
+		Зарегистрироваться
+		}
 	</button>
 </form>

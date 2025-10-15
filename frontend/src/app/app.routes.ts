@@ -32,6 +32,10 @@ export const routes: Routes = [
         path: 'user/:username',
         loadComponent: () => import('./modules').then((p) => p.User),
       },
+      {
+        path: 'terms',
+        loadComponent: () => import('./modules').then((p) => p.Terms),
+      },
     ],
   },
   {

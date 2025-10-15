@@ -6,3 +6,4 @@ export * from './search/search';
 export * from './balance/balance';
 export * from './comments/comments';
 export * from './user/user';
+export * from './terms/terms';

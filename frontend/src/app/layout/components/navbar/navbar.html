@@ -10,7 +10,7 @@
 				<a routerLink="/" class="bg-[#000] max-w-[100px]">
 					<img src="/svg/logo.svg" alt="logo icon" class="block w-full h-full">
 				</a>
-				<a routerLink="/notifications" class="bg-[#F2F2F2] p-[8.5px] block rounded-[12px] w-[40px] h-[40px]">
+				<a (click)="comingSoon()" class="bg-[#F2F2F2] p-[8.5px] block rounded-[12px] w-[40px] h-[40px]">
 					<!-- <img src="/svg/bell.svg" alt="bars icon" class="w-full h-full block"> -->
 					<lucide-icon [name]="ICONS.MessagesSquare"></lucide-icon>
 				</a>

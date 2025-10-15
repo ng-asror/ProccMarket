@@ -1,6 +1,6 @@
 import { Component, input } from '@angular/core';
 import { icons, LucideAngularModule } from 'lucide-angular';
-import { ISectionsDashboard, NumeralPipe } from '../../../../core';
+import { ISectionsDashboard } from '../../../../core';
 import { RouterLink } from '@angular/router';
 import { FormCard } from '../../../../components';
 

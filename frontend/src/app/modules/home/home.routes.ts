@@ -13,6 +13,10 @@ export const homeRoutes: Routes = [
         path: 'topic/:id',
         loadComponent: () => import('./pages').then((p) => p.Topic),
       },
+      {
+        path: 'section/:form_id',
+        loadComponent: () => import('./pages').then((p) => p.SectionComponent),
+      },
     ],
   },
 ];

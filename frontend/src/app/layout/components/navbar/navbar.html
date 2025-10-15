@@ -34,7 +34,7 @@
 							<ul>
 								@for (item of section.children; track item.id) {
 								<li>
-									<a>{{ item.name }}</a>
+									<a [routerLink]="'/home/section/' + item.id">{{ item.name }}</a>
 								</li>
 								}
 							</ul>
@@ -42,12 +42,6 @@
 					</li>
 					}
 					}
-					<li>
-						<a routerLink="/search">
-							<lucide-icon [name]="ICONS.Search" size="20"></lucide-icon>
-							Поиск
-							<lucide-icon [name]="ICONS.ChevronRight" size="20"></lucide-icon></a>
-					</li>
 				</ul>
 			</div>
 			}

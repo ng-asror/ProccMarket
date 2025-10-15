@@ -29,9 +29,12 @@ export class Auth {
         password_confirmation,
       })
       .pipe(
-        tap((res: ILoginRes) => {
-          this.telegram.setCloudItem('email', res.user.email),
-            this.telegram.setCloudItem('token', res.token);
+        tap(async (res: ILoginRes): Promise<void> => {
+          await this.telegram.setCloudItem('email', res.user.email);
+          await this.telegram.setCloudItem('token', res.token);
+          if (res.success) {
+            this.router.navigateByUrl('/porfile');
+          }
         })
       );
   }
@@ -43,7 +46,7 @@ export class Auth {
         await this.telegram.setCloudItem('email', res.user.email);
         await this.telegram.setCloudItem('token', res.token);
         if (res.success) {
-          this.router.navigateByUrl('/home');
+          this.router.navigateByUrl('/porfile');
         }
       })
     );

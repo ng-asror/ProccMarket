@@ -10,7 +10,11 @@
 
 * {
   scrollbar-width: 0;
+  user-select: none;
   &::-webkit-scrollbar {
+    display: none;
+  }
+  &::selection {
     display: none;
   }
 }

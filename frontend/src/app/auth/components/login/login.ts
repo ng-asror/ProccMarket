@@ -11,7 +11,6 @@ import {
 import { Auth } from '../../../core';
 import { firstValueFrom } from 'rxjs';
 import { Router } from '@angular/router';
-import { GoogleButtonComponent } from '../google-button/google-button.component';
 import { PasswordInputComponent } from '../../../components';
 
 @Component({
@@ -22,8 +21,9 @@ import { PasswordInputComponent } from '../../../components';
 })
 export class Login implements OnInit {
   private authService = inject(Auth);
-  protected ICONS = icons;
+
   passwordToggle = signal(false);
+  protected ICONS = icons;
   loginForm!: FormGroup;
 
   constructor(private fb: NonNullableFormBuilder, private router: Router) {}

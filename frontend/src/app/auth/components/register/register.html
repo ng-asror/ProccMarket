@@ -1,73 +1,23 @@
 <form class="card space-y-[15px]" [formGroup]="registerForm" (ngSubmit)="register()">
-  <div>
-    <label for="email" class="text-black text-[14px] leading-[100%] mb-[5px] block"
-      >Электронная почта</label
-    >
-    <input
-      type="email"
-      placeholder="example@gmail.com"
-      class="input placeholder:text-black/50 w-full"
-      id="email"
-      formControlName="email"
-    />
-  </div>
+	<div>
+		<label for="email" class="text-black text-[14px] leading-[100%] mb-[5px] block">Электронная почта</label>
+		<input type="email" placeholder="example@gmail.com" class="input placeholder:text-black/50 w-full" id="email"
+			formControlName="email" />
+	</div>
 
-  <div>
-    <label for="password" class="text-black text-[14px] leading-[100%] mb-[5px] block"
-      >Пароль</label
-    >
-    <div class="input w-full">
-      <input
-        [type]="passwordToggle() ? 'text' : 'password'"
-        placeholder="пароль"
-        formControlName="password"
-        class="placeholder:text-black/50 w-full"
-        id="password"
-        #passEl
-      />
-      <lucide-icon
-        [name]="passwordToggle() ? ICONS.Eye : ICONS.EyeClosed"
-        size="18"
-        class="cursor-pointer"
-        (click)="togglePass(passEl)"
-      ></lucide-icon>
-    </div>
-  </div>
+	<div>
+		<label for="password" class="text-black text-[14px] leading-[100%] mb-[5px] block">Пароль</label>
+		<app-password-input [control]="passwordControl" placeholder="Введите пароль">
+		</app-password-input>
+	</div>
 
-  <div>
-    <label for="replay_password" class="text-black text-[14px] leading-[100%] mb-[5px] block"
-      >Повторите пароль</label
-    >
-    <div class="input w-full">
-      <input
-        [type]="confirmPasswordToggle() ? 'text' : 'password'"
-        placeholder="повторите пароль"
-        formControlName="confirmPassword"
-        class="placeholder:text-black/50 w-full"
-        id="replay_password"
-        #confirmEl
-      />
-      <lucide-icon
-        [name]="confirmPasswordToggle() ? ICONS.Eye : ICONS.EyeClosed"
-        size="18"
-        class="cursor-pointer"
-        (click)="toggleConfirmPass(confirmEl)"
-      ></lucide-icon>
-    </div>
-  </div>
+	<div>
+		<label for="replay_password" class="text-black text-[14px] leading-[100%] mb-[5px] block">Повторите пароль</label>
+		<app-password-input [control]="repeatPasswordControl" placeholder="Повторите пароль">
+		</app-password-input>
+	</div>
 
-  <button 
-    type="submit" 
-    class="btn btn-primary w-full"
-    [disabled]="isLoading() || registerForm.invalid">
-    {{ isLoading() ? 'Загрузка...' : 'Зарегистрироваться' }}
-  </button>
-
-  <div class="flex items-center gap-x-[5px] justify-center opacity-50">
-    <hr class="w-[64.07px]" />
-    <span class="text-[14px]">или</span>
-    <hr class="w-[64.07px]" />
-  </div>
-
-  <google-btn></google-btn>
+	<button type="submit" class="btn btn-primary w-full" [disabled]="isLoading() || registerForm.invalid">
+		{{ isLoading() ? 'Загрузка...' : 'Зарегистрироваться' }}
+	</button>
 </form>

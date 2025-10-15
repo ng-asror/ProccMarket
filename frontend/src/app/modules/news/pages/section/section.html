@@ -48,7 +48,7 @@
 		<div class="space-y-[10px]">
 			@for (item of comments.data; track item.id) {
 			<div>
-				<app-comment [comment]="item"></app-comment>
+				<app-comment [comment]="item" [commentReplay]="null" [type]="'news'"></app-comment>
 			</div>
 			}
 		</div>

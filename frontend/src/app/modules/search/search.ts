@@ -4,7 +4,7 @@ import { FormCard } from '../../components';
 
 @Component({
   selector: 'app-search',
-  imports: [LucideAngularModule, FormCard],
+  imports: [LucideAngularModule],
   templateUrl: './search.html',
   styleUrl: './search.scss',
 })

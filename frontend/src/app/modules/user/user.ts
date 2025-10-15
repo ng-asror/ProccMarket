@@ -5,7 +5,7 @@ import { FormCard } from '../../components';
 
 @Component({
   selector: 'app-user',
-  imports: [RouterLink, LucideAngularModule, FormCard],
+  imports: [RouterLink, LucideAngularModule],
   templateUrl: './user.html',
   styleUrl: './user.scss',
 })

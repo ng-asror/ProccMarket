@@ -1,5 +1,5 @@
-import { Component, inject, input, OnDestroy, OnInit, signal } from '@angular/core';
-import { Section, Telegram, Topic } from '../../../../core';
+import { Component, inject, OnDestroy, OnInit, signal } from '@angular/core';
+import { Section, Telegram, TopicService } from '../../../../core';
 
 import { FormsModule } from '@angular/forms';
 import { TiptapEditorComponent } from '../../../../components';
@@ -14,7 +14,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 export class EditTheme implements OnInit, OnDestroy {
   private telegram = inject(Telegram);
   private router = inject(Router);
-  private topicService = inject(Topic);
+  private topicService = inject(TopicService);
   private sectionsService = inject(Section);
   private route = inject(ActivatedRoute);
   selectSection: number = 0;

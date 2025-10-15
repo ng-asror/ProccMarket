@@ -1,5 +1,13 @@
-import { ChangeDetectionStrategy, Component, inject, input, OnInit, signal } from '@angular/core';
-import { IComment, News, NumeralPipe } from '../../core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  inject,
+  input,
+  OnInit,
+  output,
+  signal,
+} from '@angular/core';
+import { IComment, News, NumeralPipe, TopicService } from '../../core';
 import { icons, LucideAngularModule } from 'lucide-angular';
 import { MomentModule } from 'ngx-moment';
 import { firstValueFrom } from 'rxjs';
@@ -15,11 +23,19 @@ import { ActivatedRoute } from '@angular/router';
 })
 export class Comment implements OnInit {
   private newsService = inject(News);
+  private topicService = inject(TopicService);
   private route = inject(ActivatedRoute);
 
-  protected ICONS = icons;
-  news_id: string = '';
+  commentType = input.required<'topic' | 'news'>({ alias: 'type' });
   commentInput = input.required<IComment>({ alias: 'comment' });
+  commentReplay = input.required<{
+    user: { id: number; name: string | null };
+    role: string | null;
+    comment: string;
+  } | null>();
+
+  protected ICONS = icons;
+  pageId: string = '';
   comment = signal<IComment | null>(null);
   protected commentContent = signal<{ content: string; replay_id?: number }>({
     content: '',
@@ -27,7 +43,7 @@ export class Comment implements OnInit {
 
   constructor() {
     this.route.paramMap.subscribe((params) => {
-      this.news_id = params.get('id')!;
+      this.pageId = params.get('id')!;
     });
   }
 
@@ -72,21 +88,39 @@ export class Comment implements OnInit {
   }
 
   async createComment(): Promise<void> {
-    await firstValueFrom(
-      this.newsService.createComment(
-        Number(this.news_id),
-        this.commentContent().content,
-        this.commentContent().replay_id
-      )
-    ).then((res) => {
-      this.commentContent.set({ content: '', replay_id: undefined });
-      this.comment.update((current) => {
-        if (!current) return current;
-        return { ...current, replies: [...(current.replies ?? []), res.data] };
+    if (this.commentType() === 'news') {
+      await firstValueFrom(
+        this.newsService.createComment(
+          Number(this.pageId),
+          this.commentContent().content,
+          this.commentContent().replay_id
+        )
+      ).then((res) => {
+        this.commentContent.set({ content: '', replay_id: undefined });
+        this.comment.update((current) => {
+          if (!current) return current;
+          return { ...current, replies: [...(current.replies ?? []), res.data] };
+        });
       });
-    });
+    }
+    if (this.commentType() === 'topic') {
+      await firstValueFrom(
+        this.topicService.createComment(
+          Number(this.pageId),
+          this.commentContent().content,
+          this.commentContent().replay_id
+        )
+      ).then((res) => {
+        this.commentContent.set({ content: '', replay_id: undefined });
+        this.comment.update((current) => {
+          if (!current) return current;
+          return { ...current, replies: [...(current.replies ?? []), res.data] };
+        });
+      });
+    }
   }
   protected reply(comment_id: number): void {
+    console.log(comment_id);
     this.commentContent.update((current) => ({
       ...current,
       replay_id: current.replay_id === comment_id ? undefined : comment_id,

@@ -1,16 +1,17 @@
 import { Component, computed, effect, inject, input, signal } from '@angular/core';
 import { icons, LucideAngularModule } from 'lucide-angular';
-import { AmDateFormatPipe, ITopic, NumeralPipe, Topic } from '../../core';
+import { AmDateFormatPipe, ITopic, NumeralPipe, TopicService } from '../../core';
 import { firstValueFrom } from 'rxjs';
+import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-form-card',
-  imports: [LucideAngularModule, NumeralPipe, AmDateFormatPipe],
+  imports: [LucideAngularModule, NumeralPipe, AmDateFormatPipe, RouterLink],
   templateUrl: './form-card.html',
   styleUrl: './form-card.scss',
 })
 export class FormCard {
-  private topicService = inject(Topic);
+  private topicService = inject(TopicService);
   protected ICONS = icons;
   item = input.required<ITopic>({ alias: 'topic' });
   itemSignal = signal<ITopic | null>(null);

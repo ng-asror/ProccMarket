@@ -1,5 +1,5 @@
 import { Component, inject, resource, signal } from '@angular/core';
-import { IMyTopics, NumeralPipe, ProfileService, Telegram, Topic } from '../../../../core';
+import { IMyTopics, NumeralPipe, ProfileService, Telegram, TopicService } from '../../../../core';
 import { firstValueFrom } from 'rxjs';
 import { icons, LucideAngularModule } from 'lucide-angular';
 import { RouterLink } from '@angular/router';
@@ -11,7 +11,7 @@ import { RouterLink } from '@angular/router';
   styleUrl: './topics.scss',
 })
 export class Topics {
-  private topicService = inject(Topic);
+  private topicService = inject(TopicService);
   private telegram = inject(Telegram);
   private profileService = inject(ProfileService);
   topics = signal<IMyTopics | null>(null);

@@ -16,7 +16,7 @@ export interface ITopicRes extends Result {
       email: string;
       role_id: number;
       balance: string;
-      name: string;
+      name: string | null;
       avatar: string;
       description: string;
       banned: boolean;
@@ -26,7 +26,7 @@ export interface ITopicRes extends Result {
       created_at: string;
       updated_at: string;
       deleted_at: any;
-      role_name: string;
+      role_name: string | null;
       avatar_url: string;
       role: {
         id: number;

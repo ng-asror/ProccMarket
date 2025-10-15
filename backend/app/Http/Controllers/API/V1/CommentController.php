@@ -154,15 +154,15 @@ class CommentController extends Controller
             $parentComment = Comment::find($request->replay_id);
             
             // Max 2 level depth (comment -> reply -> reply)
-            if ($parentComment->replay_id !== null) {
-                $grandParent = Comment::find($parentComment->replay_id);
-                if ($grandParent && $grandParent->replay_id !== null) {
-                    return response()->json([
-                        'success' => false,
-                        'message' => 'Maximum reply depth exceeded (max 3 levels)'
-                    ], 422);
-                }
-            }
+            // if ($parentComment->replay_id !== null) {
+            //     $grandParent = Comment::find($parentComment->replay_id);
+            //     if ($grandParent && $grandParent->replay_id !== null) {
+            //         return response()->json([
+            //             'success' => false,
+            //             'message' => 'Maximum reply depth exceeded (max 3 levels)'
+            //         ], 422);
+            //     }
+            // }
         }
 
         $comment = Comment::create([

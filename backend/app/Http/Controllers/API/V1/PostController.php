@@ -180,15 +180,15 @@ class PostController extends Controller
             }
 
             // Max 2 level depth (post -> reply -> reply)
-            if ($replyPost->reply_id !== null) {
-                $grandParent = Post::find($replyPost->reply_id);
-                if ($grandParent && $grandParent->reply_id !== null) {
-                    return response()->json([
-                        'success' => false,
-                        'message' => 'Maximum reply depth exceeded (max 3 levels)'
-                    ], 422);
-                }
-            }
+            // if ($replyPost->reply_id !== null) {
+            //     $grandParent = Post::find($replyPost->reply_id);
+            //     if ($grandParent && $grandParent->reply_id !== null) {
+            //         return response()->json([
+            //             'success' => false,
+            //             'message' => 'Maximum reply depth exceeded (max 3 levels)'
+            //         ], 422);
+            //     }
+            // }
         }
 
         $post = Post::create([

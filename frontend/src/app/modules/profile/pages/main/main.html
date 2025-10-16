@@ -129,18 +129,19 @@
 		<dialog id="my_modal_5" class="modal modal-bottom sm:modal-middle">
 			<div class="modal-box">
 				<div class="space-y-[15px]">
-					<div class="rating justify-center">
-						<input type="radio" name="rating-1" value="1" class="mask mask-star" [(ngModel)]="rating"
-							aria-label="1 star" />
-						<input type="radio" name="rating-1" value="2" class="mask mask-star" [(ngModel)]="rating"
-							aria-label="2 star" />
-						<input type="radio" name="rating-1" value="3" class="mask mask-star" [(ngModel)]="rating"
-							aria-label="3 star" />
-						<input type="radio" name="rating-1" value="4" class="mask mask-star" [(ngModel)]="rating"
-							aria-label="4 star" aria-current="true" />
-						<input type="radio" name="rating-1" value="5" class="mask mask-star" [(ngModel)]="rating"
-							aria-label="5 star" />
+					<div class="rating gap-x-[3px]">
+						<input type="radio" name="rating-4" class="mask mask-star-2" aria-label="1 star" [(ngModel)]="rating"
+							[value]="1" />
+						<input type="radio" name="rating-4" class="mask mask-star-2" aria-label="2 star" [(ngModel)]="rating"
+							[value]="2" />
+						<input type="radio" name="rating-4" class="mask mask-star-2" aria-label="3 star" [(ngModel)]="rating"
+							[value]="3" />
+						<input type="radio" name="rating-4" class="mask mask-star-2" aria-label="4 star" [(ngModel)]="rating"
+							[value]="4" />
+						<input type="radio" name="rating-4" class="mask mask-star-2" aria-label="5 star" [(ngModel)]="rating"
+							[value]="5" />
 					</div>
+
 					<div>
 						<textarea name="comment" placeholder="Расскажите, что вы думаете..." [(ngModel)]="message" maxlength="500"
 							class="textarea placeholder:text-black/50 w-full mb-[5px]"></textarea>

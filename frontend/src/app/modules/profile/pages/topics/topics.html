@@ -1,15 +1,17 @@
+@if(myTopics.value(); as data) {
+@if(data.topics.length) {
 <div class="p-[15px]">
 	<div class="flex items-center justify-between mb-[20px]">
 		<h1 class="text-[22px] font-[600] text-[#030303] leading-[100%]">Мои темы</h1>
 		<a routerLink="create" class="btn">Создать</a>
 	</div>
-	@if(!myTopics.isLoading()) {
-	@for (item of myTopics.value()?.topics; track item.id) {
+	@for (item of data.topics; track item.id) {
 	<div class="border-1 border-[#E1E1E1] p-[15px] space-y-[10px] rounded-[12px]">
 		<img [src]="item.image_url" [alt]="item.title" class="w-full h-[100px] object-center object-cover rounded-box">
 		<div>
 			<p class="text-[14px] text-[#030303]/90">{{item.section.parent.name}} / {{item.section.name}}</p>
-			<a routerLink="" class="text-[16px] font-semibold title hover:underline">{{item.title}}</a>
+			<a [routerLink]="'/home/topic/' + item.id"
+				class="text-[16px] font-semibold title hover:underline">{{item.title}}</a>
 		</div>
 		<div class="flex items-center justify-between">
 			<div class="flex gap-x-[15px]">
@@ -48,65 +50,83 @@
 		</div>
 	</div>
 	}
-	}@else {
-	<div class="space-y-4">
-		<div class="border-1 border-[#E1E1E1] rounded-[12px] space-y-[10px] p-[15px]">
-			<div class="skeleton  w-full h-[100px] rounded-box"></div>
-			<div class="skeleton w-[50%] h-[21px]"></div>
-			<div class="skeleton w-full h-[24px]"></div>
-			<div class="skeleton w-full h-[24px]"></div>
-			<div class="flex items-center justify-between gap-x-[20px] w-full">
-				<div class="grid grid-cols-4 max-w-[177.49px] gap-x-[15px] w-full">
-					<div class="skeleton w-full h-[24px]"></div>
-					<div class="skeleton w-full h-[24px]"></div>
-					<div class="skeleton w-full h-[24px]"></div>
-					<div class="skeleton w-full h-[24px]"></div>
-				</div>
-				<div class="grid grid-cols-3 max-w-[80px] gap-x-[15px] w-full">
-					<div class="skeleton w-full h-[24px]"></div>
-					<div class="skeleton w-full h-[24px]"></div>
-					<div class="skeleton w-full h-[24px]"></div>
-				</div>
-			</div>
+</div>
+}@else {
+<div class="w-full h-dvh flex items-center justify-center px-[15px]">
+	<div>
+		<img src="https://22fd1827b8a3.ngrok.app/svg/empty-file.svg" alt="empty files"
+			class="w-full block mx-auto max-w-[250px]">
+		<div class="text-center space-y-2 mt-[20px]">
+			<h3 class="font-bold text-[18px]">У вас пока нет ни одной темы</h3>
+			<p>Создайте новую тему и начните обсуждение.
+				Ваша первая публикация появится здесь.</p>
+			<a routerLink="create" class="btn">Создать тему</a>
 		</div>
-		<div class="border-1 border-[#E1E1E1] rounded-[12px] space-y-[10px] p-[15px]">
-			<div class="skeleton  w-full h-[100px] rounded-box"></div>
-			<div class="skeleton w-[50%] h-[21px]"></div>
-			<div class="skeleton w-full h-[24px]"></div>
-			<div class="skeleton w-full h-[24px]"></div>
-			<div class="flex items-center justify-between gap-x-[20px] w-full">
-				<div class="grid grid-cols-4 max-w-[177.49px] gap-x-[15px] w-full">
-					<div class="skeleton w-full h-[24px]"></div>
-					<div class="skeleton w-full h-[24px]"></div>
-					<div class="skeleton w-full h-[24px]"></div>
-					<div class="skeleton w-full h-[24px]"></div>
-				</div>
-				<div class="grid grid-cols-3 max-w-[80px] gap-x-[15px] w-full">
-					<div class="skeleton w-full h-[24px]"></div>
-					<div class="skeleton w-full h-[24px]"></div>
-					<div class="skeleton w-full h-[24px]"></div>
-				</div>
+	</div>
+</div>
+}
+}@else {
+<div class="space-y-4 p-[15px]">
+	<div class="flex items-center justify-between">
+		<div class="skeleton w-[108.34px] h-[22px]"></div>
+		<div class="w-[92px] h-[40px] skeleton"></div>
+	</div>
+	<div class="border-1 border-[#E1E1E1] rounded-[12px] space-y-[10px] p-[15px]">
+		<div class="skeleton  w-full h-[100px] rounded-box"></div>
+		<div class="skeleton w-[50%] h-[21px]"></div>
+		<div class="skeleton w-full h-[24px]"></div>
+		<div class="skeleton w-full h-[24px]"></div>
+		<div class="flex items-center justify-between gap-x-[20px] w-full">
+			<div class="grid grid-cols-4 max-w-[177.49px] gap-x-[15px] w-full">
+				<div class="skeleton w-full h-[24px]"></div>
+				<div class="skeleton w-full h-[24px]"></div>
+				<div class="skeleton w-full h-[24px]"></div>
+				<div class="skeleton w-full h-[24px]"></div>
 			</div>
-		</div>
-		<div class="border-1 border-[#E1E1E1] rounded-[12px] space-y-[10px] p-[15px]">
-			<div class="skeleton  w-full h-[100px] rounded-box"></div>
-			<div class="skeleton w-[50%] h-[21px]"></div>
-			<div class="skeleton w-full h-[24px]"></div>
-			<div class="skeleton w-full h-[24px]"></div>
-			<div class="flex items-center justify-between gap-x-[20px] w-full">
-				<div class="grid grid-cols-4 max-w-[177.49px] gap-x-[15px] w-full">
-					<div class="skeleton w-full h-[24px]"></div>
-					<div class="skeleton w-full h-[24px]"></div>
-					<div class="skeleton w-full h-[24px]"></div>
-					<div class="skeleton w-full h-[24px]"></div>
-				</div>
-				<div class="grid grid-cols-3 max-w-[80px] gap-x-[15px] w-full">
-					<div class="skeleton w-full h-[24px]"></div>
-					<div class="skeleton w-full h-[24px]"></div>
-					<div class="skeleton w-full h-[24px]"></div>
-				</div>
+			<div class="grid grid-cols-3 max-w-[80px] gap-x-[15px] w-full">
+				<div class="skeleton w-full h-[24px]"></div>
+				<div class="skeleton w-full h-[24px]"></div>
+				<div class="skeleton w-full h-[24px]"></div>
 			</div>
 		</div>
 	</div>
-	}
+	<div class="border-1 border-[#E1E1E1] rounded-[12px] space-y-[10px] p-[15px]">
+		<div class="skeleton  w-full h-[100px] rounded-box"></div>
+		<div class="skeleton w-[50%] h-[21px]"></div>
+		<div class="skeleton w-full h-[24px]"></div>
+		<div class="skeleton w-full h-[24px]"></div>
+		<div class="flex items-center justify-between gap-x-[20px] w-full">
+			<div class="grid grid-cols-4 max-w-[177.49px] gap-x-[15px] w-full">
+				<div class="skeleton w-full h-[24px]"></div>
+				<div class="skeleton w-full h-[24px]"></div>
+				<div class="skeleton w-full h-[24px]"></div>
+				<div class="skeleton w-full h-[24px]"></div>
+			</div>
+			<div class="grid grid-cols-3 max-w-[80px] gap-x-[15px] w-full">
+				<div class="skeleton w-full h-[24px]"></div>
+				<div class="skeleton w-full h-[24px]"></div>
+				<div class="skeleton w-full h-[24px]"></div>
+			</div>
+		</div>
+	</div>
+	<div class="border-1 border-[#E1E1E1] rounded-[12px] space-y-[10px] p-[15px]">
+		<div class="skeleton  w-full h-[100px] rounded-box"></div>
+		<div class="skeleton w-[50%] h-[21px]"></div>
+		<div class="skeleton w-full h-[24px]"></div>
+		<div class="skeleton w-full h-[24px]"></div>
+		<div class="flex items-center justify-between gap-x-[20px] w-full">
+			<div class="grid grid-cols-4 max-w-[177.49px] gap-x-[15px] w-full">
+				<div class="skeleton w-full h-[24px]"></div>
+				<div class="skeleton w-full h-[24px]"></div>
+				<div class="skeleton w-full h-[24px]"></div>
+				<div class="skeleton w-full h-[24px]"></div>
+			</div>
+			<div class="grid grid-cols-3 max-w-[80px] gap-x-[15px] w-full">
+				<div class="skeleton w-full h-[24px]"></div>
+				<div class="skeleton w-full h-[24px]"></div>
+				<div class="skeleton w-full h-[24px]"></div>
+			</div>
+		</div>
+	</div>
 </div>
+}

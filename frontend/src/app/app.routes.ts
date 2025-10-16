@@ -36,6 +36,10 @@ export const routes: Routes = [
         path: 'terms',
         loadComponent: () => import('./modules').then((p) => p.Terms),
       },
+      {
+        path: 'cooperation',
+        loadComponent: () => import('./modules').then((p) => p.Cooperation),
+      },
     ],
   },
   {

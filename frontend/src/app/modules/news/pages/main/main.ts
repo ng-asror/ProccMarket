@@ -3,11 +3,11 @@ import { icons, LucideAngularModule } from 'lucide-angular';
 import { AccordionItem } from '../../components';
 import { News } from '../../../../core';
 import { firstValueFrom } from 'rxjs';
-import { Menubar, Navbar } from '../../../../components';
+import { Layout } from '../../../../layout/layout';
 
 @Component({
   selector: 'app-main',
-  imports: [LucideAngularModule, AccordionItem, Navbar, Menubar],
+  imports: [LucideAngularModule, AccordionItem, Layout],
   templateUrl: './main.html',
   styleUrl: './main.scss',
 })

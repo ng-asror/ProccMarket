@@ -15,6 +15,7 @@
 		</div>
 		<img [src]="topic.image_url" [alt]="topic.title" class="w-full block h-auto">
 		<div [innerHTML]="topic.content"></div>
+
 		<div class="flex items-center gap-x-[20px]">
 			<button type="button" class="text-black/50 text-[18px] flex items-center gap-x-[5px] cursor-pointer"
 				(click)="topicToggleLike(topic.id, true)">
@@ -36,6 +37,21 @@
 				<lucide-icon [name]="ICONS.MessagesSquare"></lucide-icon>
 				<span class="block">{{topic.posts_count | numeral: '0a'}}</span>
 			</button>
+		</div>
+		<div class="flex items-center justify-between">
+			<div class="flex items-center gap-x-[5px]">
+				<div class="avatar">
+					<div class="w-[40px] rounded-full">
+						<img
+							[src]="topic.author.avatar_url? topic.author.avatar_url: 'https://proccmarket.com/avatars/avatar10.svg'" />
+					</div>
+				</div>
+				<div>
+					<h4 class="text-lg font-[400] leading-[100%]">{{topic.author.name??'user' + topic.author.id}}</h4>
+					<p class="text-sm text-black/60">{{topic.author.role_name??'Гость'}}</p>
+				</div>
+			</div>
+			<b class="text-black text-[16px]">{{topic.author.balance | numeral: '$0,0'}}</b>
 		</div>
 		<div class="space-y-[10px]">
 			<h2 class="text-lg font-semibold">Оставьте комментарий</h2>

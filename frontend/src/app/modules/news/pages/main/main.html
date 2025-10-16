@@ -1,57 +1,52 @@
-<main class="w-full h-screen bg-[#030303] grid grid-cols-1 grid-rows-[auto_1fr_auto]">
-	<app-navbar />
-	<section class="w-full h-full bg-white pt-[10px] rounded-b-[30px] overflow-y-scroll">
-		<div class="flex items-center justify-between px-[15px]">
-			<h2 class="text-[22px] font-[600] text-[#030303] leading-[100%]">Что случилось?</h2>
-		</div>
-		<div class="mt-[20px] px-[15px] flex flex-col space-y-[10px]">
-			@if(news.value(); as news) {
-			@for (item of news.data; track item.id) {
+<app-layout>
+	<div class="px-[15px] space-y-[10px]" content>
+		@if(news.value(); as news) {
+		@for (item of news.data; track item.id) {
+		<div>
 			<app-accordion-item [news-blog]="item"></app-accordion-item>
-			}
-			}@else {
-			<div class="border-1 border-[#ebebeb] p-[16px] rounded-[0.5rem]">
-				<div class="flex w-full flex-col gap-4">
-					<div class="skeleton h-4 w-[50%]"></div>
-					<div class="skeleton h-4 w-full"></div>
-					<div class="skeleton h-4 w-full"></div>
-					<div class="skeleton h-4 w-full"></div>
-				</div>
-			</div>
-			<div class="border-1 border-[#ebebeb] p-[16px] rounded-[0.5rem]">
-				<div class="flex w-full flex-col gap-4">
-					<div class="skeleton h-4 w-[50%]"></div>
-					<div class="skeleton h-4 w-full"></div>
-					<div class="skeleton h-4 w-full"></div>
-					<div class="skeleton h-4 w-full"></div>
-				</div>
-			</div>
-			<div class="border-1 border-[#ebebeb] p-[16px] rounded-[0.5rem]">
-				<div class="flex w-full flex-col gap-4">
-					<div class="skeleton h-4 w-[50%]"></div>
-					<div class="skeleton h-4 w-full"></div>
-					<div class="skeleton h-4 w-full"></div>
-					<div class="skeleton h-4 w-full"></div>
-				</div>
-			</div>
-			<div class="border-1 border-[#ebebeb] p-[16px] rounded-[0.5rem]">
-				<div class="flex w-full flex-col gap-4">
-					<div class="skeleton h-4 w-[50%]"></div>
-					<div class="skeleton h-4 w-full"></div>
-					<div class="skeleton h-4 w-full"></div>
-					<div class="skeleton h-4 w-full"></div>
-				</div>
-			</div>
-			<div class="border-1 border-[#ebebeb] p-[16px] rounded-[0.5rem]">
-				<div class="flex w-full flex-col gap-4">
-					<div class="skeleton h-4 w-[50%]"></div>
-					<div class="skeleton h-4 w-full"></div>
-					<div class="skeleton h-4 w-full"></div>
-					<div class="skeleton h-4 w-full"></div>
-				</div>
-			</div>
-			}
 		</div>
-	</section>
-	<app-menubar />
-</main>
+		}
+		}@else {
+		<div class="border-1 border-[#ebebeb] p-[16px] rounded-[0.5rem]">
+			<div class="flex w-full flex-col gap-4">
+				<div class="skeleton h-4 w-[50%]"></div>
+				<div class="skeleton h-4 w-full"></div>
+				<div class="skeleton h-4 w-full"></div>
+				<div class="skeleton h-4 w-full"></div>
+			</div>
+		</div>
+		<div class="border-1 border-[#ebebeb] p-[16px] rounded-[0.5rem]">
+			<div class="flex w-full flex-col gap-4">
+				<div class="skeleton h-4 w-[50%]"></div>
+				<div class="skeleton h-4 w-full"></div>
+				<div class="skeleton h-4 w-full"></div>
+				<div class="skeleton h-4 w-full"></div>
+			</div>
+		</div>
+		<div class="border-1 border-[#ebebeb] p-[16px] rounded-[0.5rem]">
+			<div class="flex w-full flex-col gap-4">
+				<div class="skeleton h-4 w-[50%]"></div>
+				<div class="skeleton h-4 w-full"></div>
+				<div class="skeleton h-4 w-full"></div>
+				<div class="skeleton h-4 w-full"></div>
+			</div>
+		</div>
+		<div class="border-1 border-[#ebebeb] p-[16px] rounded-[0.5rem]">
+			<div class="flex w-full flex-col gap-4">
+				<div class="skeleton h-4 w-[50%]"></div>
+				<div class="skeleton h-4 w-full"></div>
+				<div class="skeleton h-4 w-full"></div>
+				<div class="skeleton h-4 w-full"></div>
+			</div>
+		</div>
+		<div class="border-1 border-[#ebebeb] p-[16px] rounded-[0.5rem]">
+			<div class="flex w-full flex-col gap-4">
+				<div class="skeleton h-4 w-[50%]"></div>
+				<div class="skeleton h-4 w-full"></div>
+				<div class="skeleton h-4 w-full"></div>
+				<div class="skeleton h-4 w-full"></div>
+			</div>
+		</div>
+		}
+	</div>
+</app-layout>

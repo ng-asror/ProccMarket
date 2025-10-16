@@ -8,3 +8,4 @@ export * from './profile';
 export * from './layout';
 export * from './section';
 export * from './topic';
+export * from './ads';

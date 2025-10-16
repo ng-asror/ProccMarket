@@ -36,13 +36,6 @@
 				<a [routerLink]="item.id.toString()" class="cursor-pointer">
 					<lucide-icon [name]="ICONS.FilePenLine" size="20" color="#030303"></lucide-icon>
 				</a>
-				<!-- <button type="button" class="cursor-pointer" (click)="closedToggle(item.id)">
-					@if (item.closed) {
-					<lucide-icon [name]="ICONS.LockKeyhole" size="20" color="#030303"></lucide-icon>
-					} @else {
-					<lucide-icon [name]="ICONS.LockKeyholeOpen" size="20" color="#030303"></lucide-icon>
-					}
-				</button> -->
 				<button type="button" class="cursor-pointer" (click)="deleteTopic(item.id)">
 					<lucide-icon [name]="ICONS.Trash2" size="20" color="red"></lucide-icon>
 				</button>

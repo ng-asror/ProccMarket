@@ -1,12 +1,51 @@
-<swiper-container class="overflow-hidden rounded-[12px]" slides-per-view="1" space-between="10" effect="fade"
-	watch-slides-progress="true" autoplay-delay="5000" autoplay-disable-on-interaction="false" loop="true">
-	<swiper-slide class="h-[100px]">
-		<img src="/img/home-slide1.jpg" alt="home slide img" class="w-full object-cover object-center h-full">
-	</swiper-slide>
-	<swiper-slide class="h-[100px]">
-		<img src="/img/home-slide2.jpg" alt="home slide img" class="w-full object-cover object-center h-full">
-	</swiper-slide>
-	<swiper-slide class="h-[100px]">
-		<img src="/img/home-slide3.jpg" alt="home slide img" class="w-full object-cover object-center h-full">
-	</swiper-slide>
-</swiper-container>
+@if (ads.value(); as data) {
+@if (data.banners.length) {
+<div class="space-y-[10px] px-[15px] max-w-[768px] w-full mx-auto">
+	<!-- 1️⃣ Birinchi yarmi -->
+	<swiper-container class="overflow-hidden rounded-[12px]" slides-per-view="1" space-between="10" effect="fade"
+		watch-slides-progress="true" autoplay-delay="5000" autoplay-disable-on-interaction="false" loop="true">
+		@for (banner of (
+		data.banners.length > 1
+		? data.banners.slice(0, data.banners.length / 2)
+		: data.banners
+		); track banner.id) {
+		<swiper-slide class="h-[100px]">
+			@if (banner.link) {
+			<a [href]="banner.link" target="_blank">
+				<img [src]="'https://api.proccmarket.com' + banner.image_url" alt="proccmarket ads"
+					class="w-full object-cover object-center h-full" />
+			</a>
+			} @else {
+			<img [src]="'https://api.proccmarket.com' + banner.image_url" alt="proccmarket ads"
+				class="w-full object-cover object-center h-full" />
+			}
+		</swiper-slide>
+		}
+	</swiper-container>
+
+	@if (data.banners.length >= 2) {
+	<swiper-container class="overflow-hidden rounded-[12px]" slides-per-view="1" space-between="10" effect="fade"
+		watch-slides-progress="true" autoplay-delay="5000" autoplay-disable-on-interaction="false" loop="true">
+		@for (banner of data.banners.slice(data.banners.length / 2); track banner.id) {
+		<swiper-slide class="h-[100px]">
+			@if (banner.link) {
+			<a [href]="banner.link" target="_blank">
+				<img [src]="'https://api.proccmarket.com' + banner.image_url" alt="proccmarket ads"
+					class="w-full object-cover object-center h-full" />
+			</a>
+			} @else {
+			<img [src]="'https://api.proccmarket.com' + banner.image_url" alt="proccmarket ads"
+				class="w-full object-cover object-center h-full" />
+			}
+		</swiper-slide>
+		}
+	</swiper-container>
+	}
+</div>
+}
+} @else {
+<div class="space-y-[10px] px-[15px] max-w-[768px] w-full mx-auto">
+	<div class="w-full h-[100px] skeleton rounded-[12px]"></div>
+	<div class="w-full h-[100px] skeleton rounded-[12px]"></div>
+</div>
+}

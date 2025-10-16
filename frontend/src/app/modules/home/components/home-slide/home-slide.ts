@@ -1,4 +1,6 @@
-import { Component, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
+import { Component, CUSTOM_ELEMENTS_SCHEMA, inject, resource } from '@angular/core';
+import { Ads } from '../../../../core';
+import { firstValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-home-slide',
@@ -7,4 +9,9 @@ import { Component, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
   styleUrl: './home-slide.scss',
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
-export class HomeSlide {}
+export class HomeSlide {
+  private adsService = inject(Ads);
+  ads = resource({
+    loader: () => firstValueFrom(this.adsService.getAds()),
+  });
+}

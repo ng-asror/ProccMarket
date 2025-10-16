@@ -64,7 +64,7 @@
 					@for (item of transactions.data.transactions; track item.id) {
 					<div class="pb-[10px] mb-[15px] border-b-1 border-[#E1E1E1] space-y-[10px]">
 						<p class="text-end block text-[14px] text-[#030303] capitalize leading-[100%] opacity-50">
-							{{item.created_at | date: 'MMM d, y, h:mm'}}</p>
+							{{item.created_at | date: 'd-MMM y, h:mm'}}</p>
 						<b class="text-[16px] leading-[120%] text-[#030303] font-[500]">{{item.description}}</b>
 						<h3 class="price text-[22px] font-bold text-end leading-[100%]">{{item.amount}}$</h3>
 						@switch (item.status) {

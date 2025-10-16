@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\BannerController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\NewsController;
 use App\Http\Controllers\Admin\OrderTransactionAdminController;
@@ -11,6 +12,7 @@ use App\Http\Controllers\Admin\TopicController;
 use App\Http\Controllers\Admin\TransactionController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\WithdrawalController;
+use App\Http\Controllers\Admin\HomeController;
 use App\Http\Controllers\GoogleController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -24,9 +26,8 @@ Route::get('auth/google', [GoogleController::class, 'redirectToGoogle']);
 Route::get('auth/google/callback', [GoogleController::class, 'handleGoogleCallback']);
 
 Route::middleware(['auth', 'verified', 'admin'])->group(function () {
-    Route::get('dashboard', function () {
-        return Inertia::render('dashboard');
-    })->name('dashboard');
+    Route::get('/dashboard', [HomeController::class, 'index'])->name('dashboard');
+
 
     Route::group(['prefix' => 'users'], function () {
         Route::get('/', [UserController::class, 'index'])->name('admin.users.index');
@@ -112,6 +113,21 @@ Route::middleware(['auth', 'verified', 'admin'])->group(function () {
         Route::post('/{orderTransaction}/force-complete', [OrderTransactionAdminController::class, 'forceComplete'])->name('force-complete');
     });
 
+
+    
+    // Additional Banner Routes
+    Route::prefix('banners')->name('admin.banners.')->group(function () {
+        Route::get('/', [BannerController::class, 'index'])->name('index');
+        Route::post('/', [BannerController::class, 'store'])->name('store');
+        Route::get('/create', [BannerController::class, 'create'])->name('create');
+        Route::get('/{banner}/edit', [BannerController::class, 'edit'])->name('edit');
+        Route::put('/{banner}', [BannerController::class, 'update'])->name('update');
+        Route::delete('/{banner}', [BannerController::class, 'destroy'])->name('destroy');
+
+        Route::post('/{banner}/toggle-status', [BannerController::class, 'toggleStatus'])->name('toggleStatus');
+        Route::post('/bulk-delete', [BannerController::class, 'bulkDelete'])->name('bulkDelete');
+        Route::post('update-order', [BannerController::class, 'updateOrder'])->name('updateOrder');
+    });
 });
 
 require __DIR__.'/settings.php';

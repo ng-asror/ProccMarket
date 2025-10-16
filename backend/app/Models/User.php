@@ -21,6 +21,7 @@ class User extends Authenticatable
         'balance',
         'name',
         'avatar',
+        'cover',
         'description',
         'banned',
         'last_deposit_at',
@@ -47,7 +48,7 @@ class User extends Authenticatable
         ];
     }
 
-    protected $appends = ['role_name', 'avatar_url'];
+    protected $appends = ['role_name', 'avatar_url', 'cover_url'];
 
     protected static function boot()
     {
@@ -79,6 +80,15 @@ class User extends Authenticatable
         }
 
         return $this->avatar ? asset('storage/'.$this->avatar) : null;
+    }
+
+    public function getCoverUrlAttribute()
+    {
+        if (filter_var($this->cover, FILTER_VALIDATE_URL)) {
+            return $this->cover;
+        }
+
+        return $this->cover ? asset('storage/'.$this->cover) : null;
     }
 
     public function getRoleNameAttribute()

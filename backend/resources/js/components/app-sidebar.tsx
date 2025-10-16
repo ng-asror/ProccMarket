@@ -4,7 +4,7 @@ import { NavUser } from '@/components/nav-user';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
-import { LetterText, NotepadText, UserRoundCog, Cog, Users, LayoutGrid, Coins, HandCoins, Newspaper, Star, BadgeCheck } from 'lucide-react';
+import { LetterText, NotepadText, UserRoundCog, Cog, Users, LayoutGrid, Coins, HandCoins, Newspaper, Star, BadgeCheck, Images } from 'lucide-react';
 import AppLogo from './app-logo';
 
 const mainNavItems: NavItem[] = [
@@ -17,6 +17,11 @@ const mainNavItems: NavItem[] = [
         title: 'Users',
         href: '/users',
         icon: Users,
+    },
+    {
+        title: 'Banners',
+        href: '/banners',
+        icon: Images,
     },
     {
         title: 'News',

@@ -217,6 +217,7 @@ class AuthController extends Controller
             'password' => 'sometimes|string|min:8|confirmed',
             'description' => 'sometimes|nullable|string|max:1000',
             'avatar' => 'sometimes|nullable|string',
+            'cover' => 'sometimes|nullable|string',
         ]);
 
         if ($validator->fails()) {
@@ -239,6 +240,11 @@ class AuthController extends Controller
                 $data['avatar'] = $avatar;
             } 
             elseif (preg_match('/^data:image\/(\w+);base64,/', $avatar, $matches)) {
+                // Delete old avatar if it exists and is not a URL
+                if ($user->avatar && !filter_var($user->avatar, FILTER_VALIDATE_URL)) {
+                    Storage::disk('public')->delete($user->avatar);
+                }
+
                 $imageData = substr($avatar, strpos($avatar, ',') + 1);
                 $imageData = base64_decode($imageData);
                 $extension = $matches[1];
@@ -247,6 +253,29 @@ class AuthController extends Controller
                 Storage::disk('public')->put($filename, $imageData);
                 
                 $data['avatar'] = $filename;
+            }
+        }
+
+        if ($request->filled('cover')) {
+            $cover = $request->cover;
+            
+            if (filter_var($cover, FILTER_VALIDATE_URL)) {
+                $data['cover'] = $cover;
+            } 
+            elseif (preg_match('/^data:image\/(\w+);base64,/', $cover, $matches)) {
+                // Delete old cover if it exists and is not a URL
+                if ($user->cover && !filter_var($user->cover, FILTER_VALIDATE_URL)) {
+                    Storage::disk('public')->delete($user->cover);
+                }
+
+                $imageData = substr($cover, strpos($cover, ',') + 1);
+                $imageData = base64_decode($imageData);
+                $extension = $matches[1];
+                
+                $filename = 'covers/' . uniqid() . '.' . $extension;
+                Storage::disk('public')->put($filename, $imageData);
+                
+                $data['cover'] = $filename;
             }
         }
 
@@ -292,23 +321,6 @@ class AuthController extends Controller
             $user->save();
         }
 
-        // Get recent referrals with limited data
-        // $recentReferrals = $user->referrals()
-        //     ->select(['id', 'name', 'email', 'avatar', 'created_at', 'banned'])
-        //     ->latest()
-        //     ->limit(10)
-        //     ->get()
-        //     ->map(function ($referral) {
-        //         return [
-        //             'id' => $referral->id,
-        //             'name' => $referral->name,
-        //             'email' => $referral->email,
-        //             'avatar_url' => $referral->avatar_url,
-        //             'joined_at' => $referral->created_at,
-        //             'status' => $referral->banned ? 'banned' : 'active',
-        //         ];
-        //     });
-
         return response()->json([
             'success' => true,
             'user' => $user,
@@ -320,7 +332,6 @@ class AuthController extends Controller
             'referral' => [
                 'code' => $user->referral_code,
                 'stats' => $referralStats,
-                // 'recent_referrals' => $recentReferrals,
                 'referred_by' => $user->hasReferrer() 
                     ? $user->referrer->only(['id', 'name', 'email', 'avatar_url'])
                     : null,

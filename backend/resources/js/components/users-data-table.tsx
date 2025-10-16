@@ -15,6 +15,7 @@ import {
   IconX,
   IconUser,
   IconUpload,
+  IconPhoto,
 } from "@tabler/icons-react"
 import {
   ColumnDef,
@@ -422,7 +423,12 @@ function UserEditDialog({ user, roles, onUpdate }: {
   const [avatarFile, setAvatarFile] = React.useState<File | null>(null)
   const [avatarPreview, setAvatarPreview] = React.useState<string | null>(user.avatar_url || null)
   const [removeAvatar, setRemoveAvatar] = React.useState(false)
-  const fileInputRef = React.useRef<HTMLInputElement>(null)
+  const avatarFileInputRef = React.useRef<HTMLInputElement>(null)
+
+  const [coverFile, setCoverFile] = React.useState<File | null>(null)
+  const [coverPreview, setCoverPreview] = React.useState<string | null>(user.cover_url || null)
+  const [removeCover, setRemoveCover] = React.useState(false)
+  const coverFileInputRef = React.useRef<HTMLInputElement>(null)
 
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -451,12 +457,48 @@ function UserEditDialog({ user, roles, onUpdate }: {
     }
   }
 
+  const handleCoverChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      // Validate file size (max 5MB for cover)
+      if (file.size > 5120 * 1024) {
+        toast.error("Cover image size must be less than 5MB")
+        return
+      }
+
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        toast.error("Please upload an image file")
+        return
+      }
+
+      setCoverFile(file)
+      setRemoveCover(false)
+      
+      // Create preview
+      const reader = new FileReader()
+      reader.onloadend = () => {
+        setCoverPreview(reader.result as string)
+      }
+      reader.readAsDataURL(file)
+    }
+  }
+
   const handleRemoveAvatar = () => {
     setAvatarFile(null)
     setAvatarPreview(null)
     setRemoveAvatar(true)
-    if (fileInputRef.current) {
-      fileInputRef.current.value = ""
+    if (avatarFileInputRef.current) {
+      avatarFileInputRef.current.value = ""
+    }
+  }
+
+  const handleRemoveCover = () => {
+    setCoverFile(null)
+    setCoverPreview(null)
+    setRemoveCover(true)
+    if (coverFileInputRef.current) {
+      coverFileInputRef.current.value = ""
     }
   }
 
@@ -476,8 +518,15 @@ function UserEditDialog({ user, roles, onUpdate }: {
     
     if (removeAvatar && !avatarFile) {
       submitData.append('remove_avatar', '1')
-    }   
+    }
+
+    if (coverFile) {
+      submitData.append('cover', coverFile)
+    }
     
+    if (removeCover && !coverFile) {
+      submitData.append('remove_cover', '1')
+    }
 
     router.post(route('admin.users.update', user.id), submitData, {
       onSuccess: () => {
@@ -500,15 +549,81 @@ function UserEditDialog({ user, roles, onUpdate }: {
           Edit User
         </DropdownMenuItem>
       </DialogTrigger>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Edit User Profile</DialogTitle>
           <DialogDescription>
-            Update user information, role, and avatar
+            Update user information, role, avatar and cover image
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit}>
           <div className="grid gap-6 py-4">
+            {/* Cover Image Section */}
+            <div className="space-y-3">
+              <Label>Profile Cover</Label>
+              <div className="space-y-3">
+                {coverPreview ? (
+                  <div className="relative group rounded-lg overflow-hidden border-2 border-border">
+                    <img
+                      src={coverPreview}
+                      alt="Cover preview"
+                      className="w-full h-48 object-cover"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleRemoveCover}
+                      className="absolute top-3 right-3 h-8 w-8 rounded-full bg-destructive text-destructive-foreground opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center shadow-lg"
+                    >
+                      <IconX className="h-4 w-4" />
+                    </button>
+                  </div>
+                ) : (
+                  <div className="w-full h-48 rounded-lg bg-muted flex items-center justify-center border-2 border-dashed border-border">
+                    <div className="text-center">
+                      <IconPhoto className="h-12 w-12 text-muted-foreground mx-auto mb-2" />
+                      <p className="text-sm text-muted-foreground">No cover image</p>
+                    </div>
+                  </div>
+                )}
+                
+                <div className="flex gap-2">
+                  <input
+                    ref={coverFileInputRef}
+                    type="file"
+                    accept="image/jpeg,image/png,image/jpg,image/gif"
+                    onChange={handleCoverChange}
+                    className="hidden"
+                    id="cover-upload"
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => coverFileInputRef.current?.click()}
+                    className="flex-1"
+                  >
+                    <IconUpload className="mr-2 h-4 w-4" />
+                    {coverPreview ? "Change Cover" : "Upload Cover"}
+                  </Button>
+                  {coverPreview && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={handleRemoveCover}
+                      className="text-destructive hover:text-destructive"
+                    >
+                      <IconX className="mr-2 h-4 w-4" />
+                      Remove
+                    </Button>
+                  )}
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  JPG, PNG or GIF. Max size 5MB. Recommended: 1200x400px
+                </p>
+              </div>
+            </div>
+
             {/* Avatar Section */}
             <div className="space-y-3">
               <Label>Profile Avatar</Label>
@@ -538,7 +653,7 @@ function UserEditDialog({ user, roles, onUpdate }: {
                 
                 <div className="flex-1 space-y-2">
                   <input
-                    ref={fileInputRef}
+                    ref={avatarFileInputRef}
                     type="file"
                     accept="image/jpeg,image/png,image/jpg,image/gif"
                     onChange={handleAvatarChange}
@@ -549,11 +664,11 @@ function UserEditDialog({ user, roles, onUpdate }: {
                     type="button"
                     variant="outline"
                     size="sm"
-                    onClick={() => fileInputRef.current?.click()}
+                    onClick={() => avatarFileInputRef.current?.click()}
                     className="w-full"
                   >
                     <IconUpload className="mr-2 h-4 w-4" />
-                    Upload New Avatar
+                    {avatarPreview ? "Change Avatar" : "Upload Avatar"}
                   </Button>
                   {avatarPreview && (
                     <Button

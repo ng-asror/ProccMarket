@@ -1,0 +1,289 @@
+import * as React from "react"
+import { Head, router, useForm } from '@inertiajs/react'
+import { IconArrowLeft, IconUpload, IconX } from "@tabler/icons-react"
+import { toast } from "sonner"
+
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Textarea } from "@/components/ui/textarea"
+import { Switch } from "@/components/ui/switch"
+import AppLayout from '@/layouts/app-layout'
+import { BreadcrumbItem } from '@/types'
+
+const breadcrumbs: BreadcrumbItem[] = [
+  {
+    title: 'Admin Dashboard',
+    href: '/admin',
+  },
+  {
+    title: 'Banners',
+    href: '/admin/banners',
+  },
+  {
+    title: 'Create Banner',
+    href: '/admin/banners/create',
+  },
+]
+
+export default function BannerCreate() {
+  const [imagePreview, setImagePreview] = React.useState<string | null>(null)
+  
+  const { data, setData, post, processing, errors } = useForm({
+    title: '',
+    description: '',
+    image: null as File | null,
+    link: '',
+    is_active: true,
+    order: 0,
+    starts_at: '',
+    ends_at: '',
+  })
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      setData('image', file)
+      const reader = new FileReader()
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string)
+      }
+      reader.readAsDataURL(file)
+    }
+  }
+
+  const removeImage = () => {
+    setData('image', null)
+    setImagePreview(null)
+  }
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    
+    post(route('admin.banners.store'), {
+      onSuccess: () => {
+        toast.success('Banner created successfully')
+      },
+      onError: () => {
+        toast.error('Failed to create banner')
+      }
+    })
+  }
+
+  return (
+    <AppLayout breadcrumbs={breadcrumbs}>
+      <Head title="Create Banner" />
+      
+      <div className="flex h-full flex-1 flex-col gap-6 p-4 max-w-4xl mx-auto">
+        <div className="flex items-center justify-between">
+            <Button
+            variant="outline"
+            onClick={() => router.visit(route('admin.banners.index'))}
+          >
+            <IconArrowLeft className="h-4 w-4" />
+            Back to Banners
+          </Button>
+        </div>
+
+        <form onSubmit={handleSubmit}>
+          <Card>
+            <CardHeader>
+                <h1 className="text-3xl font-bold">Create New Banner</h1>
+              <CardTitle>Banner Information</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {/* Title */}
+              <div className="space-y-2">
+                <Label htmlFor="title">
+                  Title <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  id="title"
+                  value={data.title}
+                  onChange={(e) => setData('title', e.target.value)}
+                  placeholder="Enter banner title"
+                  className={errors.title ? 'border-red-500' : ''}
+                />
+                {errors.title && (
+                  <p className="text-sm text-red-500">{errors.title}</p>
+                )}
+              </div>
+
+              {/* Description */}
+              <div className="space-y-2">
+                <Label htmlFor="description">Description (Optional)</Label>
+                <Textarea
+                  id="description"
+                  value={data.description}
+                  onChange={(e) => setData('description', e.target.value)}
+                  placeholder="Enter banner description"
+                  rows={3}
+                  className={errors.description ? 'border-red-500' : ''}
+                />
+                {errors.description && (
+                  <p className="text-sm text-red-500">{errors.description}</p>
+                )}
+              </div>
+
+              {/* Image Upload */}
+              <div className="space-y-2">
+                <Label htmlFor="image">
+                  Banner Image <span className="text-red-500">*</span>
+                </Label>
+                
+                {!imagePreview ? (
+                  <div className="flex items-center justify-center w-full">
+                    <label
+                      htmlFor="image"
+                      className="flex flex-col items-center justify-center w-full h-64 border-2 border-dashed rounded-lg cursor-pointer bg-muted hover:bg-muted/80 transition-colors"
+                    >
+                      <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                        <IconUpload className="w-10 h-10 mb-3 text-muted-foreground" />
+                        <p className="mb-2 text-sm text-muted-foreground">
+                          <span className="font-semibold">Click to upload</span> or drag and drop
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          PNG, JPG, GIF or WEBP (MAX. 5MB)
+                        </p>
+                      </div>
+                      <input
+                        id="image"
+                        type="file"
+                        className="hidden"
+                        accept="image/*"
+                        onChange={handleImageChange}
+                      />
+                    </label>
+                  </div>
+                ) : (
+                  <div className="relative w-full h-64 rounded-lg overflow-hidden border">
+                    <img
+                      src={imagePreview}
+                      alt="Preview"
+                      className="w-full h-full object-cover"
+                    />
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      size="icon"
+                      className="absolute top-2 right-2"
+                      onClick={removeImage}
+                    >
+                      <IconX className="h-4 w-4" />
+                    </Button>
+                  </div>
+                )}
+                
+                {errors.image && (
+                  <p className="text-sm text-red-500">{errors.image}</p>
+                )}
+              </div>
+
+              {/* Link */}
+              <div className="space-y-2">
+                <Label htmlFor="link">Link URL (Optional)</Label>
+                <Input
+                  id="link"
+                  type="url"
+                  value={data.link}
+                  onChange={(e) => setData('link', e.target.value)}
+                  placeholder="https://example.com"
+                  className={errors.link ? 'border-red-500' : ''}
+                />
+                {errors.link && (
+                  <p className="text-sm text-red-500">{errors.link}</p>
+                )}
+              </div>
+
+              {/* Order */}
+              <div className="space-y-2">
+                <Label htmlFor="order">Display Order</Label>
+                <Input
+                  id="order"
+                  type="number"
+                  min="0"
+                  value={data.order}
+                  onChange={(e) => setData('order', parseInt(e.target.value) || 0)}
+                  placeholder="0"
+                  className={errors.order ? 'border-red-500' : ''}
+                />
+                <p className="text-xs text-muted-foreground">
+                  Lower numbers appear first
+                </p>
+                {errors.order && (
+                  <p className="text-sm text-red-500">{errors.order}</p>
+                )}
+              </div>
+
+              {/* Schedule */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="starts_at">Start Date (Optional)</Label>
+                  <Input
+                    id="starts_at"
+                    type="datetime-local"
+                    value={data.starts_at}
+                    onChange={(e) => setData('starts_at', e.target.value)}
+                    className={errors.starts_at ? 'border-red-500' : ''}
+                  />
+                  {errors.starts_at && (
+                    <p className="text-sm text-red-500">{errors.starts_at}</p>
+                  )}
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="ends_at">End Date (Optional)</Label>
+                  <Input
+                    id="ends_at"
+                    type="datetime-local"
+                    value={data.ends_at}
+                    onChange={(e) => setData('ends_at', e.target.value)}
+                    className={errors.ends_at ? 'border-red-500' : ''}
+                  />
+                  {errors.ends_at && (
+                    <p className="text-sm text-red-500">{errors.ends_at}</p>
+                  )}
+                </div>
+              </div>
+
+              {/* Active Status */}
+              <div className="flex items-center justify-between p-4 border rounded-lg">
+                <div className="space-y-0.5">
+                  <Label htmlFor="is_active">Active Status</Label>
+                  <p className="text-sm text-muted-foreground">
+                    Enable this banner to show on the website
+                  </p>
+                </div>
+                <Switch
+                  id="is_active"
+                  checked={data.is_active}
+                  onCheckedChange={(checked) => setData('is_active', checked)}
+                />
+              </div>
+
+              {/* Submit Buttons */}
+              <div className="flex items-center gap-4 pt-4">
+                <Button
+                  type="submit"
+                  disabled={processing}
+                  className="flex-1"
+                >
+                  {processing ? 'Creating...' : 'Create Banner'}
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => router.visit(route('admin.banners.index'))}
+                  disabled={processing}
+                >
+                  Cancel
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </form>
+      </div>
+    </AppLayout>
+  )
+}

@@ -105,7 +105,7 @@ Route::prefix('v1')->group(function () {
             Route::get('/section/{section}', [TopicController::class, 'index']); // Section ichidagi topiclar
             Route::post('/section/{section}', [TopicController::class, 'store']); // Yangi topic yaratish
             Route::get('/{topic}', [TopicController::class, 'show']); // Topic ko'rish
-            Route::put('/{topic}', [TopicController::class, 'update']); // Topic tahrirlash
+            Route::post('/{topic}', [TopicController::class, 'update']); // Topic tahrirlash
             Route::delete('/{topic}', [TopicController::class, 'destroy']); // Topic o'chirish
         });
 

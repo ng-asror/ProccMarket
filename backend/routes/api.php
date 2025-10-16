@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\API\V1\AuthController;
+use App\Http\Controllers\API\V1\BannerController;
 use App\Http\Controllers\API\V1\CommentController;
 use App\Http\Controllers\API\V1\ConversationController;
 use App\Http\Controllers\API\V1\CryptoBotController;
@@ -71,6 +72,7 @@ Route::prefix('v1')->group(function () {
     /* PUBLIC ENDPOINTS */
     Route::prefix('public')->group(function () {
         Route::get('/all', [PublicApiController::class, 'allPublicData']);
+        Route::get('/banners', [BannerController::class, 'index']);
         Route::get('/roles', [PublicApiController::class, 'getRoles']);
         Route::get('/settings', [PublicApiController::class, 'getSettings']);
         Route::get('/settings/{key}', [PublicApiController::class, 'getSettingByKey']);

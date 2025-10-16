@@ -98,8 +98,8 @@ export class Telegram {
       return;
     }
 
-    this.BackButton.offClick(() => this.router.navigateByUrl(url));
     this.BackButton.hide();
+    this.BackButton.offClick(() => this.router.navigateByUrl(url));
   }
 
   open(telegramLink: string): void {

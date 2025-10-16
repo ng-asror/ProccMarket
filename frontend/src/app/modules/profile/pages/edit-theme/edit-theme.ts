@@ -18,7 +18,7 @@ export class EditTheme implements OnInit, OnDestroy {
   private sectionsService = inject(Section);
   private route = inject(ActivatedRoute);
   selectSection: number = 0;
-  topic_id: number | null = null;
+  topic_id: string | null = null;
   titleTheme: string = '';
   previewUrl = signal<string | ArrayBuffer | null>(null);
   content: string = '';
@@ -28,11 +28,16 @@ export class EditTheme implements OnInit, OnDestroy {
 
   async ngOnInit(): Promise<void> {
     this.telegram.showBackButton('/profile/my-topics');
-    this.route.paramMap.subscribe((res) => {
-      this.topic_id = Number(res.get('id'));
+    this.route.paramMap.subscribe((params) => {
+      const id = params.get('id');
+      if (id && !isNaN(Number(id))) {
+        this.topic_id = id;
+      } else {
+        this.topic_id = null;
+      }
     });
     if (this.topic_id) {
-      await firstValueFrom(this.topicService.info(this.topic_id)).then((res) => {
+      await firstValueFrom(this.topicService.info(Number(this.topic_id))).then((res) => {
         this.selectSection = res.topic.section.id;
         this.titleTheme = res.topic.title;
         this.previewUrl.set(res.topic.image_url);
@@ -52,7 +57,6 @@ export class EditTheme implements OnInit, OnDestroy {
       this.telegram.showAlert('Файл не должен превышать 2 МБ');
       return;
     }
-    this.themeImg.set(file);
 
     const reader = new FileReader();
     reader.onload = () => {

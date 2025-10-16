@@ -5,7 +5,7 @@
 		@let newsData = news.data;
 		<div class="space-y-[15px]">
 			<div class="flex text-black/50 text-sm gap-x-[10px]">
-				<p class="capitalize text-[16px]">{{news.data.created_at | dateFormat:'DD MMM HH:MM'}}</p>
+				<p class="capitalize text-[16px]">{{news.data.created_at | date: 'd-MMM y, h:mm'}}</p>
 				<div class="flex items-center gap-x-[3px]">
 					<lucide-icon [name]="ICONS.Eye" size="20"></lucide-icon>
 					<p>{{news.data.views_count | numeral: '0a'}}</p>

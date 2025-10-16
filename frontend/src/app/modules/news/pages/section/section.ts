@@ -13,13 +13,14 @@ import { News, Telegram } from '../../../../core';
 import { ActivatedRoute } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { MomentModule } from 'ngx-moment';
-import { AmDateFormatPipe, NumeralPipe } from '../../../../core/pipes';
+import { NumeralPipe } from '../../../../core/pipes';
 import { FormsModule } from '@angular/forms';
 import { Comment } from '../../../../components';
+import { DatePipe } from '@angular/common';
 
 @Component({
   selector: 'app-section',
-  imports: [LucideAngularModule, MomentModule, AmDateFormatPipe, NumeralPipe, FormsModule, Comment],
+  imports: [LucideAngularModule, MomentModule, DatePipe, NumeralPipe, FormsModule, Comment],
   templateUrl: './section.html',
   styleUrl: './section.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

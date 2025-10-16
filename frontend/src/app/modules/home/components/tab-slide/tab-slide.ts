@@ -1,7 +1,7 @@
 import { Component, effect, inject, input } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { register } from 'swiper/element/bundle';
-import { ISectionsRes, Section } from '../../../../core';
+import { ISectionsRes } from '../../../../core';
 
 register();
 
@@ -15,6 +15,7 @@ register();
       <a
         routerLink="/home"
         [queryParams]="{ forms: item.id }"
+        queryParamsHandling="merge"
         routerLinkActive="active"
         class="flex flex-col items-center justify-between shrink-0 p-[10px] rounded-[6px] bg-[#F2F2F2] gap-y-[4px] forms-tab leading-[100%] text-[12px] font-[500]"
       >

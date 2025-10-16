@@ -38,46 +38,18 @@ export interface IMyTopics extends ResultData {
 export interface IMyTopicsItem {
   id: number;
   title: string;
-  image: string;
-  image_url: string;
+  image: any;
+  image_url: any;
   closed: boolean;
-  created_at: Date;
-  updated_at: Date;
-  author: {
-    id: number;
-    telegram_id: string;
-    email: string;
-    referral_code: string;
-    referred_by: any;
-    role_id: number;
-    balance: string;
-    name: string | null;
-    avatar: string;
-    description: string;
-    banned: boolean;
-    last_deposit_at: string;
-    is_admin: boolean;
-    email_verified_at: any;
-    created_at: string;
-    updated_at: string;
-    deleted_at: any;
-    role_name: string | null;
-    avatar_url: string;
-    role: {
-      id: number;
-      name: string;
-      min_deposit: string;
-      created_at: Date;
-      updated_at: Date;
-      users_count: number;
-    };
-  };
+  created_at: string;
+  updated_at: string;
+  section: IMyTopicsSection;
   posts_count: number;
   likes_count: number;
   dislikes_count: number;
   shares_count: number;
   views_count: number;
-  user_reaction: 'like' | 'dislike';
+  user_reaction: string;
   user_shared: boolean;
 }
 

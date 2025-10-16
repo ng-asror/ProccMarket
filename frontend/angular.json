@@ -4,6 +4,9 @@
   "newProjectRoot": "projects",
   "projects": {
     "frontend": {
+      "i18n": {
+        "sourceLocale": "ru-RU"
+      },
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {

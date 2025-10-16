@@ -267,7 +267,8 @@ class TopicController extends Controller
             'title' => 'sometimes|string|max:255',
             'content' => 'sometimes|string',
             'image' => 'nullable',
-            'closed' => 'sometimes|boolean'
+            'closed' => 'sometimes|boolean',
+            'remove_image' => 'sometimes|boolean'
         ]);
 
         if ($validator->fails()) {
@@ -277,7 +278,26 @@ class TopicController extends Controller
             ], 422);
         }
 
-        $topic->update($request->only(['title', 'content', 'image', 'closed']));
+        // Data tayyorlash
+        $data = $request->only(['title', 'content', 'closed']);
+
+        // Image handling
+        if ($request->boolean('remove_image')) {
+            // Rasmni o'chirish
+            $data['image'] = null;
+        }
+        elseif ($request->hasFile('image') && $request->file('image')->isValid()) {
+            // Yangi file yuklash
+            $data['image'] = $request->file('image')->store('topics', 'public');
+        }
+        elseif ($request->filled('image') && is_string($request->image) && 
+                Str::startsWith($request->image, ['http://', 'https://'])) {
+            // URL link
+            $data['image'] = $request->image;
+        }
+        // Agar image null yoki yuborilmagan bo'lsa - o'zgartirmaymiz
+
+        $topic->update($data);
         
         $topic->load(['user', 'section:id,name'])
             ->loadCount([

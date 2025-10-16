@@ -7,9 +7,9 @@
 					class="bg-[#F2F2F2] p-[8px] cursor-pointer rounded-[12px] w-[40px] drawer-button h-[40px]">
 					<img src="/svg/bars.svg" alt="bars icon" class="w-full h-full block">
 				</label>
-				<a routerLink="/" class="bg-[#000] max-w-[100px]">
+				<div class="block w-[100px]">
 					<img src="/svg/logo.svg" alt="logo icon" class="block w-full h-full">
-				</a>
+				</div>
 				<a (click)="comingSoon()" class="bg-[#F2F2F2] p-[8.5px] block rounded-[12px] w-[40px] h-[40px]">
 					<!-- <img src="/svg/bell.svg" alt="bars icon" class="w-full h-full block"> -->
 					<lucide-icon [name]="ICONS.MessagesSquare"></lucide-icon>
@@ -20,8 +20,11 @@
 	<div class="drawer-side">
 		<label for="my-drawer" aria-label="close sidebar" class="drawer-overlay"></label>
 		<div class="min-h-dvh w-10 bg-white max-w-xs w-full flex flex-col justify-between row-gap-2 rounded-r-box">
-			@if (sections.value(); as getSection) {
 			<div class="space-y-[15px]">
+				<div class="w-[100px] block my-[15px_0] mx-[15px]">
+					<img src="svg/logo.svg" alt="proccmarket logo" class="block w-full h-full">
+				</div>
+				@if (sections.value(); as getSection) {
 				<ul class="menu max-w-xs w-full">
 					@for (section of getSection.sections; track section.id) {
 					@if(section.children) {
@@ -43,10 +46,10 @@
 					}
 					}
 				</ul>
+				}
 			</div>
-			}
 			<ul class="menu menu-md w-full">
-				<li><a>Сотрудничество</a></li>
+				<li><a routerLink="/cooperation">Сотрудничество</a></li>
 				<li><a>Правила</a></li>
 				<li><a>О нас</a></li>
 			</ul>

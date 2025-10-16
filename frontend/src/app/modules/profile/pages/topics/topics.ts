@@ -1,12 +1,13 @@
 import { Component, inject, resource, signal } from '@angular/core';
-import { IMyTopics, NumeralPipe, ProfileService, Telegram, TopicService } from '../../../../core';
+import { IMyTopics, ProfileService, Telegram, TopicService } from '../../../../core';
 import { firstValueFrom } from 'rxjs';
 import { icons, LucideAngularModule } from 'lucide-angular';
 import { RouterLink } from '@angular/router';
+import { FormCard } from '../../../../components';
 
 @Component({
   selector: 'app-topics',
-  imports: [LucideAngularModule, NumeralPipe, RouterLink],
+  imports: [LucideAngularModule, FormCard, RouterLink],
   templateUrl: './topics.html',
   styleUrl: './topics.scss',
 })

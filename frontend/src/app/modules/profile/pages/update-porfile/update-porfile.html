@@ -1,7 +1,12 @@
 <div class="p-[15px]">
 	@if (!loader()) {
-	<div class=" w-[100px] h-[100px] mx-auto mb-[20px] cursor-pointer" onclick="avatarsModal.showModal()">
-		<img [src]="userAvatar()" class="w-full h-full block object-cover object-center rounded-[12px]" />
+	<img [src]="userCover()" alt="cover img"
+		class="w-full h-[150px] rounded-box object-cover object-center cursor-pointer h-[150px]"
+		onclick="avatarsModal.showModal()">
+	<div
+		class=" w-[100px] h-[100px] mx-auto my-[-48px_15px] border-5 border-[#fff] rounded-box overflow-hidden relative z-2 cursor-pointer"
+		onclick="avatarsModal.showModal()">
+		<img [src]="userAvatar()" class="w-full h-full block object-cover object-center" />
 	</div>
 	<form [formGroup]="updateForm" class="space-y-4" (ngSubmit)="update()">
 		<div>
@@ -127,8 +132,12 @@
 			}
 		</div>
 		<div class="mt-[15px]">
-			<label for="avatarInp" class="leading-[100%] mb-[5px] block text-[14px]">Выберите файл</label>
+			<label for="avatarInp" class="leading-[100%] mb-[5px] block text-[14px]">Аватар профиля</label>
 			<input type="file" class="file-input w-full" accept="image/*" (change)="avatarSelect($event)" />
+		</div>
+		<div class="mt-[15px]">
+			<label for="avatarInp" class="leading-[100%] mb-[5px] block text-[14px]">Баннер фона</label>
+			<input type="file" class="file-input w-full" accept="image/*" (change)="coverSelect($event)" />
 		</div>
 		<div class="modal-action">
 			<form method="dialog">

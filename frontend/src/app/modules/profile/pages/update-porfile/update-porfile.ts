@@ -59,7 +59,7 @@ export class UpdatePorfile implements OnInit, OnDestroy {
         this.userAvatar.set(
           res.user.avatar_url ? res.user.avatar_url : 'https://proccmarket.com/avatars/avatar10.svg'
         );
-        this.userCover.set(res.user.cover ?? null);
+        this.userCover.set(res.user.cover_url ?? null);
         this.updateForm.patchValue({
           name: res.user.name,
           email: res.user.email,
@@ -89,6 +89,19 @@ export class UpdatePorfile implements OnInit, OnDestroy {
     ) as HTMLDialogElement;
     dialog?.close();
   }
+  protected coverSelect(selectCover: Event): void {
+    const coverFile = (selectCover.target as HTMLInputElement).files?.[0];
+    if (!coverFile) return;
+    const reader = new FileReader();
+    reader.readAsDataURL(coverFile);
+    reader.onload = async () => {
+      this.userCover.set(reader.result as string);
+      // const dialog: HTMLDialogElement | null = document.getElementById(
+      //   'avatarsModal'
+      // ) as HTMLDialogElement;
+      // dialog?.close();
+    };
+  }
 
   async update(): Promise<void> {
     const body: IUpdateForm = this.updateForm.getRawValue();
@@ -96,11 +109,15 @@ export class UpdatePorfile implements OnInit, OnDestroy {
       delete body.password;
       delete body.password_confirmation;
     }
-    firstValueFrom(this.profileService.updateProfile({ ...body, avatar: this.userAvatar() })).then(
-      () => {
-        this.router.navigate(['/profile']);
-      }
-    );
+    firstValueFrom(
+      this.profileService.updateProfile({
+        ...body,
+        avatar: this.userAvatar(),
+        cover: this.userCover(),
+      })
+    ).then(() => {
+      this.router.navigate(['/profile']);
+    });
   }
 
   async avatarSelect(event: Event): Promise<void> {
@@ -110,10 +127,10 @@ export class UpdatePorfile implements OnInit, OnDestroy {
     reader.readAsDataURL(file);
     reader.onload = async () => {
       this.userAvatar.set(reader.result as string);
-      const dialog: HTMLDialogElement | null = document.getElementById(
-        'avatarsModal'
-      ) as HTMLDialogElement;
-      dialog?.close();
+      // const dialog: HTMLDialogElement | null = document.getElementById(
+      //   'avatarsModal'
+      // ) as HTMLDialogElement;
+      // dialog?.close();
     };
   }
 

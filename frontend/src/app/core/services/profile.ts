@@ -8,6 +8,7 @@ interface updateProfileBody {
   email?: string;
   description?: string;
   avatar?: string;
+  cover?: string | null;
   password?: string;
   password_confirmation?: string;
 }

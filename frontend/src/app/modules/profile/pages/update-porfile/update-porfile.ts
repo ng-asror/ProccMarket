@@ -38,6 +38,7 @@ export class UpdatePorfile implements OnInit, OnDestroy {
   loader = signal<boolean>(true);
   protected localAavatars = avatarsMock;
   userAvatar = signal<string>('https://proccmarket.com/avatars/avatar10.svg');
+  userCover = signal<string | null>(null);
   constructor() {
     this.updateForm = this.fb.group(
       {
@@ -58,6 +59,7 @@ export class UpdatePorfile implements OnInit, OnDestroy {
         this.userAvatar.set(
           res.user.avatar_url ? res.user.avatar_url : 'https://proccmarket.com/avatars/avatar10.svg'
         );
+        this.userCover.set(res.user.cover ?? null);
         this.updateForm.patchValue({
           name: res.user.name,
           email: res.user.email,
@@ -103,13 +105,16 @@ export class UpdatePorfile implements OnInit, OnDestroy {
 
   async avatarSelect(event: Event): Promise<void> {
     const file = (event.target as HTMLInputElement).files?.[0];
-    if (file) {
-      await firstValueFrom(
-        this.profileService.updateProfile({
-          avatar: file,
-        })
-      );
-    }
+    if (!file) return;
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = async () => {
+      this.userAvatar.set(reader.result as string);
+      const dialog: HTMLDialogElement | null = document.getElementById(
+        'avatarsModal'
+      ) as HTMLDialogElement;
+      dialog?.close();
+    };
   }
 
   ngOnDestroy(): void {

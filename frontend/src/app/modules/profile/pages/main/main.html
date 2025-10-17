@@ -20,10 +20,11 @@
 						}
 					</div>
 					<div>
-						<h1 class=" text-[20px] text-[#030300] font-[500] mb-1 leading-[100%] text-center">
+						<h1 class="text-[20px] text-[#030300] font-[500] mb-1 leading-[100%]">
 							{{profile.user.name??'user' + profile.user.id}}</h1>
 						<h2 class="text-[16px] lowercase text-[#030300] font-[500] leading-[100%]">
 							{{profile.user.role_name? profile.user.role_name: 'Гость'}}</h2>
+						<p class="text-[16px] text-[#030303]/50">{{profile.user.email}}</p>
 					</div>
 				</div>
 				<p class="text-[16px] text-[#030300] leading-[120%] font-[400] block">{{profile.user.description}}</p>

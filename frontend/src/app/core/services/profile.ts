@@ -7,7 +7,7 @@ interface updateProfileBody {
   name?: string;
   email?: string;
   description?: string;
-  avatar?: string | File;
+  avatar?: string;
   password?: string;
   password_confirmation?: string;
 }

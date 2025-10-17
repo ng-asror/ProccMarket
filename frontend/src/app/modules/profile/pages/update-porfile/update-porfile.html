@@ -1,11 +1,9 @@
 <div class="p-[15px]">
 	@if (!loader()) {
-	<div class="w-[100px] h-[100px] mx-auto mb-[25px] cursor-pointer" onclick="avatarsModal.showModal()">
-		<img [src]="userAvatar()" class="w-full h-full block" />
+	<div class=" w-[100px] h-[100px] mx-auto mb-[20px] cursor-pointer" onclick="avatarsModal.showModal()">
+		<img [src]="userAvatar()" class="w-full h-full block object-cover object-center rounded-[12px]" />
 	</div>
 	<form [formGroup]="updateForm" class="space-y-4" (ngSubmit)="update()">
-		<h2 class="text-2xl font-semibold text-center mb-4">Обновление профиля</h2>
-		<!-- Имя -->
 		<div>
 			<label for="name" class="text-black text-[14px] mb-1 block">Имя и Фамилия*</label>
 			<input type="text" id="name" formControlName="name" placeholder="Ваше имя"
@@ -130,7 +128,7 @@
 		</div>
 		<div class="mt-[15px]">
 			<label for="avatarInp" class="leading-[100%] mb-[5px] block text-[14px]">Выберите файл</label>
-			<input type="file" class="file-input w-full" (change)="avatarSelect($event)" />
+			<input type="file" class="file-input w-full" accept="image/*" (change)="avatarSelect($event)" />
 		</div>
 		<div class="modal-action">
 			<form method="dialog">

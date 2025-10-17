@@ -3,13 +3,12 @@ import { RouterLink } from '@angular/router';
 import { icons, LucideAngularModule } from 'lucide-angular';
 import { firstValueFrom } from 'rxjs';
 import { Auth, LayoutService, NumeralPipe, ProfileService, Telegram } from '../../../../core';
-import { NgIf } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Layout } from '../../../../layout/layout';
 
 @Component({
   selector: 'app-main',
-  imports: [NumeralPipe, LucideAngularModule, NgIf, RouterLink, FormsModule, Layout],
+  imports: [NumeralPipe, LucideAngularModule, RouterLink, FormsModule, Layout],
   templateUrl: './main.html',
   styleUrl: './main.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

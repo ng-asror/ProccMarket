@@ -101,6 +101,17 @@ export class UpdatePorfile implements OnInit, OnDestroy {
     );
   }
 
+  async avatarSelect(event: Event): Promise<void> {
+    const file = (event.target as HTMLInputElement).files?.[0];
+    if (file) {
+      await firstValueFrom(
+        this.profileService.updateProfile({
+          avatar: file,
+        })
+      );
+    }
+  }
+
   ngOnDestroy(): void {
     this.telegram.hiddeBackButton('/profile');
   }

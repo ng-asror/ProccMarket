@@ -4,10 +4,10 @@ import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment.development';
 import { IMyTopics, IProfileRes } from '../interfaces';
 interface updateProfileBody {
-  name: string;
-  email: string;
-  description: string;
-  avatar: string;
+  name?: string;
+  email?: string;
+  description?: string;
+  avatar?: string | File;
   password?: string;
   password_confirmation?: string;
 }

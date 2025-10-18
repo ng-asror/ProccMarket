@@ -123,4 +123,17 @@ class ConversationController extends Controller
             'message' => 'Conversation deleted successfully',
         ]);
     }
+
+    public function verifyAccess(Conversation $conversation)
+    {
+        $user = auth()->user();
+        
+        if ($user->is_admin) {
+            return response()->json(['hasAccess' => true]);
+        }
+        
+        $hasAccess = $conversation->hasParticipant($user->id);
+        
+        return response()->json(['hasAccess' => $hasAccess]);
+    }
 }

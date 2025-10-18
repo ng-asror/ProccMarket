@@ -11,6 +11,7 @@ use App\Http\Controllers\API\V1\NewsController;
 use App\Http\Controllers\API\V1\NewsLikeController;
 use App\Http\Controllers\API\V1\NewsShareController;
 use App\Http\Controllers\API\V1\OrderTransactionController;
+use App\Http\Controllers\API\V1\PartnershipController;
 use App\Http\Controllers\API\V1\PostController;
 use App\Http\Controllers\API\V1\PublicApiController;
 use App\Http\Controllers\API\V1\ReviewController;
@@ -148,6 +149,16 @@ Route::prefix('v1')->group(function () {
             // Route::post('/transfer', [CryptoBotController::class, 'transfer']);
         });
 
+        // ==========================================
+        // PARTNERSHIP APPLICATION ROUTES
+        // ==========================================
+        Route::prefix('partnership')->name('api.partnership.')->group(function () {
+            Route::get('can-apply', [PartnershipController::class, 'canApply'])->name('canApply');
+            Route::get('my-application', [PartnershipController::class, 'myApplication'])->name('myApplication');
+            Route::post('submit', [PartnershipController::class, 'submit'])->name('submit');
+            Route::delete('cancel', [PartnershipController::class, 'cancel'])->name('cancel');
+        });
+
         // Withdrawal Endpoints
         Route::prefix('withdrawals')->group(function () {
             Route::get('/', [WithdrawalController::class, 'index']);
@@ -219,6 +230,7 @@ Route::prefix('v1')->group(function () {
             Route::post('/conversations', [ConversationController::class, 'store']);
             Route::get('/conversations/{conversation}', [ConversationController::class, 'show']);
             Route::delete('/conversations/{conversation}', [ConversationController::class, 'destroy']);
+            Route::get('/conversations/{conversation}/verify-access', [ConversationController::class, 'verifyAccess']);
 
             // Message routes
             Route::post('/conversations/{conversation}/messages', [MessageController::class, 'store']);

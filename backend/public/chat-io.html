@@ -1,0 +1,1540 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat & Orders - ProccMarket (Socket.io)</title>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://cdn.socket.io/4.6.1/socket.io.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 1200px;
+            height: 90vh;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        .user-badge {
+            background: rgba(255,255,255,0.2);
+            padding: 10px 20px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .login-container {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+        }
+
+        .login-box {
+            width: 100%;
+            max-width: 400px;
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        }
+
+        .login-box h2 {
+            margin-bottom: 30px;
+            color: #333;
+            text-align: center;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #666;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .main-content {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 300px 1fr 350px;
+            overflow: hidden;
+        }
+
+        .sidebar {
+            background: #f8f9fa;
+            border-right: 1px solid #e0e0e0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .sidebar-header h3 {
+            font-size: 18px;
+            color: #333;
+        }
+
+        .new-chat-btn {
+            padding: 8px 16px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            width: auto;
+        }
+
+        .conversations-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px;
+        }
+
+        .conversation-item {
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .conversation-item:hover {
+            background: #e9ecef;
+        }
+
+        .conversation-item.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .conversation-avatar {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: #dee2e6;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+
+        .conversation-item.active .conversation-avatar {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .conversation-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .conversation-name {
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 4px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .conversation-preview {
+            font-size: 12px;
+            opacity: 0.7;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .chat-area {
+            display: flex;
+            flex-direction: column;
+            background: white;
+        }
+
+        .chat-header {
+            padding: 20px 30px;
+            border-bottom: 1px solid #e0e0e0;
+            background: #f8f9fa;
+        }
+
+        .chat-header h3 {
+            font-size: 18px;
+            color: #333;
+            margin-bottom: 4px;
+        }
+
+        .chat-header p {
+            font-size: 12px;
+            color: #999;
+        }
+
+        .messages-container {
+            flex: 1;
+            padding: 30px;
+            overflow-y: auto;
+            background: #fafafa;
+        }
+
+        .message {
+            margin-bottom: 20px;
+            display: flex;
+            gap: 12px;
+        }
+
+        .message.sent {
+            flex-direction: row-reverse;
+        }
+
+        .message-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: #dee2e6;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 12px;
+            flex-shrink: 0;
+        }
+
+        .message-content {
+            max-width: 60%;
+        }
+
+        .message-bubble {
+            padding: 12px 16px;
+            border-radius: 18px;
+            word-wrap: break-word;
+            line-height: 1.4;
+        }
+
+        .message.sent .message-bubble {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+
+        .message.received .message-bubble {
+            background: white;
+            color: #333;
+            border: 1px solid #e0e0e0;
+            border-bottom-left-radius: 4px;
+        }
+
+        .message-time {
+            font-size: 11px;
+            color: #999;
+            margin-top: 4px;
+            padding: 0 4px;
+        }
+
+        .message-input-area {
+            padding: 20px 30px;
+            border-top: 1px solid #e0e0e0;
+            background: white;
+        }
+
+        .message-input-form {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .message-input-form input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 24px;
+            font-size: 14px;
+        }
+
+        .message-input-form input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .send-btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            color: white;
+            cursor: pointer;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .orders-panel {
+            background: #f8f9fa;
+            border-left: 1px solid #e0e0e0;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
+        .panel-header {
+            padding: 20px;
+            border-bottom: 1px solid #e0e0e0;
+            background: white;
+        }
+
+        .panel-header h3 {
+            font-size: 16px;
+            color: #333;
+            margin-bottom: 4px;
+        }
+
+        .create-order-btn {
+            margin-top: 12px;
+            padding: 10px 16px;
+            background: #28a745;
+            font-size: 14px;
+        }
+
+        .orders-list {
+            padding: 15px;
+        }
+
+        .order-card {
+            background: white;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+            border: 1px solid #e0e0e0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .order-status {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+        }
+
+        .order-status.pending { background: #fff3cd; color: #856404; }
+        .order-status.accepted { background: #d1ecf1; color: #0c5460; }
+        .order-status.in_progress { background: #cce5ff; color: #004085; }
+        .order-status.delivered { background: #e2e3e5; color: #383d41; }
+        .order-status.completed { background: #d4edda; color: #155724; }
+        .order-status.dispute { background: #f8d7da; color: #721c24; }
+        .order-status.released { background: #d4edda; color: #155724; }
+        .order-status.cancellation_requested { background: #fff3cd; color: #856404; }
+        .order-status.cancelled { background: #f8d7da; color: #721c24; }
+        .order-status.refunded { background: #f8d7da; color: #721c24; }
+
+        .order-title {
+            font-weight: 600;
+            font-size: 14px;
+            color: #333;
+            margin-bottom: 6px;
+        }
+
+        .order-amount {
+            font-size: 20px;
+            font-weight: bold;
+            color: #28a745;
+            margin: 10px 0;
+        }
+
+        .order-description {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 12px;
+            line-height: 1.4;
+        }
+
+        .order-meta {
+            font-size: 12px;
+            color: #999;
+            margin-bottom: 12px;
+        }
+
+        .order-meta strong {
+            color: #666;
+        }
+
+        .order-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .order-actions button {
+            padding: 8px 12px;
+            font-size: 13px;
+            border-radius: 6px;
+        }
+
+        .btn-success { background: #28a745; }
+        .btn-primary { background: #007bff; }
+        .btn-warning { background: #ffc107; color: #333; }
+        .btn-danger { background: #dc3545; }
+        .btn-info { background: #17a2b8; }
+
+        .cancellation-notice {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            font-size: 12px;
+        }
+
+        .revision-notice {
+            background: #d1ecf1;
+            border: 1px solid #17a2b8;
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            font-size: 12px;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            margin-bottom: 20px;
+        }
+
+        .modal-header h3 {
+            font-size: 20px;
+            color: #333;
+        }
+
+        .modal-body {
+            margin-bottom: 20px;
+        }
+
+        .modal-footer {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        .modal-footer button {
+            width: auto;
+            padding: 10px 20px;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #28a745;
+            color: white;
+            padding: 16px 24px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 2000;
+            animation: slideIn 0.3s ease;
+            max-width: 350px;
+        }
+
+        .notification.error { background: #dc3545; }
+        .notification.info { background: #17a2b8; }
+        .notification.warning { background: #ffc107; color: #333; }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+        }
+
+        .refresh-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #6c757d;
+            border: none;
+            color: white;
+            cursor: pointer;
+            font-size: 18px;
+        }
+
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: inherit;
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .ws-status {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+
+        .ws-status.connected { background: #28a745; }
+        .ws-status.disconnected { background: #dc3545; }
+
+        .role-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 600;
+            margin-left: 6px;
+        }
+
+        .role-badge.client { background: #007bff; color: white; }
+        .role-badge.freelancer { background: #28a745; color: white; }
+
+        .revision-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 600;
+            margin-left: 6px;
+            background: #17a2b8;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container" id="app">
+        <!-- Login Screen -->
+        <div class="login-container" id="login-screen">
+            <div class="login-box">
+                <h2>🔐 Login to ProccMarket</h2>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="login-email" placeholder="Enter your email">
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="login-password" placeholder="Enter your password">
+                </div>
+                <button onclick="login()">Login</button>
+            </div>
+        </div>
+
+        <!-- Main App -->
+        <div id="main-app" style="display: none; flex: 1; display: flex; flex-direction: column;">
+            <div class="header">
+                <h1>
+                    💬 ProccMarket Chat (Socket.io)
+                    <span class="ws-status disconnected" id="ws-status"></span>
+                </h1>
+                <div class="user-badge">
+                    <div class="user-avatar" id="user-avatar">?</div>
+                    <div>
+                        <div style="font-weight: 600;" id="user-name">User</div>
+                        <div style="font-size: 12px; opacity: 0.9;">Balance: $<span id="user-balance">0</span></div>
+                    </div>
+                    <button onclick="logout()" style="margin-left: 15px; width: auto; padding: 8px 16px; background: rgba(255,255,255,0.2); font-size: 12px;">Logout</button>
+                </div>
+            </div>
+
+            <div class="main-content">
+                <div class="sidebar">
+                    <div class="sidebar-header">
+                        <h3>Conversations</h3>
+                        <button class="new-chat-btn" onclick="showNewChatModal()">+ New</button>
+                    </div>
+                    <div class="conversations-list" id="conversations-list">
+                        <div class="empty-state">
+                            <p>No conversations yet</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="chat-area">
+                    <div class="chat-header" id="chat-header" style="display: none;">
+                        <h3 id="chat-name">Select a conversation</h3>
+                        <p id="chat-info">No conversation selected</p>
+                    </div>
+                    <div class="messages-container" id="messages-container" style="max-height: 60vh;">
+                        <div class="empty-state">
+                            <p>Select a conversation to start chatting</p>
+                        </div>
+                    </div>
+                    <div class="message-input-area" style="display: none;" id="message-input-area">
+                        <div class="message-input-form">
+                            <input type="text" id="message-input" placeholder="Type a message..." onkeypress="handleKeyPress(event)">
+                            <button class="refresh-btn" onclick="refreshConversation()">↻</button>
+                            <button class="send-btn" onclick="sendMessage()">➤</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="orders-panel">
+                    <div class="panel-header">
+                        <h3>📦 Order Transactions</h3>
+                        <p style="font-size: 12px; color: #999; margin-top: 4px;">Secure escrow system</p>
+                        <button class="create-order-btn" onclick="showCreateOrderModal()" id="create-order-btn" style="display: none;">+ Create Order</button>
+                    </div>
+                    <div class="orders-list" id="orders-list">
+                        <div class="empty-state" style="padding: 40px 20px;">
+                            <p>No orders yet</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <div class="modal" id="new-chat-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Start New Conversation</h3>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Enter User ID to chat with:</label>
+                    <input type="number" id="new-chat-user-id" placeholder="User ID" style="width: 100%;">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="closeModal('new-chat-modal')">Cancel</button>
+                <button onclick="createConversation()">Start Chat</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="create-order-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Create Order Transaction</h3>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Who is creating this order?</label>
+                    <select id="order-type">
+                        <option value="true">I'm the Client (I will pay)</option>
+                        <option value="false">I'm the Freelancer (I will receive payment)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Title</label>
+                    <input type="text" id="order-title" placeholder="e.g., Build a website">
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea id="order-description" placeholder="Describe the work required..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Amount ($)</label>
+                    <input type="number" id="order-amount" placeholder="100.00" step="0.01" min="0.01">
+                </div>
+                <div class="form-group">
+                    <label>Deadline (Optional)</label>
+                    <input type="datetime-local" id="order-deadline">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="closeModal('create-order-modal')">Cancel</button>
+                <button class="btn-success" onclick="createOrder()">Create Order</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="reason-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="reason-modal-title">Enter Reason</h3>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label id="reason-modal-label">Reason:</label>
+                    <textarea id="reason-modal-input" placeholder="Enter your reason..." rows="4"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="closeModal('reason-modal')">Cancel</button>
+                <button id="reason-modal-submit" onclick="submitReason()">Submit</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE_URL = window.location.origin + '/api/v1';
+        const SOCKET_URL = 'http://localhost:3001'; // Socket.io server URL
+        
+        let state = {
+            token: null,
+            user: null,
+            conversations: [],
+            currentConversation: null,
+            socket: null,
+            wsConnected: false,
+            reasonCallback: null,
+            joinedConversations: new Set()
+        };
+
+        // Utility Functions
+        function showNotification(message, type = 'success') {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            setTimeout(() => notification.remove(), 3000);
+        }
+
+        function formatTime(dateString) {
+            const date = new Date(dateString);
+            const now = new Date();
+            const diff = now - date;
+            if (diff < 60000) return 'Just now';
+            if (diff < 3600000) return Math.floor(diff / 60000) + 'm ago';
+            if (diff < 86400000) return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+            return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        }
+
+        function getAxiosConfig() {
+            return state.token ? { headers: { 'Authorization': `Bearer ${state.token}` } } : {};
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') sendMessage();
+        }
+
+        function updateWSStatus(connected) {
+            state.wsConnected = connected;
+            const statusEl = document.getElementById('ws-status');
+            if (statusEl) {
+                statusEl.className = `ws-status ${connected ? 'connected' : 'disconnected'}`;
+            }
+        }
+
+        // Authentication
+        async function login() {
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+
+            if (!email || !password) {
+                showNotification('Please enter email and password', 'error');
+                return;
+            }
+
+            try {
+                const response = await axios.post(`${API_BASE_URL}/auth/login`, { email, password });
+                const { token, user } = response.data;
+
+                state.token = token;
+                state.user = user;
+
+                document.getElementById('login-screen').style.display = 'none';
+                document.getElementById('main-app').style.display = 'flex';
+                document.getElementById('user-name').textContent = user.name || user.email;
+                document.getElementById('user-balance').textContent = user.balance || 0;
+                document.getElementById('user-avatar').textContent = (user.name || user.email).charAt(0).toUpperCase();
+
+                showNotification('Logged in successfully! 🎉');
+                initializeWebSocket();
+                await loadConversations();
+            } catch (error) {
+                showNotification(error.response?.data?.message || 'Login failed', 'error');
+            }
+        }
+
+        function logout() {
+            if (state.socket) {
+                try { 
+                    state.socket.disconnect(); 
+                } catch(e) {}
+            }
+            
+            state = { 
+                token: null, 
+                user: null, 
+                conversations: [], 
+                currentConversation: null, 
+                socket: null, 
+                wsConnected: false, 
+                reasonCallback: null,
+                joinedConversations: new Set()
+            };
+            
+            document.getElementById('login-screen').style.display = 'flex';
+            document.getElementById('main-app').style.display = 'none';
+            document.getElementById('login-email').value = '';
+            document.getElementById('login-password').value = '';
+            
+            showNotification('Logged out successfully');
+        }
+
+        // WebSocket with Socket.io
+        function initializeWebSocket() {
+            console.log('🔌 Connecting to Socket.io server...');
+            
+            try {
+                state.socket = io(SOCKET_URL, {
+                    auth: {
+                        token: state.token
+                    },
+                    transports: ['websocket', 'polling'],
+                    reconnection: true,
+                    reconnectionDelay: 1000,
+                    reconnectionDelayMax: 5000,
+                    reconnectionAttempts: 5
+                });
+
+                // Connection events
+                state.socket.on('connect', () => {
+                    console.log('✅ Socket.io connected!', state.socket.id);
+                    updateWSStatus(true);
+                    showNotification('Real-time chat enabled! 🔔', 'success');
+                    
+                    // Rejoin conversations if any
+                    if (state.joinedConversations.size > 0) {
+                        const conversationIds = Array.from(state.joinedConversations);
+                        state.socket.emit('join-conversations', conversationIds);
+                        console.log('🔄 Rejoined conversations:', conversationIds);
+                    }
+                });
+
+                state.socket.on('disconnect', (reason) => {
+                    console.log('⚠️ Socket.io disconnected:', reason);
+                    updateWSStatus(false);
+                    if (reason === 'io server disconnect') {
+                        state.socket.connect();
+                    }
+                });
+
+                state.socket.on('connect_error', (error) => {
+                    console.error('❌ Connection error:', error.message);
+                    updateWSStatus(false);
+                    showNotification('Connection error - retrying...', 'warning');
+                });
+
+                state.socket.on('error', (error) => {
+                    console.error('❌ Socket error:', error);
+                    showNotification(error.message || 'Socket error', 'error');
+                });
+
+                // Listen for message events
+                state.socket.on('message.sent', (data) => {
+                    console.log('📨 New message received:', data);
+                    handleNewMessage(data);
+                });
+
+                // Listen for order updates (if you add them later)
+                state.socket.on('order.updated', (data) => {
+                    console.log('📦 Order updated:', data);
+                    if (state.currentConversation) {
+                        loadOrders();
+                    }
+                });
+
+            } catch (error) {
+                console.error('❌ WebSocket initialization error:', error);
+                state.socket = null;
+                updateWSStatus(false);
+                showNotification('Using manual refresh mode', 'warning');
+            }
+        }
+
+        function subscribeToConversation(conversationId) {
+            if (!state.socket || !state.wsConnected) {
+                console.log('⚠️ Socket.io not available, skipping subscription');
+                return;
+            }
+
+            try {
+                console.log(`📡 Joining conversation room: ${conversationId}`);
+                state.socket.emit('join-conversations', [conversationId]);
+                state.joinedConversations.add(conversationId);
+                console.log('✅ Successfully joined conversation room');
+            } catch (error) {
+                console.error('❌ Failed to join conversation:', error);
+            }
+        }
+
+        function unsubscribeFromConversation(conversationId) {
+            if (!state.socket) return;
+            
+            try {
+                console.log(`📡 Leaving conversation room: ${conversationId}`);
+                state.socket.emit('leave-conversation', conversationId);
+                state.joinedConversations.delete(conversationId);
+            } catch (error) {
+                console.error('❌ Failed to leave conversation:', error);
+            }
+        }
+
+        function handleNewMessage(event) {
+            console.log('📥 Processing new message:', event);
+            
+            const message = event.message || event;
+            const conversationId = event.conversation_id || message.conversation_id;
+            
+            // Update current conversation if it matches
+            if (state.currentConversation?.id === conversationId) {
+                appendMessage(message);
+            }
+            
+            // Refresh conversations list
+            if (!state.conversationsRefreshTimeout) {
+                state.conversationsRefreshTimeout = setTimeout(() => {
+                    loadConversations();
+                    state.conversationsRefreshTimeout = null;
+                }, 1000);
+            }
+            
+            // Show notification if message is not from current user
+            if (message.user_id !== state.user.id) {
+                showNotification('💬 New message received!', 'info');
+            }
+        }
+
+        function appendMessage(msg) {
+            const container = document.getElementById('messages-container');
+            
+            const emptyState = container.querySelector('.empty-state');
+            if (emptyState) {
+                emptyState.remove();
+            }
+            
+            // Check if message already exists to prevent duplicates
+            const existingMessage = container.querySelector(`[data-message-id="${msg.id}"]`);
+            if (existingMessage) {
+                console.log('Message already exists, skipping');
+                return;
+            }
+            
+            const isSent = msg.user_id === state.user.id;
+            const initial = (msg.user?.name || msg.user?.email || '?').charAt(0).toUpperCase();
+            
+            const messageHTML = `
+                <div class="message ${isSent ? 'sent' : 'received'}" data-message-id="${msg.id}">
+                    <div class="message-avatar">${initial}</div>
+                    <div class="message-content">
+                        <div class="message-bubble">
+                            ${msg.content || '[File message]'}
+                        </div>
+                        <div class="message-time">${formatTime(msg.created_at || new Date().toISOString())}</div>
+                    </div>
+                </div>
+            `;
+            
+            container.insertAdjacentHTML('beforeend', messageHTML);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        // Conversations
+        async function loadConversations() {
+            try {
+                const response = await axios.get(`${API_BASE_URL}/chat/conversations`, getAxiosConfig());
+                state.conversations = response.data.data || [];
+                renderConversations();
+            } catch (error) {
+                console.error('Failed to load conversations:', error);
+            }
+        }
+
+        function renderConversations() {
+            const container = document.getElementById('conversations-list');
+
+            if (state.conversations.length === 0) {
+                container.innerHTML = '<div class="empty-state"><p>No conversations yet<br>Click "+ New" to start</p></div>';
+                return;
+            }
+
+            container.innerHTML = state.conversations.map(conv => {
+                const otherUser = conv.other_participant;
+                const initial = (otherUser.name || otherUser.email).charAt(0).toUpperCase();
+                const isActive = state.currentConversation?.id === conv.id;
+
+                return `
+                    <div class="conversation-item ${isActive ? 'active' : ''}" onclick="selectConversation(${conv.id})">
+                        <div class="conversation-avatar">${initial}</div>
+                        <div class="conversation-info">
+                            <div class="conversation-name">${otherUser.name || otherUser.email}</div>
+                            <div class="conversation-preview">${conv.messages_count || 0} messages</div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        async function selectConversation(conversationId) {
+            try {
+                // Unsubscribe from previous conversation
+                if (state.currentConversation) {
+                    unsubscribeFromConversation(state.currentConversation.id);
+                }
+
+                const response = await axios.get(`${API_BASE_URL}/chat/conversations/${conversationId}`, getAxiosConfig());
+
+                state.currentConversation = response.data.conversation;
+                const messages = response.data.messages || [];
+
+                document.getElementById('chat-header').style.display = 'block';
+                document.getElementById('message-input-area').style.display = 'block';
+                document.getElementById('create-order-btn').style.display = 'block';
+
+                const otherUser = state.currentConversation.other_participant;
+                document.getElementById('chat-name').textContent = otherUser.name || otherUser.email;
+                document.getElementById('chat-info').textContent = otherUser.email;
+
+                renderConversations();
+                renderMessages(messages);
+                subscribeToConversation(conversationId);
+                loadOrders();
+            } catch (error) {
+                console.error('Failed to load conversation:', error);
+                showNotification('Failed to load conversation', 'error');
+            }
+        }
+
+        function refreshConversation() {
+            if (state.currentConversation) {
+                selectConversation(state.currentConversation.id);
+                showNotification('Refreshed!', 'info');
+            }
+        }
+
+        async function showNewChatModal() {
+            document.getElementById('new-chat-modal').classList.add('active');
+        }
+
+        async function createConversation() {
+            const otherUserId = document.getElementById('new-chat-user-id')?.value;
+
+            if (!otherUserId) {
+                showNotification('Please enter a user ID', 'error');
+                return;
+            }
+
+            try {
+                const response = await axios.post(`${API_BASE_URL}/chat/conversations`,
+                    { user_id: parseInt(otherUserId) },
+                    getAxiosConfig()
+                );
+
+                closeModal('new-chat-modal');
+                showNotification('Conversation created! 🎉');
+                loadConversations();
+                selectConversation(response.data.data.id);
+            } catch (error) {
+                showNotification(error.response?.data?.message || 'Failed to create conversation', 'error');
+            }
+        }
+
+        // Messages
+        function renderMessages(messages) {
+            const container = document.getElementById('messages-container');
+
+            if (messages.length === 0) {
+                container.innerHTML = '<div class="empty-state"><p>No messages yet<br>Start the conversation!</p></div>';
+                return;
+            }
+
+            container.innerHTML = messages.map(msg => {
+                const isSent = msg.user_id === state.user.id;
+                const initial = (msg.user.name || msg.user.email).charAt(0).toUpperCase();
+
+                return `
+                    <div class="message ${isSent ? 'sent' : 'received'}" data-message-id="${msg.id}">
+                        <div class="message-avatar">${initial}</div>
+                        <div class="message-content">
+                            <div class="message-bubble">
+                                ${msg.content || '[File message]'}
+                            </div>
+                            <div class="message-time">${formatTime(msg.created_at)}</div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            container.scrollTop = container.scrollHeight;
+        }
+
+        async function sendMessage() {
+            const input = document.getElementById('message-input');
+            const content = input.value.trim();
+
+            if (!content || !state.currentConversation) return;
+
+            try {
+                await axios.post(
+                    `${API_BASE_URL}/chat/conversations/${state.currentConversation.id}/messages`,
+                    { content },
+                    getAxiosConfig()
+                );
+
+                input.value = '';
+            } catch (error) {
+                showNotification('Failed to send message', 'error');
+            }
+        }
+
+        // Orders
+        async function loadOrders() {
+            if (!state.currentConversation) return;
+
+            try {
+                const response = await axios.get(
+                    `${API_BASE_URL}/chat/conversations/${state.currentConversation.id}/orders`,
+                    getAxiosConfig()
+                );
+
+                renderOrders(response.data.data || []);
+            } catch (error) {
+                console.error('Failed to load orders:', error);
+            }
+        }
+
+        function renderOrders(orders) {
+            const container = document.getElementById('orders-list');
+
+            if (orders.length === 0) {
+                container.innerHTML = '<div class="empty-state" style="padding: 40px 20px;"><p>No orders yet<br>Create one to get started!</p></div>';
+                return;
+            }
+
+            container.innerHTML = orders.map(order => {
+                let roleInfo = '';
+                if (order.is_client) {
+                    roleInfo = '<span class="role-badge client">Client</span>';
+                } else if (order.is_freelancer) {
+                    roleInfo = '<span class="role-badge freelancer">Freelancer</span>';
+                }
+
+                let revisionBadge = '';
+                if (order.has_revisions && order.revision_count > 0) {
+                    revisionBadge = `<span class="revision-badge">🔄 ${order.revision_count}x revised</span>`;
+                }
+
+                let cancellationNotice = '';
+                if (order.waiting_for_my_approval) {
+                    cancellationNotice = `
+                        <div class="cancellation-notice">
+                            ⚠️ <strong>Cancellation Request</strong><br>
+                            Other party wants to cancel this order.
+                            ${order.cancellation_reason ? `<br>Reason: ${order.cancellation_reason}` : ''}
+                        </div>
+                    `;
+                } else if (order.i_requested_cancellation) {
+                    cancellationNotice = `
+                        <div class="cancellation-notice">
+                            ⏳ <strong>Waiting for Approval</strong><br>
+                            Your cancellation request is pending approval.
+                            ${order.cancellation_reason ? `<br>Reason: ${order.cancellation_reason}` : ''}
+                        </div>
+                    `;
+                }
+
+                let revisionNotice = '';
+                if (order.revision_reason && order.status === 'in_progress') {
+                    revisionNotice = `
+                        <div class="revision-notice">
+                            🔄 <strong>Qayta ishlash so'ralgan</strong><br>
+                            ${order.revision_reason}
+                            ${order.revision_requested_at ? `<br><small>So'ralgan vaqt: ${formatTime(order.revision_requested_at)}</small>` : ''}
+                        </div>
+                    `;
+                }
+
+                return `
+                    <div class="order-card">
+                        <span class="order-status ${order.status}">${order.status.replace(/_/g, ' ')}</span>
+                        ${roleInfo}
+                        ${revisionBadge}
+                        <div class="order-title">${order.title}</div>
+                        <div class="order-amount">${parseFloat(order.amount).toFixed(2)}</div>
+                        <div class="order-description">${order.description}</div>
+                        ${order.deadline ? `<div class="order-meta"><strong>Deadline:</strong> ${new Date(order.deadline).toLocaleDateString()}</div>` : ''}
+                        ${revisionNotice}
+                        ${cancellationNotice}
+                        <div class="order-actions">
+                            ${order.can_accept ? `<button class="btn-success" onclick="acceptOrder(${order.id})">✓ Accept Order</button>` : ''}
+                            ${order.can_deliver ? `<button class="btn-primary" onclick="deliverOrder(${order.id})">📦 Mark Delivered</button>` : ''}
+                            ${order.can_request_revision ? `<button class="btn-warning" onclick="requestRevision(${order.id})">🔄 Request Changes</button>` : ''}
+                            ${order.can_complete ? `<button class="btn-success" onclick="completeOrder(${order.id})">✓ Complete & Pay</button>` : ''}
+                            ${order.can_cancel ? `<button class="btn-danger" onclick="cancelOrder(${order.id})">✗ Cancel</button>` : ''}
+                            ${order.can_request_cancellation ? `<button class="btn-warning" onclick="requestCancellation(${order.id})">🚫 Request Cancellation</button>` : ''}
+                            ${order.can_approve_cancellation ? `<button class="btn-success" onclick="approveCancellation(${order.id})">✓ Approve Cancellation</button>` : ''}
+                            ${order.can_reject_cancellation ? `<button class="btn-danger" onclick="rejectCancellation(${order.id})">✗ Reject Cancellation</button>` : ''}
+                            ${order.can_dispute ? `<button class="btn-danger" onclick="disputeOrder(${order.id})">⚠ Open Dispute</button>` : ''}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function showCreateOrderModal() {
+            if (!state.currentConversation) {
+                showNotification('Please select a conversation first', 'error');
+                return;
+            }
+            document.getElementById('create-order-modal').classList.add('active');
+        }
+
+        async function createOrder() {
+            const title = document.getElementById('order-title').value.trim();
+            const description = document.getElementById('order-description').value.trim();
+            const amount = document.getElementById('order-amount').value;
+            const deadline = document.getElementById('order-deadline').value;
+            const isClientOrder = document.getElementById('order-type').value === 'true';
+
+            if (!title || !description || !amount) {
+                showNotification('Please fill in all required fields', 'error');
+                return;
+            }
+
+            try {
+                const data = {
+                    conversation_id: state.currentConversation.id,
+                    title,
+                    description,
+                    amount: parseFloat(amount),
+                    is_client_order: isClientOrder
+                };
+
+                if (deadline) data.deadline = deadline;
+
+                await axios.post(
+                    `${API_BASE_URL}/chat/conversations/${state.currentConversation.id}/orders`,
+                    data,
+                    getAxiosConfig()
+                );
+
+                closeModal('create-order-modal');
+                showNotification('Order created successfully! 🎉');
+
+                document.getElementById('order-title').value = '';
+                document.getElementById('order-description').value = '';
+                document.getElementById('order-amount').value = '';
+                document.getElementById('order-deadline').value = '';
+
+                loadOrders();
+                selectConversation(state.currentConversation.id);
+            } catch (error) {
+                showNotification(error.response?.data?.message || 'Failed to create order', 'error');
+            }
+        }
+
+        async function acceptOrder(orderId) {
+            try {
+                await axios.post(`${API_BASE_URL}/chat/orders/${orderId}/accept`, {}, getAxiosConfig());
+                showNotification('Order accepted! Funds escrowed. 💰');
+                loadOrders();
+                selectConversation(state.currentConversation.id);
+                
+                const response = await axios.get(`${API_BASE_URL}/auth/me`, getAxiosConfig());
+                document.getElementById('user-balance').textContent = response.data.balance || 0;
+            } catch (error) {
+                showNotification(error.response?.data?.message || 'Failed to accept order', 'error');
+            }
+        }
+
+        async function deliverOrder(orderId) {
+            try {
+                await axios.post(`${API_BASE_URL}/chat/orders/${orderId}/deliver`, {}, getAxiosConfig());
+                showNotification('Work marked as delivered! ✅');
+                loadOrders();
+            } catch (error) {
+                showNotification(error.response?.data?.message || 'Failed', 'error');
+            }
+        }
+
+        async function completeOrder(orderId) {
+            if (!confirm('This will release payment to the freelancer. Continue?')) return;
+
+            try {
+                await axios.post(`${API_BASE_URL}/chat/orders/${orderId}/complete`, {}, getAxiosConfig());
+                showNotification('Order completed! Payment released. 💸');
+                loadOrders();
+                
+                const response = await axios.get(`${API_BASE_URL}/auth/me`, getAxiosConfig());
+                document.getElementById('user-balance').textContent = response.data.balance || 0;
+            } catch (error) {
+                showNotification(error.response?.data?.message || 'Failed', 'error');
+            }
+        }
+
+        async function cancelOrder(orderId) {
+            showReasonModal(
+                'Cancel Order',
+                'Enter cancellation reason (optional):',
+                async (reason) => {
+                    try {
+                        await axios.post(`${API_BASE_URL}/chat/orders/${orderId}/cancel`, 
+                            reason ? { reason } : {}, 
+                            getAxiosConfig()
+                        );
+                        showNotification('Order cancelled. ❌');
+                        loadOrders();
+                    } catch (error) {
+                        showNotification(error.response?.data?.message || 'Failed', 'error');
+                    }
+                }
+            );
+        }
+
+        async function requestCancellation(orderId) {
+            showReasonModal(
+                'Request Cancellation',
+                'Why do you want to cancel? (optional):',
+                async (reason) => {
+                    try {
+                        await axios.post(`${API_BASE_URL}/chat/orders/${orderId}/request-cancellation`, 
+                            reason ? { reason } : {}, 
+                            getAxiosConfig()
+                        );
+                        showNotification('Cancellation request sent. Waiting for approval... ⏳', 'info');
+                        loadOrders();
+                    } catch (error) {
+                        showNotification(error.response?.data?.message || 'Failed', 'error');
+                    }
+                }
+            );
+        }
+
+        async function requestRevision(orderId) {
+            showReasonModal(
+                '🔄 Qayta ishlashga yuborish',
+                'Nima o\'zgartirilishi kerak? (kamida 10 ta belgi):',
+                async (reason) => {
+                    if (!reason || reason.length < 10) {
+                        showNotification('Sabab kamida 10 ta belgidan iborat bo\'lishi kerak', 'error');
+                        return;
+                    }
+
+                    try {
+                        await axios.post(`${API_BASE_URL}/chat/orders/${orderId}/request-revision`, 
+                            { reason }, 
+                            getAxiosConfig()
+                        );
+                        showNotification('Ish freelancerga qayta ishlashga yuborildi! 🔄', 'info');
+                        loadOrders();
+                    } catch (error) {
+                        showNotification(error.response?.data?.message || 'Failed', 'error');
+                    }
+                }
+            );
+        }
+
+        async function approveCancellation(orderId) {
+            if (!confirm('Are you sure you want to approve this cancellation? Funds will be refunded.')) return;
+
+            try {
+                await axios.post(`${API_BASE_URL}/chat/orders/${orderId}/approve-cancellation`, {}, getAxiosConfig());
+                showNotification('Cancellation approved. Funds refunded. 🔄');
+                loadOrders();
+                
+                const response = await axios.get(`${API_BASE_URL}/auth/me`, getAxiosConfig());
+                document.getElementById('user-balance').textContent = response.data.balance || 0;
+            } catch (error) {
+                showNotification(error.response?.data?.message || 'Failed', 'error');
+            }
+        }
+
+        async function rejectCancellation(orderId) {
+            if (!confirm('Are you sure you want to reject this cancellation request?')) return;
+
+            try {
+                await axios.post(`${API_BASE_URL}/chat/orders/${orderId}/reject-cancellation`, {}, getAxiosConfig());
+                showNotification('Cancellation request rejected. Order continues. ▶️', 'info');
+                loadOrders();
+            } catch (error) {
+                showNotification(error.response?.data?.message || 'Failed', 'error');
+            }
+        }
+
+        async function disputeOrder(orderId) {
+            showReasonModal(
+                'Open Dispute',
+                'Describe the issue (min 10 characters):',
+                async (reason) => {
+                    if (!reason || reason.length < 10) {
+                        showNotification('Dispute reason must be at least 10 characters', 'error');
+                        return;
+                    }
+
+                    try {
+                        await axios.post(`${API_BASE_URL}/chat/orders/${orderId}/dispute`, { reason }, getAxiosConfig());
+                        showNotification('Dispute opened. Admin will review. ⚠️', 'warning');
+                        loadOrders();
+                    } catch (error) {
+                        showNotification(error.response?.data?.message || 'Failed', 'error');
+                    }
+                }
+            );
+        }
+
+        // Reason Modal Helper
+        function showReasonModal(title, label, callback) {
+            document.getElementById('reason-modal-title').textContent = title;
+            document.getElementById('reason-modal-label').textContent = label;
+            document.getElementById('reason-modal-input').value = '';
+            state.reasonCallback = callback;
+            document.getElementById('reason-modal').classList.add('active');
+        }
+
+        function submitReason() {
+            const reason = document.getElementById('reason-modal-input').value.trim();
+            if (state.reasonCallback) {
+                state.reasonCallback(reason);
+                state.reasonCallback = null;
+            }
+            closeModal('reason-modal');
+        }
+
+        console.log('💬 ProccMarket Chat Ready! (Socket.io Version)');
+        console.log('🔌 Socket.io server URL:', SOCKET_URL);
+        console.log('✨ Real-time updates via Socket.io');
+    </script>
+</body>
+</html>

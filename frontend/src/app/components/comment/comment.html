@@ -1,6 +1,5 @@
 @if (comment(); as comment) {
-<div [id]="comment.created_at + comment.user.telegram_id"
-	class="card border-1 border-[#E1E1E1] space-y-[10px] p-[10px]">
+<div class="card border-1 border-[#E1E1E1] space-y-[10px] p-[10px]">
 	<div class="flex items-center justify-between">
 		<div class="flex items-center gap-x-[5px]">
 			<div class="avatar">
@@ -14,7 +13,7 @@
 				<p class="text-sm text-black/60">{{comment.user.role_name??'Гость'}}</p>
 			</div>
 		</div>
-		<b class="text-black text-[16px]">{{comment.user.balance | numeral: '$0,0'}}</b>
+		<b class="text-black text-[16px]">{{comment.user.balance}}$</b>
 	</div>
 	@if(commentReplay(); as data) {
 	<div class="border-l-[3px] border-[#818181] p-[5px] bg-[#F2F2F2]">

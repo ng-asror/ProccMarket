@@ -5,7 +5,7 @@
 		@let newsData = news.data;
 		<div class="space-y-[15px]">
 			<div class="flex text-black/50 text-sm gap-x-[10px]">
-				<p class="capitalize text-[16px]">{{news.data.created_at | dateFormat:'DD MMM HH:MM'}}</p>
+				<p class="capitalize text-[16px]">{{news.data.created_at | date: 'd-MMM y, h:mm'}}</p>
 				<div class="flex items-center gap-x-[3px]">
 					<lucide-icon [name]="ICONS.Eye" size="20"></lucide-icon>
 					<p>{{news.data.views_count | numeral: '0a'}}</p>
@@ -13,6 +13,9 @@
 			</div>
 			<h1 class="text-2xl font-semibold">{{news.data.title}}</h1>
 		</div>
+		@if (news.data.image_url) {
+		<img [src]="'https://api.proccmarket.com'+news.data.image_url" [alt]="news.data.title" class="block w-full h-auto">
+		}
 		<div [innerHTML]="news.data.description"></div>
 		<div class="flex items-center gap-x-[20px]">
 			<button type="button" class="text-black/50 text-[18px] flex items-center gap-x-[5px] cursor-pointer"

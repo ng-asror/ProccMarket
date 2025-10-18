@@ -5,8 +5,7 @@
 			<div class="border-1 border-[#E1E1E1] p-[15px] rounded-[12px] mb-[20px]">
 				@if(getMe.value(); as me) {
 				<div class="flex items-center justify-between mb-[10px]">
-					<h1 class="text-[40px] text-[#030300] font-[800] price leading-[100%]">{{me.user.balance | numeral:
-						'$0,0[.]00'}}</h1>
+					<h1 class="text-[40px] text-[#030300] font-[800] price leading-[100%]">${{me.user.balance}}</h1>
 					<button type="button" class="btn" (click)="onReloadClick()">
 						<lucide-icon [name]="ICONS.RefreshCcw" size="20" [class.animate-spin]="isSpinning"></lucide-icon>
 					</button>
@@ -65,11 +64,9 @@
 					@for (item of transactions.data.transactions; track item.id) {
 					<div class="pb-[10px] mb-[15px] border-b-1 border-[#E1E1E1] space-y-[10px]">
 						<p class="text-end block text-[14px] text-[#030303] capitalize leading-[100%] opacity-50">
-							{{item.created_at |
-							dateFormat: 'MMMM DD, HH:MM'}}</p>
+							{{item.created_at | date: 'd-MMM y, h:mm'}}</p>
 						<b class="text-[16px] leading-[120%] text-[#030303] font-[500]">{{item.description}}</b>
-						<h3 class="price text-[22px] font-bold text-end leading-[100%]">{{item.amount | numeral:
-							'$0,0[.]00'}}</h3>
+						<h3 class="price text-[22px] font-bold text-end leading-[100%]">{{item.amount}}$</h3>
 						@switch (item.status) {
 						@case ('completed') {
 						<p class="p-[4px] block bg-[#04B70A] leading-[100%] text-center rounded text-[16px] text-[#fff]">Выполнено

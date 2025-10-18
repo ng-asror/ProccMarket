@@ -1,5 +1,5 @@
 import { Component, CUSTOM_ELEMENTS_SCHEMA, inject, resource } from '@angular/core';
-import { Ads } from '../../../../core';
+import { Ads, Telegram } from '../../../../core';
 import { firstValueFrom } from 'rxjs';
 
 @Component({
@@ -11,7 +11,12 @@ import { firstValueFrom } from 'rxjs';
 })
 export class HomeSlide {
   private adsService = inject(Ads);
+  private telegram = inject(Telegram);
   ads = resource({
     loader: () => firstValueFrom(this.adsService.getAds()),
   });
+
+  protected openLink(link: string): void {
+    this.telegram.open(link);
+  }
 }

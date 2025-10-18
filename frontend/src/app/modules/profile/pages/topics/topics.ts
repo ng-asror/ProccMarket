@@ -21,18 +21,6 @@ export class Topics {
     loader: () => firstValueFrom(this.profileService.myTopics()),
   });
 
-  // closedToggle(id: number): void {
-  //   this.myTopics.update((current) => {
-  //     if (!current) return current;
-  //     return {
-  //       ...current,
-  //       topics: current.topics.map((topic) =>
-  //         topic.id === id ? { ...topic, closed: !topic.closed } : topic
-  //       ),
-  //     };
-  //   });
-  // }
-
   async deleteTopic(topic_id: number): Promise<void> {
     await firstValueFrom(this.topicService.delete(topic_id));
     this.myTopics.update((current) => {

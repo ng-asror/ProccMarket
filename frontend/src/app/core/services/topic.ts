@@ -53,7 +53,7 @@ export class TopicService {
     if (image) {
       formData.append('image', image);
     }
-    return this.http.put<Result>(`${environment.apiUrl}/topics/${topic_id}`, formData);
+    return this.http.post<Result>(`${environment.apiUrl}/topics/${topic_id}`, formData);
   }
   /**
    *

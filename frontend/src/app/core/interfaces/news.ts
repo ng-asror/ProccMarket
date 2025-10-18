@@ -33,8 +33,8 @@ export interface INewsInfo {
   id: number;
   title: string;
   description: string;
-  image: any;
-  image_url: any;
+  image: string;
+  image_url: string | null;
   status: string;
   created_at: Date;
   updated_at: Date;

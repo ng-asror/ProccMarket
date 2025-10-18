@@ -1,9 +1,8 @@
 import { Component, inject, resource, signal } from '@angular/core';
 import { icons, LucideAngularModule } from 'lucide-angular';
 import { DateFocus } from '../../shared';
-import { AmDateFormatPipe, Auth, BalanceService, Telegram, TTransactionTypes } from '../../core';
+import { Auth, BalanceService, Telegram, TTransactionTypes } from '../../core';
 import { firstValueFrom } from 'rxjs';
-import { NumeralPipe } from '../../core';
 import {
   FormGroup,
   FormsModule,
@@ -12,18 +11,11 @@ import {
   Validators,
 } from '@angular/forms';
 import { Layout } from '../../layout/layout';
+import { DatePipe } from '@angular/common';
 
 @Component({
   selector: 'app-balance',
-  imports: [
-    LucideAngularModule,
-    DateFocus,
-    NumeralPipe,
-    FormsModule,
-    AmDateFormatPipe,
-    ReactiveFormsModule,
-    Layout,
-  ],
+  imports: [LucideAngularModule, DateFocus, FormsModule, ReactiveFormsModule, DatePipe, Layout],
   templateUrl: './balance.html',
   styleUrl: './balance.scss',
 })

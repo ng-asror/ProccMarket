@@ -91,15 +91,15 @@ export class Telegram {
       return;
     }
     this.BackButton.show();
-    this.BackButton.onClick(() => this.router.navigateByUrl(url));
+    this.BackButton.onClick(() => this.router.navigate([url]));
   }
   hiddeBackButton(url: string): void {
     if (!this.BackButton) {
       return;
     }
 
-    this.BackButton.offClick(() => this.router.navigateByUrl(url));
     this.BackButton.hide();
+    this.BackButton.offClick(() => this.router.navigate([url]));
   }
 
   open(telegramLink: string): void {

@@ -6,14 +6,17 @@
 			<label class="label">
 				<span class="label-text text-black text-[16px] leading-[100%] mb-[5px] block">Разделы темы*</span>
 			</label>
-			<select class="select w-full cursor-pointer" name=" section1" [(ngModel)]="selectSection">
+			<select class="select w-full cursor-pointer" name=" section1" [(ngModel)]="selectSection"
+				[disabled]="topic_id!==null">
 				<option disabled selected value="0" hidden>Выберите раздел темы</option>
 				@for (item of sections.sections; track item.id) {
 				@if(item.children) {
-				<option disabled class="ml-[-20px]">{{item.name}}</option>
-				@for (item of item.children; track item.id) {
-				<option class="pl-2" [value]="item.id">{{item.name}}</option>
-				}}}
+				<optgroup [label]="item.name">
+					@for (item of item.children; track item.id) {
+					<option [value]="item.id">{{item.name}}</option>
+					}
+				</optgroup>
+				}}
 			</select>
 		</div>
 		}

@@ -12,9 +12,10 @@
 				<p class="text-sm text-black/60">{{item.author.role_name??'Гость'}}</p>
 			</div>
 		</div>
-		<b class="text-black text-[16px]">{{item.author.balance | numeral: '$0,0'}}</b>
+		<b class="text-black text-[16px]">{{item.author.balance}}$</b>
 	</div>
-	<img [src]="item.image_url" alt="form img" class="w-full object-cover object-center h-[100px] rounded-[12px] block">
+	<img [src]="item.image_url" alt="form img" [routerLink]="'/home/topic/' + item.id"
+		class="w-full object-cover object-center h-[100px] rounded-[12px] cursor-pointer block">
 	<a [routerLink]="'/home/topic/' + item.id"
 		class="text-[20px] block hover:underline title text-[#030303] font-[400] leading-[120%] cursor-pointer">{{item.title}}
 	</a>

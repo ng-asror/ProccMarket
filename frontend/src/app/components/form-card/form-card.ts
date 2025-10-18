@@ -1,4 +1,4 @@
-import { Component, computed, effect, inject, input, signal } from '@angular/core';
+import { Component, effect, inject, input, signal } from '@angular/core';
 import { icons, LucideAngularModule } from 'lucide-angular';
 import { AmDateFormatPipe, ITopic, NumeralPipe, TopicService } from '../../core';
 import { firstValueFrom } from 'rxjs';

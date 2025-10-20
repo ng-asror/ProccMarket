@@ -10,11 +10,20 @@ const server = http.createServer(app);
 // Socket.io configuration
 const io = new Server(server, {
     cors: {
-        origin: process.env.FRONTEND_URL || "http://localhost:3000",
+        origin: [
+            process.env.FRONTEND_URL || "http://localhost:3000",
+            "https://proccmarket.com",
+            "https://www.proccmarket.com",
+            "http://proccmarket.com",
+            /\.proccmarket\.com$/
+        ],
         methods: ["GET", "POST"],
-        credentials: true
+        credentials: true,
+        allowedHeaders: ["Authorization", "Content-Type"]
     },
-    transports: ['websocket', 'polling']
+    transports: ['websocket', 'polling'],
+    allowEIO3: true,
+    path: '/socket.io/'
 });
 
 // Redis subscriber

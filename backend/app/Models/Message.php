@@ -109,4 +109,20 @@ class Message extends Model
             ->where('user_id', '!=', $userId)
             ->whereNull('read_at');
     }
+
+    /**
+     * Scope to get messages from a specific conversation
+     */
+    public function scopeForConversation($query, int $conversationId)
+    {
+        return $query->where('conversation_id', $conversationId);
+    }
+
+    /**
+     * Scope to get messages from a specific user
+     */
+    public function scopeFromUser($query, int $userId)
+    {
+        return $query->where('user_id', $userId);
+    }
 }

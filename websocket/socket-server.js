@@ -67,10 +67,19 @@ io.use(async (socket, next) => {
 
 // Handle socket connections
 io.on('connection', (socket) => {
-    console.log(`User connected: ${socket.user.email} (ID: ${socket.user.id})`);
+    console.log(`✅ User connected: ${socket.user.name} (ID: ${socket.user.id})`);
 
-    // Join user's personal room
-    socket.join(`user.${socket.user.id}`);
+    // Join user's personal room (for notifications)
+    const userRoom = `user.${socket.user.id}`;
+    socket.join(userRoom);
+    console.log(`👤 User ${socket.user.id} joined personal room: ${userRoom}`);
+
+    // Send connection confirmation
+    socket.emit('connected', {
+        message: 'Successfully connected to Socket.io server',
+        userId: socket.user.id,
+        rooms: Array.from(socket.rooms)
+    });
 
     // Join user's conversations
     socket.on('join-conversations', async (conversationIds) => {
@@ -78,30 +87,129 @@ io.on('connection', (socket) => {
             return socket.emit('error', { message: 'Invalid conversation IDs' });
         }
 
+        const joinedConversations = [];
+        const failedConversations = [];
+
         for (const conversationId of conversationIds) {
             try {
                 // Verify user has access to this conversation
-                const hasAccess = await verifyConversationAccess(socket.user.id, conversationId, socket.handshake.auth.token);
+                const hasAccess = await verifyConversationAccess(
+                    socket.user.id, 
+                    conversationId, 
+                    socket.handshake.auth.token
+                );
                 
                 if (hasAccess) {
-                    socket.join(`conversation.${conversationId}`);
-                    console.log(`User ${socket.user.id} joined conversation ${conversationId}`);
+                    const roomName = `conversation.${conversationId}`;
+                    socket.join(roomName);
+                    joinedConversations.push(conversationId);
+                    console.log(`💬 User ${socket.user.id} joined conversation ${conversationId}`);
+                } else {
+                    failedConversations.push({ 
+                        conversationId, 
+                        reason: 'Access denied' 
+                    });
                 }
             } catch (error) {
-                console.error(`Error joining conversation ${conversationId}:`, error.message);
+                console.error(`❌ Error joining conversation ${conversationId}:`, error.message);
+                failedConversations.push({ 
+                    conversationId, 
+                    reason: error.message 
+                });
             }
+        }
+
+        // Send response back to client
+        socket.emit('conversations-joined', {
+            joined: joinedConversations,
+            failed: failedConversations,
+            totalRooms: Array.from(socket.rooms)
+        });
+    });
+
+    // Join single conversation
+    socket.on('join-conversation', async (conversationId) => {
+        try {
+            const hasAccess = await verifyConversationAccess(
+                socket.user.id,
+                conversationId,
+                socket.handshake.auth.token
+            );
+
+            if (hasAccess) {
+                const roomName = `conversation.${conversationId}`;
+                socket.join(roomName);
+                console.log(`💬 User ${socket.user.id} joined conversation ${conversationId}`);
+                
+                socket.emit('conversation-joined', {
+                    conversationId,
+                    success: true
+                });
+            } else {
+                socket.emit('conversation-join-failed', {
+                    conversationId,
+                    reason: 'Access denied'
+                });
+            }
+        } catch (error) {
+            console.error(`❌ Error joining conversation ${conversationId}:`, error.message);
+            socket.emit('conversation-join-failed', {
+                conversationId,
+                reason: error.message
+            });
         }
     });
 
     // Leave conversation
     socket.on('leave-conversation', (conversationId) => {
-        socket.leave(`conversation.${conversationId}`);
-        console.log(`User ${socket.user.id} left conversation ${conversationId}`);
+        const roomName = `conversation.${conversationId}`;
+        socket.leave(roomName);
+        console.log(`👋 User ${socket.user.id} left conversation ${conversationId}`);
+        
+        socket.emit('conversation-left', {
+            conversationId,
+            success: true
+        });
+    });
+
+    // Typing indicator
+    socket.on('typing-start', (conversationId) => {
+        socket.to(`conversation.${conversationId}`).emit('user-typing', {
+            userId: socket.user.id,
+            userName: socket.user.name,
+            conversationId
+        });
+    });
+
+    socket.on('typing-stop', (conversationId) => {
+        socket.to(`conversation.${conversationId}`).emit('user-stopped-typing', {
+            userId: socket.user.id,
+            conversationId
+        });
+    });
+
+    // Online status
+    socket.on('online', () => {
+        socket.broadcast.emit('user-online', {
+            userId: socket.user.id,
+            userName: socket.user.name
+        });
     });
 
     // Handle disconnect
     socket.on('disconnect', () => {
-        console.log(`User disconnected: ${socket.user.name} (ID: ${socket.user.id})`);
+        console.log(`👋 User disconnected: ${socket.user.name} (ID: ${socket.user.id})`);
+        
+        // Broadcast offline status
+        socket.broadcast.emit('user-offline', {
+            userId: socket.user.id,
+            userName: socket.user.name
+        });
+    });
+
+    // Error handling
+    socket.on('error', (error) => {
+        console.error(`❌ Socket error for user ${socket.user.id}:`, error);
     });
 });
 
@@ -126,43 +234,141 @@ async function verifyConversationAccess(userId, conversationId, token) {
 
 // Listen to Redis for Laravel broadcasts
 redis.psubscribe('laravel_database_*', (err, count) => {
-  if (err) console.error('Redis psubscribe error:', err);
-  else console.log(`✅ Pattern subscribed to ${count} channels`);
+    if (err) {
+        console.error('❌ Redis psubscribe error:', err);
+    } else {
+        console.log(`✅ Subscribed to ${count} Redis pattern(s)`);
+    }
 });
 
 redis.on('pmessage', (pattern, channel, message) => {
-  try {
-    console.log(`📡 Redis pattern: ${pattern}`);
-    console.log(`📨 Redis channel: ${channel}`);
-    console.log(`📦 Redis raw message: ${message}`);
+    try {
+        console.log(`\n📡 ===== NEW REDIS MESSAGE =====`);
+        console.log(`📨 Channel: ${channel}`);
+        console.log(`📦 Message: ${message.substring(0, 200)}...`);
 
-    const data = JSON.parse(message);
-    const event = data.event;
-    const payload = data.data;
+        const data = JSON.parse(message);
+        const event = data.event;
+        const payload = data.data;
 
-    console.log(`Received event: ${event} on channel: ${channel}`);
+        console.log(`🎯 Event: ${event}`);
 
-    // Parse channel name, e.g. laravel_database_private-conversation.1
-    const cleanChannel = channel.replace('laravel_database_private-', '');
-    const [channelType, channelId] = cleanChannel.split('.');
-    const roomName = `${channelType}.${channelId}`;
+        // Parse channel name
+        // Examples:
+        // - laravel_database_private-user.1 -> user.1
+        // - laravel_database_private-conversation.5 -> conversation.5
+        let roomName = channel
+            .replace('laravel_database_', '')
+            .replace('private-', '')
+            .replace('presence-', '');
 
-    // Emit event to the right Socket.io room
-    io.to(roomName).emit(event, payload);
+        console.log(`🚪 Target room: ${roomName}`);
 
-    console.log(`🚀 Emitted "${event}" to room "${roomName}"`);
-  } catch (error) {
-    console.error('❌ Error processing Redis message:', error.message);
-  }
+        // Get connected clients in this room
+        const room = io.sockets.adapter.rooms.get(roomName);
+        const clientCount = room ? room.size : 0;
+        console.log(`👥 Clients in room: ${clientCount}`);
+
+        if (clientCount > 0) {
+            // Emit to the room
+            io.to(roomName).emit(event, payload);
+            console.log(`✅ Emitted "${event}" to ${clientCount} client(s) in room "${roomName}"`);
+        } else {
+            console.log(`⚠️  No clients in room "${roomName}" - message not delivered`);
+        }
+
+        console.log(`===== END MESSAGE =====\n`);
+    } catch (error) {
+        console.error('❌ Error processing Redis message:', error.message);
+        console.error('Stack:', error.stack);
+    }
 });
 
+// Redis connection events
+redis.on('connect', () => {
+    console.log('✅ Redis connected successfully');
+});
+
+redis.on('error', (err) => {
+    console.error('❌ Redis connection error:', err);
+});
+
+redis.on('ready', () => {
+    console.log('✅ Redis ready to accept commands');
+});
 
 // Health check endpoint
 app.get('/health', (req, res) => {
-    res.json({ status: 'ok', timestamp: new Date().toISOString() });
+    const rooms = [];
+    io.sockets.adapter.rooms.forEach((sockets, room) => {
+        // Only show custom rooms (not socket IDs)
+        if (!sockets.has(room)) {
+            rooms.push({
+                room,
+                clients: sockets.size
+            });
+        }
+    });
+
+    res.json({
+        status: 'ok',
+        timestamp: new Date().toISOString(),
+        connections: io.engine.clientsCount,
+        rooms: rooms,
+        redis: redis.status
+    });
+});
+
+// Debug endpoint - list all active rooms
+app.get('/debug/rooms', (req, res) => {
+    const rooms = [];
+    io.sockets.adapter.rooms.forEach((sockets, room) => {
+        const socketIds = Array.from(sockets);
+        rooms.push({
+            room,
+            clientCount: sockets.size,
+            socketIds: socketIds
+        });
+    });
+
+    res.json({
+        totalRooms: rooms.length,
+        rooms: rooms
+    });
+});
+
+// Debug endpoint - emit test event
+app.post('/debug/emit', express.json(), (req, res) => {
+    const { room, event, data } = req.body;
+    
+    if (!room || !event) {
+        return res.status(400).json({ error: 'room and event are required' });
+    }
+
+    io.to(room).emit(event, data || { test: true });
+    
+    res.json({
+        success: true,
+        emitted: { room, event, data }
+    });
+});
+
+// Graceful shutdown
+process.on('SIGTERM', () => {
+    console.log('SIGTERM received, closing server...');
+    server.close(() => {
+        console.log('Server closed');
+        redis.quit();
+        process.exit(0);
+    });
 });
 
 const PORT = process.env.SOCKET_PORT || 3001;
 server.listen(PORT, () => {
-    console.log(`Socket.io server running on port ${PORT}`);
+    console.log(`\n🚀 ===================================`);
+    console.log(`🚀 Socket.io Server Started`);
+    console.log(`🚀 Port: ${PORT}`);
+    console.log(`🚀 Laravel API: ${LARAVEL_API_URL}`);
+    console.log(`🚀 Redis: ${process.env.REDIS_HOST || '127.0.0.1'}:${process.env.REDIS_PORT || 6379}`);
+    console.log(`🚀 ===================================\n`);
 });

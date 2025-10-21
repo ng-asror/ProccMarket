@@ -9,12 +9,17 @@ use App\Http\Requests\UpdateMessageRequest;
 use App\Http\Resources\MessageResource;
 use App\Models\Conversation;
 use App\Models\Message;
+use App\Services\NotificationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
 class MessageController extends Controller
 {
+    public function __construct(private NotificationService $notificationService)
+    {
+    }
+
     /**
      * Send a new message in a conversation.
      */
@@ -45,6 +50,9 @@ class MessageController extends Controller
             $fileSize = $file->getSize();
         }
 
+        // Mark all previous unread messages as read (user entered chat and wrote message)
+        Message::unreadForUser($conversation->id, $user->id)->update(['read_at' => now()]);
+
         // Create the message
         $message = Message::create([
             'conversation_id' => $conversation->id,
@@ -65,6 +73,21 @@ class MessageController extends Controller
 
         // Broadcast the message via WebSocket
         broadcast(new MessageSent($message));
+
+        // Send notification to other participant
+        $otherParticipant = $conversation->getOtherParticipant($user->id);
+        if ($otherParticipant) {
+            $this->notificationService->sendNewMessageNotification(
+                $otherParticipant->id,
+                [
+                    'sender_id' => $user->id,
+                    'sender_name' => $user->name,
+                    'conversation_id' => $conversation->id,
+                    'message_id' => $message->id,
+                    'message_preview' => $message->content ? \Str::limit($message->content, 50) : 'Sent a file',
+                ]
+            );
+        }
 
         return response()->json([
             'message' => 'Message sent successfully',

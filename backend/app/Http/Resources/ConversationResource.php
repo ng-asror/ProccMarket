@@ -22,7 +22,7 @@ class ConversationResource extends JsonResource
             'other_participant' => new UserResource($otherParticipant),
             'last_message' => new MessageResource($this->whenLoaded('latestMessage')),
             'last_message_at' => $this->last_message_at,
-            'unread_count' => $this->whenCounted('messages'),
+            'unread_count' => $this->unread_count ?? 0,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];

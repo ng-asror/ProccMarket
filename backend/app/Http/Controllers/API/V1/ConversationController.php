@@ -8,12 +8,17 @@ use App\Http\Resources\ConversationResource;
 use App\Http\Resources\MessageResource;
 use App\Models\Conversation;
 use App\Models\Message;
+use App\Services\NotificationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 class ConversationController extends Controller
 {
+    public function __construct(private NotificationService $notificationService)
+    {
+    }
+
     /**
      * Display a listing of conversations for the authenticated user.
      * Admins can see all conversations.
@@ -33,6 +38,15 @@ class ConversationController extends Controller
 
         $conversations = $query->paginate(20);
 
+        // Add unread count for each conversation
+        $conversations->getCollection()->transform(function ($conversation) use ($user) {
+            $conversation->unread_count = Message::where('conversation_id', $conversation->id)
+                ->where('user_id', '!=', $user->id)
+                ->whereNull('read_at')
+                ->count();
+            return $conversation;
+        });
+
         return ConversationResource::collection($conversations);
     }
 
@@ -41,17 +55,35 @@ class ConversationController extends Controller
      */
     public function store(StartConversationRequest $request): JsonResponse
     {
+        $user = $request->user();
+        $otherUserId = $request->validated()['user_id'];
+
         $conversation = Conversation::findOrCreateBetween(
-            $request->user()->id,
-            $request->validated()['user_id']
+            $user->id,
+            $otherUserId
         );
 
         $conversation->load(['userOne', 'userTwo', 'latestMessage.user']);
 
+        // Check if this is a new conversation
+        $isNewConversation = $conversation->wasRecentlyCreated;
+
+        // Send notification to other user if it's a new conversation
+        if ($isNewConversation) {
+            $this->notificationService->sendNewConversationNotification(
+                $otherUserId,
+                [
+                    'initiator_id' => $user->id,
+                    'initiator_name' => $user->name,
+                    'conversation_id' => $conversation->id,
+                ]
+            );
+        }
+
         return response()->json([
-            'message' => 'Conversation created successfully',
+            'message' => $isNewConversation ? 'Conversation created successfully' : 'Conversation already exists',
             'data' => new ConversationResource($conversation),
-        ], 201);
+        ], $isNewConversation ? 201 : 200);
     }
 
     /**
@@ -67,7 +99,6 @@ class ConversationController extends Controller
                 'message' => 'Unauthorized to view this conversation',
             ], 403);
         }
-
 
         $sort = $request->query('sort', 'asc');
 

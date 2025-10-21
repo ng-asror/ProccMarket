@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\BannerController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\NewsController;
 use App\Http\Controllers\Admin\OrderTransactionAdminController;
+use App\Http\Controllers\Admin\PartnershipApplicationController;
 use App\Http\Controllers\Admin\ReviewController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\SectionController;
@@ -127,6 +128,18 @@ Route::middleware(['auth', 'verified', 'admin'])->group(function () {
         Route::post('/{banner}/toggle-status', [BannerController::class, 'toggleStatus'])->name('toggleStatus');
         Route::post('/bulk-delete', [BannerController::class, 'bulkDelete'])->name('bulkDelete');
         Route::post('update-order', [BannerController::class, 'updateOrder'])->name('updateOrder');
+    });
+
+    // Partnership Applications Routes
+    Route::prefix('partnerships')->name('admin.partnerships.')->group(function () {
+        Route::get('/', [PartnershipApplicationController::class, 'index'])->name('index');
+        Route::get('/statistics', [PartnershipApplicationController::class, 'statistics'])->name('statistics');
+        Route::get('/export', [PartnershipApplicationController::class, 'export'])->name('export');
+        Route::post('/bulk-delete', [PartnershipApplicationController::class, 'bulkDelete'])->name('bulkDelete');
+        
+        Route::get('/{application}', [PartnershipApplicationController::class, 'show'])->name('show');
+        Route::post('/{application}/update-status', [PartnershipApplicationController::class, 'updateStatus'])->name('updateStatus');
+        Route::delete('/{application}', [PartnershipApplicationController::class, 'destroy'])->name('destroy');
     });
 });
 

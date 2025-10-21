@@ -10,7 +10,9 @@ use App\Http\Controllers\API\V1\MessageController;
 use App\Http\Controllers\API\V1\NewsController;
 use App\Http\Controllers\API\V1\NewsLikeController;
 use App\Http\Controllers\API\V1\NewsShareController;
+use App\Http\Controllers\API\V1\NotificationController;
 use App\Http\Controllers\API\V1\OrderTransactionController;
+use App\Http\Controllers\API\V1\PartnershipController;
 use App\Http\Controllers\API\V1\PostController;
 use App\Http\Controllers\API\V1\PublicApiController;
 use App\Http\Controllers\API\V1\ReviewController;
@@ -148,6 +150,16 @@ Route::prefix('v1')->group(function () {
             // Route::post('/transfer', [CryptoBotController::class, 'transfer']);
         });
 
+        // ==========================================
+        // PARTNERSHIP APPLICATION ROUTES
+        // ==========================================
+        Route::prefix('partnership')->name('api.partnership.')->group(function () {
+            Route::get('can-apply', [PartnershipController::class, 'canApply'])->name('canApply');
+            Route::get('my-application', [PartnershipController::class, 'myApplication'])->name('myApplication');
+            Route::post('submit', [PartnershipController::class, 'submit'])->name('submit');
+            Route::delete('cancel', [PartnershipController::class, 'cancel'])->name('cancel');
+        });
+
         // Withdrawal Endpoints
         Route::prefix('withdrawals')->group(function () {
             Route::get('/', [WithdrawalController::class, 'index']);
@@ -219,6 +231,7 @@ Route::prefix('v1')->group(function () {
             Route::post('/conversations', [ConversationController::class, 'store']);
             Route::get('/conversations/{conversation}', [ConversationController::class, 'show']);
             Route::delete('/conversations/{conversation}', [ConversationController::class, 'destroy']);
+            Route::get('/conversations/{conversation}/verify-access', [ConversationController::class, 'verifyAccess']);
 
             // Message routes
             Route::post('/conversations/{conversation}/messages', [MessageController::class, 'store']);
@@ -228,7 +241,6 @@ Route::prefix('v1')->group(function () {
             Route::delete('/messages/{message}', [MessageController::class, 'destroy']);
 
             // Order Transaction routes
-            
             Route::prefix('conversations/{conversation}/orders')->group(function () {
                 Route::get('/', [OrderTransactionController::class, 'index']);
                 Route::post('/', [OrderTransactionController::class, 'store']);
@@ -243,7 +255,7 @@ Route::prefix('v1')->group(function () {
                 // Pending orders uchun cancel
                 Route::post('/{orderTransaction}/cancel', [OrderTransactionController::class, 'cancel']);
                 
-                // YANGI: Qayta ishlashga yuborish (delivered -> in_progress)
+                // Qayta ishlashga yuborish (delivered -> in_progress)
                 Route::post('/{orderTransaction}/request-revision', [OrderTransactionController::class, 'requestRevision']);
                 
                 // Accepted orders uchun cancellation request flow
@@ -252,6 +264,17 @@ Route::prefix('v1')->group(function () {
                 Route::post('/{orderTransaction}/reject-cancellation', [OrderTransactionController::class, 'rejectCancellation']);
                 
                 Route::post('/{orderTransaction}/dispute', [OrderTransactionController::class, 'dispute']);
+            });
+
+            // Notification routes
+            Route::prefix('notifications')->group(function () {
+                Route::get('/', [NotificationController::class, 'index']);
+                Route::get('/unread', [NotificationController::class, 'unread']);
+                Route::get('/unread-count', [NotificationController::class, 'unreadCount']);
+                Route::post('/{notification}/read', [NotificationController::class, 'markAsRead']);
+                Route::post('/mark-all-read', [NotificationController::class, 'markAllAsRead']);
+                Route::delete('/{notification}', [NotificationController::class, 'destroy']);
+                Route::delete('/read/all', [NotificationController::class, 'deleteAllRead']);
             });
         });
     });

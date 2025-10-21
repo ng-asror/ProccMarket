@@ -11,12 +11,17 @@ use App\Http\Resources\OrderTransactionResource;
 use App\Models\Conversation;
 use App\Models\Message;
 use App\Models\OrderTransaction;
+use App\Services\NotificationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class OrderTransactionController extends Controller
 {
+    public function __construct(private NotificationService $notificationService)
+    {
+    }
+
     /**
      * Get transactions for a conversation
      */
@@ -70,16 +75,12 @@ class OrderTransactionController extends Controller
         $otherParticipant = $conversation->getOtherParticipant($user->id);
 
         // Determine who is client and who is freelancer based on 'is_client_order' flag
-        // If is_client_order = true: creator is client, executor is freelancer
-        // If is_client_order = false: creator is freelancer, executor is client
         $isClientOrder = $validated['is_client_order'] ?? true;
 
         if ($isClientOrder) {
-            // Client creates order, freelancer executes
             $clientId = $user->id;
             $freelancerId = $otherParticipant->id;
         } else {
-            // Freelancer creates order, client needs to accept
             $clientId = $otherParticipant->id;
             $freelancerId = $user->id;
         }
@@ -120,6 +121,18 @@ class OrderTransactionController extends Controller
 
             // Broadcast message sent event
             broadcast(new \App\Events\MessageSent($orderTransaction->message));
+
+            // Send notification to other participant
+            $this->notificationService->sendOrderCreatedNotification(
+                $otherParticipant->id,
+                [
+                    'creator_id' => $user->id,
+                    'order_id' => $orderTransaction->id,
+                    'order_title' => $orderTransaction->title,
+                    'conversation_id' => $conversation->id,
+                    'amount' => $orderTransaction->amount,
+                ]
+            );
 
             return response()->json([
                 'success' => true,
@@ -175,6 +188,17 @@ class OrderTransactionController extends Controller
             if ($orderTransaction->accept()) {
                 $orderTransaction->load(['creator', 'executor', 'client', 'freelancer']);
 
+                // Send notification to creator
+                $this->notificationService->sendOrderAcceptedNotification(
+                    $orderTransaction->creator_id,
+                    [
+                        'acceptor_id' => $user->id,
+                        'order_id' => $orderTransaction->id,
+                        'order_title' => $orderTransaction->title,
+                        'conversation_id' => $orderTransaction->conversation_id,
+                    ]
+                );
+
                 return response()->json([
                     'success' => true,
                     'message' => 'Order accepted successfully. Funds have been escrowed.',
@@ -211,6 +235,17 @@ class OrderTransactionController extends Controller
 
         if ($orderTransaction->deliver()) {
             $orderTransaction->load(['creator', 'executor', 'client', 'freelancer']);
+
+            // Send notification to client
+            $this->notificationService->sendOrderDeliveredNotification(
+                $orderTransaction->client_id,
+                [
+                    'order_id' => $orderTransaction->id,
+                    'order_title' => $orderTransaction->title,
+                    'conversation_id' => $orderTransaction->conversation_id,
+                    'freelancer_id' => $orderTransaction->freelancer_id,
+                ]
+            );
 
             return response()->json([
                 'success' => true,
@@ -249,6 +284,17 @@ class OrderTransactionController extends Controller
 
             $orderTransaction->load(['creator', 'executor', 'client', 'freelancer']);
 
+            // Send notification to freelancer
+            $this->notificationService->sendOrderCompletedNotification(
+                $orderTransaction->freelancer_id,
+                [
+                    'order_id' => $orderTransaction->id,
+                    'order_title' => $orderTransaction->title,
+                    'conversation_id' => $orderTransaction->conversation_id,
+                    'amount' => $orderTransaction->amount,
+                ]
+            );
+
             return response()->json([
                 'success' => true,
                 'message' => 'Order completed and payment released',
@@ -282,6 +328,22 @@ class OrderTransactionController extends Controller
 
             if ($orderTransaction->cancel($user->id, $validated['reason'] ?? null)) {
                 $orderTransaction->load(['creator', 'executor', 'client', 'freelancer', 'cancelledBy']);
+
+                // Send notification to other participant
+                $otherUserId = $orderTransaction->creator_id === $user->id 
+                    ? $orderTransaction->executor_id 
+                    : $orderTransaction->creator_id;
+
+                $this->notificationService->sendOrderCancelledNotification(
+                    $otherUserId,
+                    [
+                        'cancelled_by_id' => $user->id,
+                        'order_id' => $orderTransaction->id,
+                        'order_title' => $orderTransaction->title,
+                        'conversation_id' => $orderTransaction->conversation_id,
+                        'reason' => $validated['reason'] ?? null,
+                    ]
+                );
 
                 return response()->json([
                     'success' => true,
@@ -322,6 +384,22 @@ class OrderTransactionController extends Controller
         if ($orderTransaction->requestCancellation($user->id, $validated['reason'] ?? null)) {
             $orderTransaction->load(['creator', 'executor', 'client', 'freelancer', 'cancellationRequestedBy']);
 
+            // Send notification to other participant
+            $otherUserId = $orderTransaction->creator_id === $user->id 
+                ? $orderTransaction->executor_id 
+                : $orderTransaction->creator_id;
+
+            $this->notificationService->sendOrderCancellationRequestedNotification(
+                $otherUserId,
+                [
+                    'requester_id' => $user->id,
+                    'order_id' => $orderTransaction->id,
+                    'order_title' => $orderTransaction->title,
+                    'conversation_id' => $orderTransaction->conversation_id,
+                    'reason' => $validated['reason'] ?? null,
+                ]
+            );
+
             return response()->json([
                 'success' => true,
                 'message' => 'Cancellation request sent. Waiting for other party approval.',
@@ -349,9 +427,23 @@ class OrderTransactionController extends Controller
             ], 403);
         }
 
+        $cancellationRequestedByUser = $orderTransaction->cancellationRequestedBy;
+
         try {
             if ($orderTransaction->approveCancellation($user->id)) {
                 $orderTransaction->load(['creator', 'executor', 'client', 'freelancer', 'cancelledBy', 'cancellationRequestedBy']);
+
+                if($cancellationRequestedByUser){
+                    // Send notification to requester
+                    $this->notificationService->sendOrderCancellationApprovedNotification(
+                        $cancellationRequestedByUser->id,
+                        [
+                            'order_id' => $orderTransaction->id,
+                            'order_title' => $orderTransaction->title,
+                            'conversation_id' => $orderTransaction->conversation_id,
+                        ]
+                    );
+                }
 
                 return response()->json([
                     'success' => true,
@@ -387,8 +479,22 @@ class OrderTransactionController extends Controller
             ], 403);
         }
 
+        $cancellationRequestedByUser = $orderTransaction->cancellationRequestedBy;
+
         if ($orderTransaction->rejectCancellation()) {
             $orderTransaction->load(['creator', 'executor', 'client', 'freelancer']);
+
+            if($cancellationRequestedByUser){
+                // Send notification to requester
+                $this->notificationService->sendOrderCancellationRejectedNotification(
+                    $cancellationRequestedByUser->id,
+                    [
+                        'order_id' => $orderTransaction->id,
+                        'order_title' => $orderTransaction->title,
+                        'conversation_id' => $orderTransaction->conversation_id,
+                    ]
+                );
+            }
 
             return response()->json([
                 'success' => true,
@@ -422,6 +528,22 @@ class OrderTransactionController extends Controller
         if ($orderTransaction->raiseDispute($user->id, $validated['reason'])) {
             $orderTransaction->load(['creator', 'executor', 'client', 'freelancer', 'disputeRaisedBy']);
 
+            // Send notification to other participant
+            $otherUserId = $orderTransaction->creator_id === $user->id 
+                ? $orderTransaction->executor_id 
+                : $orderTransaction->creator_id;
+
+            $this->notificationService->sendOrderDisputedNotification(
+                $otherUserId,
+                [
+                    'dispute_raised_by_id' => $user->id,
+                    'order_id' => $orderTransaction->id,
+                    'order_title' => $orderTransaction->title,
+                    'conversation_id' => $orderTransaction->conversation_id,
+                    'reason' => $validated['reason'],
+                ]
+            );
+
             return response()->json([
                 'success' => true,
                 'message' => 'Dispute raised successfully. An admin will review your case.',
@@ -435,7 +557,9 @@ class OrderTransactionController extends Controller
         ], 422);
     }
 
-
+    /**
+     * Request revision
+     */
     public function requestRevision(RevisionOrderTransactionRequest $request, OrderTransaction $orderTransaction): JsonResponse
     {
         $user = $request->user();
@@ -452,6 +576,17 @@ class OrderTransactionController extends Controller
 
             if ($orderTransaction->requestRevision($user->id, $validated['reason'] ?? null)) {
                 $orderTransaction->load(['creator', 'executor', 'client', 'freelancer', 'revisionRequestedBy']);
+
+                // Send notification to freelancer
+                $this->notificationService->sendOrderRevisionRequestedNotification(
+                    $orderTransaction->freelancer_id,
+                    [
+                        'order_id' => $orderTransaction->id,
+                        'order_title' => $orderTransaction->title,
+                        'conversation_id' => $orderTransaction->conversation_id,
+                        'reason' => $validated['reason'] ?? null,
+                    ]
+                );
 
                 return response()->json([
                     'success' => true,

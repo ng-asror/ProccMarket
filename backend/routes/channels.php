@@ -76,7 +76,7 @@ Broadcast::channel('topic.{topicId}', function ($user, $topicId) {
     return false;
 });
 
-// User-specific channel
+// User-specific channel - for notifications and private messages
 Broadcast::channel('user.{userId}', function ($user, $userId) {
     return (int) $user->id === (int) $userId;
 });

@@ -344,31 +344,29 @@ class TopicController extends Controller
     /**
      * View tracking (avtomatik)
      */
-    private function trackView(Request $request, Topic $topic, $user)
-    {
-        $ipAddress = $request->ip();
-        $userAgent = $request->userAgent();
+        private function trackView(Request $request, Topic $topic, $user)
+        {
+            $ipAddress = $request->ip();
+            $userAgent = $request->userAgent();
 
-        // 24 soat ichida bir xil user/IP qayta view qo'shmaydi
-        $existingView = $topic->views()
-            ->where(function ($query) use ($user, $ipAddress) {
-                if ($user) {
-                    $query->where('user_id', $user->id);
-                } else {
-                    $query->where('ip_address', $ipAddress);
-                }
-            })
-            ->where('created_at', '>=', now()->subDay())
-            ->first();
-
-        if (!$existingView) {
-            $topic->views()->create([
-                'user_id' => $user ? $user->id : null,
-                'ip_address' => $ipAddress,
-                'user_agent' => $userAgent,
-            ]);
+            try {
+                // firstOrCreate race condition xavfini kamaytiradi
+                $topic->views()->firstOrCreate(
+                    [
+                        'viewable_id' => $topic->id,
+                        'viewable_type' => Topic::class,
+                        'user_id' => $user ? $user->id : null,
+                        'ip_address' => $ipAddress,
+                    ],
+                    [
+                        'user_agent' => $userAgent,
+                    ]
+                );
+            } catch (\Illuminate\Database\UniqueConstraintViolationException $e) {
+                // Agar duplicate entry bo'lsa, e'tibor bermaymiz (view allaqachon mavjud)
+                // Bu race condition holatida yuzaga kelishi mumkin
+            }
         }
-    }
 
     /**
      * User section ga kirish huquqini tekshirish

@@ -9,13 +9,14 @@ export interface IUser {
   id: number;
   telegram_id: string;
   email: string;
-  role_id: any;
+  role_id: number;
   balance: string;
-  name: any;
-  avatar: any;
+  name: string | null;
+  avatar: string | null;
+  avatar_url: string | null;
   banned: boolean;
   last_deposit_at: any;
-  is_admin: number;
+  is_admin: boolean;
   email_verified_at: any;
   remember_token: any;
   created_at: string;

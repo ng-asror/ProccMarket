@@ -1,14 +1,23 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  ElementRef,
   inject,
   OnDestroy,
   OnInit,
   resource,
   signal,
+  ViewChild,
 } from '@angular/core';
-import { AmDateFormatPipe, NumeralPipe, Telegram, TopicService } from '../../../../core';
-import { ActivatedRoute } from '@angular/router';
+import {
+  AmDateFormatPipe,
+  ITopicRes,
+  MessageService,
+  NumeralPipe,
+  Telegram,
+  TopicService,
+} from '../../../../core';
+import { ActivatedRoute, Router } from '@angular/router';
 import { icons, LucideAngularModule } from 'lucide-angular';
 import { firstValueFrom } from 'rxjs';
 import { FormsModule } from '@angular/forms';
@@ -23,10 +32,14 @@ import { MomentModule } from 'ngx-moment';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Topic implements OnInit, OnDestroy {
+  private messageService = inject(MessageService);
   private telegram = inject(Telegram);
   private topicService = inject(TopicService);
   private activatedRoute = inject(ActivatedRoute);
+  private router = inject(Router);
 
+  @ViewChild('userModal') userModal!: ElementRef<HTMLDialogElement>;
+  protected author = signal<ITopicRes['topic']['author'] | null>(null);
   protected ICONS = icons;
   protected comment = signal<{ content: string; replay_id?: number }>({
     content: '',
@@ -92,7 +105,15 @@ export class Topic implements OnInit, OnDestroy {
       });
     });
   }
-
+  protected createChat(user_id: number): void {
+    firstValueFrom(this.messageService.createConversation(user_id)).then((res) => {
+      this.router.navigate(['/inbox/chat', res.data.id, user_id]);
+    });
+  }
+  protected openUserModal(data: ITopicRes['topic']['author']): void {
+    this.author.set(data);
+    this.userModal.nativeElement.showModal();
+  }
   ngOnDestroy(): void {
     this.telegram.BackButton.hide();
     this.telegram.BackButton.offClick(() => history.back());

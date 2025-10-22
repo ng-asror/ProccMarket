@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { All } from './all';
+import { Chat } from './chat';
 
-describe('All', () => {
-  let component: All;
-  let fixture: ComponentFixture<All>;
+describe('Chat', () => {
+  let component: Chat;
+  let fixture: ComponentFixture<Chat>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [All]
+      imports: [Chat]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(All);
+    fixture = TestBed.createComponent(Chat);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

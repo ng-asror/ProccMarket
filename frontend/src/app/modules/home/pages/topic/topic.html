@@ -39,7 +39,7 @@
 			</button>
 		</div>
 		<div class="flex items-center justify-between">
-			<div class="flex items-center gap-x-[5px]">
+			<div class="flex items-center gap-x-[5px] cursor-pointer" (click)="openUserModal(topic.author)">
 				<div class="avatar">
 					<div class="w-[40px] rounded-full">
 						<img
@@ -71,6 +71,44 @@
 		</div>
 		}}
 	</div>
+	<!-- User modal -->
+	<input type="checkbox" id="" class="modal-toggle" />
+	<dialog class="modal modal-bottom sm:modal-middle" #userModal>
+		<div class="modal-box">
+			@if (author(); as author) {
+			<div class="mb-[-35px]">
+				@if(author.cover_url) {
+				<img [src]="author.cover_url" [alt]="author.name"
+					class="w-full h-[130px] rounded-box object-cover object-center">
+				}@else {
+				<div class="w-full h-[130px] rounded-box bg-[#F2F2F2]"></div>
+				}
+			</div>
+			<div class="flex items-end gap-x-[10px]">
+				<div class="rounded-box w-[90px] h-[90px] border-4 bg-[#ffff] border-[#fff] overflow-hidden">
+					@if(author.avatar_url !== null){
+					<img src="{{author.avatar_url}}" alt="user face" class="w-full h-full block object-cover object-center">
+					}@else {
+					<img src="https://proccmarket.com/avatars/avatar10.svg" alt="avatar10"
+						class="w-full h-full block rounded-full">
+					}
+				</div>
+				<div class="mb-[10px]">
+					<h1 class="text-[20px] text-[#030300] font-[500] mb-1 leading-[100%]">
+						{{author.name??'user' + author.id}}</h1>
+					<h2 class="text-[16px] lowercase text-[#030300] font-[500] leading-[100%]">
+						{{author.role_name? author.role_name: 'Гость'}}</h2>
+				</div>
+			</div>
+			<p class="text-[16px] text-[#030300] leading-[120%] font-[400] block">{{author.description}}</p>
+			<button type="button" class="btn btn-primary w-full mt-[10px]" (click)="createChat(author.id)">Написать
+				сообщение</button>
+			}
+			<form method="dialog">
+				<button class="btn btn-sm btn-circle absolute right-2 top-2">✕</button>
+			</form>
+		</div>
+	</dialog>
 	}@else {
 	<div class="flex w-full flex-col gap-4">
 		<div class="skeleton h-4 w-full"></div>

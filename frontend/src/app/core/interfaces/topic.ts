@@ -17,7 +17,9 @@ export interface ITopicRes extends Result {
       role_id: number;
       balance: string;
       name: string | null;
-      avatar: string;
+      avatar: string | null;
+      cover: string | null;
+      cover_url: string | null;
       description: string;
       banned: boolean;
       last_deposit_at: string;

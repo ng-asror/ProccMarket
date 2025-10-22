@@ -88,6 +88,8 @@ export interface ITopic {
     balance: string;
     name: string | null;
     avatar: string;
+    cover: string | null;
+    cover_url: string | null;
     description: string;
     banned: boolean;
     last_deposit_at: string;

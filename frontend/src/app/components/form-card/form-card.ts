@@ -1,8 +1,8 @@
-import { Component, effect, inject, input, signal } from '@angular/core';
+import { Component, effect, ElementRef, inject, input, signal, ViewChild } from '@angular/core';
 import { icons, LucideAngularModule } from 'lucide-angular';
-import { AmDateFormatPipe, ITopic, NumeralPipe, TopicService } from '../../core';
+import { AmDateFormatPipe, ITopic, MessageService, NumeralPipe, TopicService } from '../../core';
 import { firstValueFrom } from 'rxjs';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-form-card',
@@ -12,6 +12,11 @@ import { RouterLink } from '@angular/router';
 })
 export class FormCard {
   private topicService = inject(TopicService);
+  private messageService = inject(MessageService);
+  private router = inject(Router);
+
+  @ViewChild('userModal') userModal!: ElementRef<HTMLDialogElement>;
+  protected author = signal<ITopic['author'] | null>(null);
   protected ICONS = icons;
   item = input.required<ITopic>({ alias: 'topic' });
   itemSignal = signal<ITopic | null>(null);
@@ -33,5 +38,14 @@ export class FormCard {
         };
       });
     });
+  }
+  protected createChat(user_id: number): void {
+    firstValueFrom(this.messageService.createConversation(user_id)).then((res) => {
+      this.router.navigate(['/inbox/chat', res.data.id, user_id]);
+    });
+  }
+  protected openUserModal(data: ITopic['author']): void {
+    this.author.set(data);
+    this.userModal.nativeElement.showModal();
   }
 }

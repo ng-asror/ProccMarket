@@ -1,0 +1,9 @@
+<div class="flex items-end gap-x-[10px] p-[15px]">
+	<textarea class="textarea w-full placeholder:text-black/50 resize-none" placeholder="Написать сообщение..."
+		[(ngModel)]="txtContent" maxlength="200" style="min-height: 42px; height: 42px;" matInput cdkTextareaAutosize
+		#autosize="cdkTextareaAutosize"></textarea>
+	<button type="button" class="btn btn-primary" [disabled]="txtContent().length === 0 || !this.txtContent().trim()"
+		(click)="send()">
+		<lucide-icon [name]="ICONS.SendHorizontal" size="18"></lucide-icon>
+	</button>
+</div>

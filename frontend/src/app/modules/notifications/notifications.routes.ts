@@ -13,10 +13,10 @@ export const notificationRoutes: Routes = [
             path: 'messages',
             loadComponent: () => import('./pages').then((p) => p.Messages),
           },
-          {
-            path: 'orders',
-            loadComponent: () => import('./pages').then((p) => p.Comments),
-          },
+					{
+						path: 'orders_list',
+						loadComponent: () => import('./pages').then((p) => p.OrdersList),
+					},
           {
             path: '',
             redirectTo: 'messages',

@@ -4,7 +4,7 @@
 		<a [routerLink]="'/home/section/' + sectionBlog().id" class="btn btn-sm"><lucide-icon [name]="ICONS.ChevronRight"
 				size="20"></lucide-icon></a>
 	</div>
-	@for (item of sectionBlog().topics.slice(0, 2); track item.id) {
+	@for (item of sectionBlog().topics; track item.id) {
 	<div>
 		<app-form-card [topic]="item"></app-form-card>
 	</div>

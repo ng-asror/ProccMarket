@@ -1,9 +1,7 @@
-<!-- <div class="flex gap-x-[5px] bg-[#F2F2F2] px-[15px] py-[10px] border-b-[#E1E1E1] border-b-1">
-	<a class="bg-[#fff] flex items-center justify-center py-[7px] rounded-[6px] text-[16px] text-[#030300] leading-[100%] font-[400] px-[15px] text-center"
-		routerLink="messages" routerLinkActive="active-link">Сообщения</a>
-	<a class="bg-[#fff] flex items-center justify-center py-[7px] rounded-[6px] text-[16px] text-[#030300] leading-[100%] font-[400] px-[15px] text-center"
-		routerLink="orders" routerLinkActive="active-link">Гарант-сделки</a>
-</div> -->
+<div class="tabs tabs-sm tabs-box">
+  <a class="tab flex-1" routerLink="messages" routerLinkActive="tab-active">Сообщения</a>
+  <a class="tab flex-1" routerLink="orders_list" routerLinkActive="tab-active">Гарант-сделки</a>
+</div>
 <div class="content">
 	<router-outlet />
 </div>

@@ -91,13 +91,6 @@ export class Chat implements OnInit, OnDestroy, AfterViewInit {
         this.messagesService.sendMessage(Number(this.chat_id()), this.txtContent())
       ).then((res) => {
         this.socketService.emit('message.send', res);
-        // this.messages.update((current) => {
-        //   if (!current) return current;
-        //   return {
-        //     ...current,
-        //     messages: [...current.messages, res.data],
-        //   };
-        // });
         this.txtContent.set('');
         this.scrollToBottom();
       });

@@ -11,9 +11,7 @@ export class SocketService {
   private telegram = inject(Telegram);
 
   initSocket(token: string | null) {
-    console.log(token);
     if (!token) {
-      console.log('Token yoq');
       return;
     }
     this.socket = io(environment.socketUrl, {

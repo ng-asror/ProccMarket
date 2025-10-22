@@ -1,4 +1,4 @@
-import { Component, HostListener, inject, OnInit, signal } from '@angular/core';
+import { AfterViewInit, Component, HostListener, inject, OnInit, signal } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { SocketService, Telegram } from './core/services';
 
@@ -8,19 +8,20 @@ import { SocketService, Telegram } from './core/services';
   templateUrl: './app.html',
   styleUrl: './app.scss',
 })
-export class App implements OnInit {
+export class App implements OnInit, AfterViewInit {
   private socketService = inject(SocketService);
   protected readonly title = signal('frontend');
   private telegram = inject(Telegram);
 
   ngOnInit(): void {
     this.telegram.init('#030303');
+  }
+  ngAfterViewInit(): void {
     this.telegram.getCloudStorage('token').then((res) => {
       if (!res) return;
       this.socketService.initSocket(res);
     });
   }
-
   @HostListener('document:click', ['$event'])
   onClick(event: MouseEvent) {
     const target = event.target as HTMLElement;

@@ -1,0 +1,26 @@
+@if (userInfo.value(); as user) {
+<div class="flex justify-between items-center p-[15px] rounded-b-[12px] bg-[#030303]">
+	<div class="flex items-center gap-x-[10px]">
+		<div class="avatar">
+			<div class="w-12 rounded-full">
+				<img [src]="user.avatar_url??'https://proccmarket.com/avatars/avatar10.svg'" />
+			</div>
+		</div>
+		<div>
+			<h3 class="text-white text-[18px]">{{user.name??'user' + user.id}}</h3>
+			<p class="text-white/50 text-[14px] leading-[100%]">{{user.role_name??'Гость'}}</p>
+		</div>
+	</div>
+	<div class="dropdown dropdown-end">
+		<div tabindex="0" role="button" class="btn btn-sm btn-circle m-1"><lucide-icon
+				[name]="ICONS.EllipsisVertical"></lucide-icon></div>
+		<ul tabindex="-1" class="dropdown-content menu bg-base-100 rounded-box z-1 w-40 p-2 shadow-sm">
+			<li><a class=" text-green-500"><lucide-icon [name]="ICONS.ShieldCheck" size="18"></lucide-icon>Гарант</a></li>
+			<li (click)="deleteChat()"><a class="text-orange-600"><lucide-icon [name]="ICONS.Trash2"
+						size="18"></lucide-icon>Удалить чат</a></li>
+		</ul>
+	</div>
+</div>
+}@else {
+<div class="skeleton w-full h-[78px]"></div>
+}

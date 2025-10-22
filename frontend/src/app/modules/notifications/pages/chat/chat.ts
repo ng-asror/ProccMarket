@@ -1,6 +1,5 @@
 import {
   AfterViewInit,
-  ChangeDetectorRef,
   Component,
   ElementRef,
   inject,
@@ -11,7 +10,7 @@ import {
   ViewChild,
 } from '@angular/core';
 import { icons, LucideAngularModule } from 'lucide-angular';
-import { TextFieldModule } from '@angular/cdk/text-field';
+
 import {
   IConversationRes,
   IMessageResSocket,
@@ -20,13 +19,13 @@ import {
   Telegram,
 } from '../../../../core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, Subscription } from 'rxjs';
 import { FormsModule } from '@angular/forms';
-import { Message } from '../../components';
+import { Message, MessageForm } from '../../components';
 
 @Component({
   selector: 'app-chat',
-  imports: [LucideAngularModule, FormsModule, Message, TextFieldModule],
+  imports: [LucideAngularModule, FormsModule, Message, MessageForm],
   templateUrl: './chat.html',
   styleUrl: './chat.scss',
 })
@@ -35,14 +34,13 @@ export class Chat implements OnInit, OnDestroy, AfterViewInit {
   private socketService = inject(SocketService);
   private messagesService = inject(MessageService);
   private activatedRoute = inject(ActivatedRoute);
-  private cds = inject(ChangeDetectorRef);
   private router = inject(Router);
+  private sub: Subscription = new Subscription();
 
   protected ICONS = icons;
   chat_id = signal<string | null>(null);
   user_id = signal<string | null>(null);
   messages = signal<IConversationRes | null>(null);
-  txtContent = signal<string>('');
 
   @ViewChild('chatCanvas') chatContent!: ElementRef<HTMLDivElement>;
 
@@ -61,7 +59,7 @@ export class Chat implements OnInit, OnDestroy, AfterViewInit {
   ngOnInit(): void {
     this.telegram.showBackButton('/inbox/messages');
     this.getChats();
-    this.socketService.onMessage().subscribe((res: IMessageResSocket) => {
+    this.socketService.on('message.send').subscribe((res: IMessageResSocket) => {
       this.messages.update((current) => {
         if (!current) return current;
         this.scrollToBottom();
@@ -74,27 +72,16 @@ export class Chat implements OnInit, OnDestroy, AfterViewInit {
   }
   getChats(): void {
     this.socketService.joinConversation(Number(this.chat_id()));
-    this.messagesService.getConversation(Number(this.chat_id())).subscribe({
-      next: (res) => {
-        this.messages.set(res);
-      },
-      complete: () => {
-        this.scrollToBottom();
-      },
-    });
-  }
-
-  async send(): Promise<void> {
-    if (!this.txtContent().trim()) return;
-    try {
-      await firstValueFrom(
-        this.messagesService.sendMessage(Number(this.chat_id()), this.txtContent())
-      ).then((res) => {
-        this.socketService.emit('message.send', res);
-        this.txtContent.set('');
-        this.scrollToBottom();
-      });
-    } catch (error) {}
+    this.sub.add(
+      this.messagesService.getConversation(Number(this.chat_id())).subscribe({
+        next: (res) => {
+          this.messages.set(res);
+        },
+        complete: () => {
+          this.scrollToBottom();
+        },
+      })
+    );
   }
 
   ngAfterViewInit(): void {
@@ -118,6 +105,7 @@ export class Chat implements OnInit, OnDestroy, AfterViewInit {
     });
   }
   ngOnDestroy(): void {
+    this.sub.unsubscribe();
     this.socketService.leaveConversation(Number(this.chat_id()));
     this.telegram.hiddeBackButton('/inbox/messages');
   }

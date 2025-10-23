@@ -3,6 +3,7 @@ import { io, Socket } from 'socket.io-client';
 import { environment } from '../../../environments/environment.development';
 import { Telegram } from './telegram';
 import { Observable } from 'rxjs';
+import { IMessageResSocket } from '../interfaces';
 @Injectable({
   providedIn: 'root',
 })
@@ -47,13 +48,16 @@ export class SocketService {
   emit(event: string, data: any) {
     this.socket?.emit(event, data);
   }
-  on(event: string): Observable<any> {
-    return new Observable((observer) => {
-      this.socket?.on(event, (data) => {
+
+  onMessage(): Observable<IMessageResSocket> {
+    return new Observable<IMessageResSocket>((observer) => {
+      if (!this.socket) return;
+      this.socket.on('message.send', (data: IMessageResSocket) => {
         observer.next(data);
       });
     });
   }
+
   get getSocket(): Socket | null {
     return this.socket;
   }

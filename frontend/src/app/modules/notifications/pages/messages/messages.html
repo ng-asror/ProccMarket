@@ -1,0 +1,34 @@
+<div class="divide-y divide-[#E1E1E1]">
+	<!-- User -->
+	@if(chats_list_signal(); as chat_list) {
+	@for (item of chat_list.data; track item.id) {
+	<a class="flex items-start gap-3 p-[10px_15px] bg-white hover:bg-[#F2F2F2]/30 cursor-pointer"
+		[routerLink]="['/inbox/chat',item.id, item.other_participant.id]">
+		<div class="rounded-full w-[40px] h-[40px] flex items-center justify-center overflow-hidden">
+			<img [src]="item.other_participant.avatar_url??'https://proccmarket.com/avatars/avatar10.svg'" alt="user-face"
+				class="w-full h-full">
+		</div>
+		<div class="flex-1">
+			<p class="text-[14px] font-medium text-gray-900 truncate">{{item.other_participant.name?? 'user'+item.id}}</p>
+			@if (item.last_message; as last_message) {
+			<p class="text-[12px] text-gray-500 truncate">{{last_message.content}}</p>
+			}@else {
+			<p class="text-[12px] text-gray-500 truncate italic">Пусто...</p>
+			}
+		</div>
+		<div class="flex flex-col items-end gap-1">
+			<span class="text-[11px] text-gray-400">{{item.last_message_at | date: 'hh:mm'}}</span>
+			@if(!item.last_message?.is_read && item.unread_count > 0) {
+			<span
+				class="block leading-[100%] text-white text-[12px] rounded bg-[#030300] p-[4px]">{{item.unread_count}}</span>
+			}
+		</div>
+	</a>
+	}
+	@if (!chat_list || chat_list.data.length === 0) {
+	<div class="px-[15px]">
+		<p>Пока сообщений нет.</p>
+	</div>
+	}
+	}
+</div>

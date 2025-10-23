@@ -29,7 +29,6 @@ interface IUpdateForm {
   styleUrl: './update-porfile.scss',
 })
 export class UpdatePorfile implements OnInit, OnDestroy {
-  protected apiurl = environment.ngrok;
   private telegram = inject(Telegram);
   private profileService = inject(ProfileService);
   private fb = inject(NonNullableFormBuilder);

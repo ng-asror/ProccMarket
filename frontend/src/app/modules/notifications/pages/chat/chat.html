@@ -1,0 +1,30 @@
+<div class="chat-content">
+	<div>
+		<app-header [all-id]="{user_id: +user_id()!, chat_id: +chat_id()!}"></app-header>
+	</div>
+	<div class="overflow-y-scroll chat-canvas px-[15px] overflow-y-auto scroll-smooth" #chatCanvas>
+		@defer (when messages(); prefetch on idle) {
+		@if(messages(); as msgs) {
+		@for (item of msgs.messages; track item.id) {
+		<app-message [message]="{message:item, user_id: +user_id()!}"></app-message>
+		}
+		@if (msgs.messages.length === 0) {
+		<div class="w-full h-full flex flex-col items-center justify-center">
+			<img src="https://proccmarket.com/svg/empty-chats.svg" alt="empty-chats" class="w-full max-w-[200px] h-auto">
+			<p class="text-center text-black/50 py-[20px]">Пока сообщений нет. Начните разговор!</p>
+		</div>
+		}
+		}
+		}@placeholder {
+		<div class="space-y-[10px] pt-[10px]">
+			<div class="skeleton w-[50%] h-[42px]"></div>
+			<div class="skeleton w-[50%] ml-auto h-[42px]"></div>
+			<div class="skeleton w-[50%] h-[42px]"></div>
+			<div class="skeleton w-[50%] ml-auto h-[42px]"></div>
+		</div>
+		}
+	</div>
+	<div>
+		<app-message-form [chat_id]="+chat_id()!"></app-message-form>
+	</div>
+</div>

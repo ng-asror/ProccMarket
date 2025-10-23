@@ -10,3 +10,4 @@ export * from './sections';
 export * from './topic';
 export * from './balance';
 export * from './ads';
+export * from './messages';

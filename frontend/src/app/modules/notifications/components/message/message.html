@@ -1,0 +1,19 @@
+@let content = message().message;
+@let user_id = message().user_id;
+<div class="chat" [ngClass]="content.user_id === user_id? 'chat-start':'chat-end'">
+	<div class="chat-image avatar">
+		<div class="w-10 rounded-full">
+			<img alt="Tailwind CSS chat bubble component"
+				[src]="content.user.avatar_url??'https://proccmarket.com/avatars/avatar10.svg'" />
+		</div>
+	</div>
+	<div class="chat-header">
+		{{content.user.name??'user' + content.id}} {{content.user.is_admin?'(админ)':''}}
+		<time class="text-xs opacity-50">{{content.created_at | date:'dd-MMM hh:mm'}}</time>
+	</div>
+	<div class="chat-bubble break-words whitespace-pre-wrap" [class.chat-bubble-secondary]="content.user.is_admin">
+		{{content.content}}</div>
+	@if(content.is_read && content.user.id === user_id){
+	<div class="chat-footer opacity-50">Прочитано</div>
+	}
+</div>

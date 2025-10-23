@@ -1,4 +1,4 @@
-export * from './all/all';
-export * from './comments/comments';
-export * from './friends/friends';
+export * from './messages/messages';
 export * from './main/main';
+export * from './chat/chat';
+export * from './orders-list/orders-list'

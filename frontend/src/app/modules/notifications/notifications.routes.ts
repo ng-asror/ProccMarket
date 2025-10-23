@@ -2,7 +2,7 @@ import { Routes } from '@angular/router';
 
 export const notificationRoutes: Routes = [
   {
-    path: 'notifications',
+    path: 'inbox',
     loadComponent: () => import('./notifications').then((p) => p.Notifications),
     children: [
       {
@@ -10,23 +10,23 @@ export const notificationRoutes: Routes = [
         loadComponent: () => import('./pages').then((p) => p.Main),
         children: [
           {
-            path: 'all',
-            loadComponent: () => import('./pages').then((p) => p.All),
+            path: 'messages',
+            loadComponent: () => import('./pages').then((p) => p.Messages),
           },
-          {
-            path: 'comments',
-            loadComponent: () => import('./pages').then((p) => p.Comments),
-          },
-          {
-            path: 'friends',
-            loadComponent: () => import('./pages').then((p) => p.Friends),
-          },
+					{
+						path: 'orders_list',
+						loadComponent: () => import('./pages').then((p) => p.OrdersList),
+					},
           {
             path: '',
-            redirectTo: 'all',
+            redirectTo: 'messages',
             pathMatch: 'full',
           },
         ],
+      },
+      {
+        path: 'chat/:chat_id/:user_id',
+        loadComponent: () => import('./pages').then((p) => p.Chat),
       },
     ],
   },

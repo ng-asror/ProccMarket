@@ -56,16 +56,11 @@ import {
 } from "@/components/ui/table"
 import { Checkbox } from "@/components/ui/checkbox"
 import AppLayout from '@/layouts/app-layout'
-import { BreadcrumbItem } from '@/types'
+import { BreadcrumbItem, User } from '@/types'
 
 interface PartnershipApplication {
   id: number
-  user: {
-    id: number
-    name: string
-    email: string
-    avatar: string | null
-  }
+  user: User,
   processing_experience: string
   deposit_amount: number
   about_yourself: string
@@ -277,7 +272,7 @@ export default function AdminPartnershipIndex() {
           <div className="flex items-center gap-2 min-w-0">
             {user.avatar ? (
               <img
-                src={user.avatar}
+                src={user.avatar_url || undefined}
                 alt={user.name || user.email}
                 className="h-8 w-8 rounded-full flex-shrink-0"
               />

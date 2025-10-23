@@ -872,7 +872,7 @@ const columns = (roles: any[], refreshData: () => void): ColumnDef<z.infer<typeo
         <div className="flex items-center gap-3">
           {user.avatar_url ? (
             <img
-              src={user.avatar_url}
+              src={user.avatar_url || undefined}
               alt={user.name || user.email}
               className="h-10 w-10 rounded-full"
             />

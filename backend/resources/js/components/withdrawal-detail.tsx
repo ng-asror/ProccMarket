@@ -83,6 +83,7 @@ export const withdrawalSchema = z.object({
     name: z.string().nullable(),
     email: z.string(),
     avatar: z.string().nullable(),
+    avatar_url: z.string().nullable(),
   }),
   amount: z.number(),
   requisites: z.string(),
@@ -405,7 +406,7 @@ const columns = (refreshData: () => void): ColumnDef<z.infer<typeof withdrawalSc
         <div className="flex items-center gap-3">
           {user.avatar ? (
             <img
-              src={user.avatar}
+              src={user.avatar_url || undefined}
               alt={user.name || user.email}
               className="h-10 w-10 rounded-full"
             />

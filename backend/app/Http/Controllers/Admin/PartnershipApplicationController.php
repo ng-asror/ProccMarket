@@ -53,6 +53,7 @@ class PartnershipApplicationController extends Controller
                     'name' => $app->user->name,
                     'email' => $app->user->email,
                     'avatar' => $app->user->avatar,
+                    'avatar_url' => $app->user->avatar_url,
                 ],
                 'processing_experience' => $app->processing_experience,
                 'deposit_amount' => $app->deposit_amount,

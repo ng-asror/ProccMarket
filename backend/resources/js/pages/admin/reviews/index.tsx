@@ -57,19 +57,14 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import AppLayout from '@/layouts/app-layout'
-import { BreadcrumbItem } from '@/types'
+import { BreadcrumbItem, User } from '@/types'
 
 interface Review {
   id: number
   star: number
   comment: string
   created_at: string
-  user: {
-    id: number
-    name: string | null
-    email: string
-    avatar: string | null
-  }
+  user: User
 }
 
 interface AdminReviewPageProps {
@@ -239,7 +234,7 @@ const adminColumns = (refreshData: () => void): ColumnDef<Review>[] => [
         >
           {user.avatar ? (
             <img
-              src={user.avatar}
+              src={user.avatar_url || undefined}
               alt={user.name || user.email}
               className="h-8 w-8 rounded-full flex-shrink-0"
             />

@@ -46,14 +46,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import AppLayout from '@/layouts/app-layout'
-import { BreadcrumbItem } from '@/types'
-
-interface User {
-  id: number
-  name: string | null
-  email: string
-  avatar: string | null
-}
+import { BreadcrumbItem, User } from '@/types'
 
 interface OrderTransaction {
   id: number
@@ -223,7 +216,7 @@ const adminColumns: ColumnDef<OrderTransaction>[] = [
         <div className="flex items-center gap-2 min-w-0">
           {user.avatar ? (
             <img
-              src={user.avatar}
+              src={user.avatar_url || undefined}
               alt={user.name || user.email}
               className="h-7 w-7 rounded-full flex-shrink-0"
             />
@@ -266,7 +259,7 @@ const adminColumns: ColumnDef<OrderTransaction>[] = [
         <div className="flex items-center gap-2 min-w-0">
           {user.avatar ? (
             <img
-              src={user.avatar}
+              src={user.avatar_url || undefined}
               alt={user.name || user.email}
               className="h-7 w-7 rounded-full flex-shrink-0"
             />

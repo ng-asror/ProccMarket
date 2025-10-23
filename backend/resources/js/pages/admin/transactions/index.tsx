@@ -66,7 +66,7 @@ import {
 } from "@/components/ui/table"
 import { Textarea } from "@/components/ui/textarea"
 import AppLayout from '@/layouts/app-layout'
-import { BreadcrumbItem } from '@/types'
+import { BreadcrumbItem, User } from '@/types'
 
 interface Transaction {
   id: number
@@ -77,12 +77,7 @@ interface Transaction {
   description: string | null
   created_at: string
   paid_at: string | null
-  user: {
-    id: number
-    name: string | null
-    email: string
-    avatar: string | null
-  }
+  user: User
 }
 
 interface AdminPageProps {
@@ -250,7 +245,7 @@ const adminColumns = (refreshData: () => void): ColumnDef<Transaction>[] => [
         >
           {user.avatar ? (
             <img
-              src={user.avatar}
+              src={user.avatar_url || undefined}
               alt={user.name || user.email}
               className="h-8 w-8 rounded-full flex-shrink-0"
             />

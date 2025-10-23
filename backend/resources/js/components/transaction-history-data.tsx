@@ -72,11 +72,11 @@ import {
   TabsContent,
 } from "@/components/ui/tabs"
 import { router } from '@inertiajs/react'
-import { parse } from "path"
 
 // Schema for user data validation
 export const userSchema = z.object({
   id: z.number(),
+  telegram_id: z.string().nullable(),
   name: z.string().nullable(),
   email: z.string(),
   role: z.object({
@@ -86,6 +86,7 @@ export const userSchema = z.object({
   balance: z.number(),
   banned: z.boolean(),
   avatar: z.string().nullable(),
+  avatar_url: z.string().nullable(),
   is_admin: z.boolean(),
   created_at: z.string(),
 })
@@ -321,8 +322,9 @@ function BalanceUpdateDialog({ user, onUpdate }: { user: z.infer<typeof userSche
   }
 
   const newBalance = type === "add"
-    ? parseFloat(user.balance) + (parseFloat(amount) || 0)
-    : parseFloat(user.balance) - (parseFloat(amount) || 0)
+    ? user.balance + (parseFloat(amount ?? "0") || 0)
+    : user.balance - (parseFloat(amount ?? "0") || 0)
+
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -558,7 +560,7 @@ const columns = (roles: any[], refreshData: () => void): ColumnDef<z.infer<typeo
         <div className="flex items-center gap-3">
           {user.avatar ? (
             <img
-              src={user.avatar}
+              src={user.avatar_url || undefined}
               alt={user.name || user.email}
               className="h-10 w-10 rounded-full"
             />

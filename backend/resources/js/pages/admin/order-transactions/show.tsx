@@ -30,14 +30,7 @@ import { Label } from "@/components/ui/label"
 import { Separator } from "@/components/ui/separator"
 import { Textarea } from "@/components/ui/textarea"
 import AppLayout from '@/layouts/app-layout'
-import { BreadcrumbItem } from '@/types'
-
-interface User {
-  id: number
-  name: string | null
-  email: string
-  avatar: string | null
-}
+import { BreadcrumbItem, User } from '@/types'
 
 interface OrderTransaction {
   id: number
@@ -113,7 +106,7 @@ function UserDisplay({ user, label, roleColor }: { user: User; label: string; ro
       <div className="flex items-center gap-3 mt-2">
         {user.avatar ? (
           <img
-            src={user.avatar}
+            src={user.avatar_url || undefined}
             alt={user.name || user.email}
             className="h-10 w-10 rounded-full"
           />

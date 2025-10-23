@@ -56,20 +56,13 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import AppLayout from '@/layouts/app-layout'
-import { BreadcrumbItem } from '@/types'
+import { BreadcrumbItem, User } from '@/types'
 
 interface Review {
   id: number
   star: number
   comment: string
   created_at: string
-}
-
-interface User {
-  id: number
-  name: string | null
-  email: string
-  avatar: string | null
 }
 
 interface UserReviewPageProps {
@@ -359,7 +352,7 @@ export default function UserReviewsPage() {
             <div className="flex items-center gap-4">
               {user.avatar ? (
                 <img
-                  src={user.avatar}
+                  src={user.avatar_url || undefined}
                   alt={user.name || user.email}
                   className="h-16 w-16 rounded-full"
                 />

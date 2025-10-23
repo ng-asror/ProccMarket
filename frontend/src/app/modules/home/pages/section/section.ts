@@ -1,6 +1,6 @@
-import { Component, inject, OnDestroy, OnInit, resource } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit, resource, signal } from '@angular/core';
 import { Layout } from '../../../../layout/layout';
-import { Section, Telegram } from '../../../../core';
+import { ISectionsDashboard, Section, Telegram } from '../../../../core';
 import { firstValueFrom } from 'rxjs';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { icons, LucideAngularModule } from 'lucide-angular';
@@ -19,17 +19,16 @@ export class SectionComponent implements OnInit, OnDestroy {
 
   protected ICONS = icons;
 
-  protected section = resource({
-    loader: () =>
-      firstValueFrom(this.sectionService.forumsDashboard()).then((res) => {
-        const param = this.activatedRoute.snapshot.params['form_id'];
-        const findSection = res.sections.find((item) => (item.id === +param ? item : null));
-        console.log(findSection);
-        return findSection;
-      }),
-  }).asReadonly();
+  section = signal<ISectionsDashboard | null>(null);
 
   ngOnInit(): void {
+    this.activatedRoute.paramMap.subscribe((params) => {
+      const formId = params.get('form_id');
+      firstValueFrom(this.sectionService.forumsDashboard()).then((res) => {
+        const findSection = res.sections.find((item) => (item.id === +formId! ? item : null));
+        this.section.set(findSection ?? null);
+      });
+    });
     this.telegram.showBackButton('/home');
   }
   ngOnDestroy(): void {

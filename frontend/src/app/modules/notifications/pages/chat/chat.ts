@@ -21,11 +21,12 @@ import { ActivatedRoute } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { FormsModule } from '@angular/forms';
 import { Header, Message, MessageForm } from '../../components';
+
 @Component({
   selector: 'app-chat',
   imports: [LucideAngularModule, FormsModule, Message, MessageForm, Header],
   templateUrl: './chat.html',
-  styleUrl: './chat.scss',
+  styleUrls: ['./chat.scss'], // to'g'rilandi
 })
 export class Chat implements OnInit, OnDestroy, AfterViewInit {
   private telegram = inject(Telegram);
@@ -49,27 +50,38 @@ export class Chat implements OnInit, OnDestroy, AfterViewInit {
   ngOnInit(): void {
     this.telegram.showBackButton('/inbox/messages');
     this.getChats();
-    this.socketService.onMessage().subscribe((res: IMessageResSocket) => {
-      console.log(res);
-      this.messages.update((current) => {
-        if (!current) return current;
+    this.socketService.onMessage().subscribe({
+      next: (res) => {
+        console.log('Yangi xabar:', res);
+        this.messages.update((current) => {
+          if (!current) return current;
+          return {
+            ...current,
+            messages: [...current.messages, res.message],
+          };
+        });
         this.scrollToBottom();
-        return {
-          ...current,
-          messages: [...current.messages, res.message],
-        };
-      });
+      },
+      error: (err) => {
+        console.error('Socket xatosi:', err);
+      },
     });
   }
+
   getChats(): void {
-    this.socketService.joinConversation(Number(this.chat_id()));
+    const chatId = Number(this.chat_id());
+    if (!chatId) return;
+    this.socketService.joinConversation(chatId);
     this.sub.add(
-      this.messagesService.getConversation(Number(this.chat_id())).subscribe({
+      this.messagesService.getConversation(chatId).subscribe({
         next: (res) => {
           this.messages.set(res);
         },
         complete: () => {
           this.scrollToBottom();
+        },
+        error: (err) => {
+          console.error('Xabarlarni olishda xato:', err);
         },
       })
     );
@@ -84,14 +96,15 @@ export class Chat implements OnInit, OnDestroy, AfterViewInit {
     setTimeout(() => {
       element.scrollTo({
         top: element.scrollHeight + 60,
-        behavior: 'instant',
+        behavior: 'instant', // yoki 'smooth'
       });
     }, 500);
   }
 
   ngOnDestroy(): void {
     this.sub.unsubscribe();
-    this.socketService.leaveConversation(Number(this.chat_id()));
+    const chatId = Number(this.chat_id());
+    if (chatId) this.socketService.leaveConversation(chatId);
     this.telegram.hiddeBackButton('/inbox/messages');
   }
 }

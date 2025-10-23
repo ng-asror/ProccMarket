@@ -49,7 +49,8 @@ export class Chat implements OnInit, OnDestroy, AfterViewInit {
   ngOnInit(): void {
     this.telegram.showBackButton('/inbox/messages');
     this.getChats();
-    this.socketService.on('message.send').subscribe((res: IMessageResSocket) => {
+    this.socketService.onMessage().subscribe((res: IMessageResSocket) => {
+      console.log(res);
       this.messages.update((current) => {
         if (!current) return current;
         this.scrollToBottom();

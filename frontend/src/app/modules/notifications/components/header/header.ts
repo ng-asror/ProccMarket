@@ -1,6 +1,6 @@
 import { Component, inject, input, resource } from '@angular/core';
 import { icons, LucideAngularModule } from 'lucide-angular';
-import { MessageService, SocketService } from '../../../../core';
+import { MessageService, Order, SocketService } from '../../../../core';
 import { firstValueFrom } from 'rxjs';
 import { Router } from '@angular/router';
 
@@ -13,6 +13,7 @@ import { Router } from '@angular/router';
 export class Header {
   private messagesService = inject(MessageService);
   private socketService = inject(SocketService);
+  private orderService = inject(Order);
   private router = inject(Router);
 
   IDS = input.required<{ user_id: number; chat_id: number }>({ alias: 'all-id' });
@@ -32,4 +33,6 @@ export class Header {
       this.router.navigate(['/inbox/messages']);
     });
   }
+
+  protected viewOrders(): void {}
 }

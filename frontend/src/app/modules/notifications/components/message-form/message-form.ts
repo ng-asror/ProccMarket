@@ -3,7 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
 import { icons, LucideAngularModule } from 'lucide-angular';
 import { TextFieldModule } from '@angular/cdk/text-field';
-import { MessageService, SocketService } from '../../../../core';
+import { IMessageResSocket, MessageService, SocketService } from '../../../../core';
 
 @Component({
   selector: 'app-message-form',
@@ -24,7 +24,7 @@ export class MessageForm {
     if (!this.txtContent().trim()) return;
     try {
       await firstValueFrom(this.messageService.sendMessage(this.chat_id(), this.txtContent())).then(
-        (res) => {
+        (res: IMessageResSocket) => {
           this.socketService.emit('message.send', res);
           this.txtContent.set('');
         }

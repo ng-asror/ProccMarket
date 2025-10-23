@@ -1,0 +1,7 @@
+.ellipses-txt {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1; /* Sets the maximum number of lines to 4 */
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

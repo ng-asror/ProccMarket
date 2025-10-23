@@ -52,12 +52,11 @@ export class EditTheme implements OnInit, OnDestroy {
   protected onFileSelect(event: Event): void {
     const file = (event.target as HTMLInputElement).files?.[0];
     if (!file) return;
-
     if (file.size > 2 * 1024 * 1024) {
       this.telegram.showAlert('Файл не должен превышать 2 МБ');
       return;
     }
-
+    this.themeImg.set(file);
     const reader = new FileReader();
     reader.onload = () => {
       this.previewUrl.set(reader.result);

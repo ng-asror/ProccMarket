@@ -13,7 +13,7 @@
 	</div>
 	<div class="chat-bubble break-words whitespace-pre-wrap" [class.chat-bubble-secondary]="content.user.is_admin">
 		{{content.content}}</div>
-	@if(content.is_read && content.user.id === user_id){
+	@if(content.is_read && content.user.id !== user_id){
 	<div class="chat-footer opacity-50">Прочитано</div>
 	}
 </div>

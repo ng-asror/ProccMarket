@@ -32,13 +32,14 @@ export class Message implements OnInit, AfterViewInit, OnDestroy {
 
   ngOnInit(): void {
     this.messageSignal.set(this.message().message);
-    this.socketService.listenAnyEvent('message-read').subscribe({
+    this.socketService.listen<IMessage>('message-read').subscribe({
       next: (res: IMessage) => {
         if (res.id === this.message().message.id) {
           this.messageSignal.set(res);
         }
       },
     });
+    this.notification();
   }
 
   ngAfterViewInit(): void {
@@ -57,6 +58,13 @@ export class Message implements OnInit, AfterViewInit, OnDestroy {
       }
     );
     this.observer.observe(this.el.nativeElement);
+  }
+  private notification(): void {
+    this.socketService.listen<any>('notification.sent').subscribe({
+      next: (res) => {
+        console.log(JSON.stringify(res));
+      },
+    });
   }
   ngOnDestroy(): void {
     this.observer?.disconnect();

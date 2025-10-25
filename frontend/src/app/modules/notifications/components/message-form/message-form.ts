@@ -3,7 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
 import { icons, LucideAngularModule } from 'lucide-angular';
 import { TextFieldModule } from '@angular/cdk/text-field';
-import { IMessageResSocket, MessageService, SocketService } from '../../../../core';
+import { IMessage, MessageService, SocketService } from '../../../../core';
 
 @Component({
   selector: 'app-message-form',
@@ -13,7 +13,6 @@ import { IMessageResSocket, MessageService, SocketService } from '../../../../co
 })
 export class MessageForm {
   private messageService = inject(MessageService);
-  private socketService = inject(SocketService);
 
   chat_id = input.required<number>({ alias: 'chat_id' });
 
@@ -23,12 +22,13 @@ export class MessageForm {
   async send(): Promise<void> {
     if (!this.txtContent().trim()) return;
     try {
-      await firstValueFrom(this.messageService.sendMessage(this.chat_id(), this.txtContent())).then(
-        (res: IMessageResSocket) => {
-          this.socketService.emit('message.send', res);
-          this.txtContent.set('');
-        }
-      );
-    } catch (error) {}
+      await firstValueFrom(
+        this.messageService.sendMessage(this.chat_id(), this.txtContent())
+      ).finally(() => {
+        this.txtContent.set('');
+      });
+    } catch (error) {
+      console.log(error);
+    }
   }
 }

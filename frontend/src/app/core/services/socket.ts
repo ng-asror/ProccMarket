@@ -1,7 +1,6 @@
 import { inject, Injectable } from '@angular/core';
 import { io, Socket } from 'socket.io-client';
 import { environment } from '../../../environments/environment.development';
-import { Telegram } from './telegram';
 import { Observable } from 'rxjs';
 
 @Injectable({
@@ -9,7 +8,6 @@ import { Observable } from 'rxjs';
 })
 export class SocketService {
   private socket: Socket | null = null;
-  private telegram = inject(Telegram);
 
   /** Socket ulanishini boshlash */
   initSocket(token: string | null) {
@@ -36,26 +34,8 @@ export class SocketService {
     });
   }
 
-  /** Chatga qo‘shilish */
-  joinConversation(id: number) {
-    if (!this.socket) {
-      console.warn('Socket ulanmagan: joinConversation ishlamadi.');
-      return;
-    }
-    this.socket.emit('join-conversations', [id]);
-  }
-
-  /** Chatdan chiqish */
-  leaveConversation(id: number) {
-    if (!this.socket) {
-      console.warn('Socket ulanmagan: leaveConversation ishlamadi.');
-      return;
-    }
-    this.socket.emit('leave-conversations', [id]);
-  }
-
   /** Event yuborish */
-  emit(event: string, data: any) {
+  emit<T>(event: string, data: T): void {
     if (!this.socket) {
       console.warn(`Socket ulanmagan: emit "${event}" ishlamadi.`);
       return;
@@ -63,23 +43,13 @@ export class SocketService {
     this.socket.emit(event, data);
   }
 
-  /** Xabarlarni olish */
-  onMessage(): Observable<any> {
+  listen<T>(event: string): Observable<T> {
     return new Observable((observer) => {
-      this.socket?.on('message.sent', (data) => {
-        observer.next(data);
-      });
+      if (!this.socket) {
+        console.warn(`Socket ulanmagan: emit "${event}" ishlamadi.`);
+        return;
+      }
+      this.socket.on(event, (data: T) => observer.next(data));
     });
-  }
-  listenAnyEvent(event: string): Observable<any> {
-    return new Observable((observer) => {
-      this.socket?.on(event, (data) => {
-        observer.next(data);
-      });
-    });
-  }
-  /** Socket obyektini olish */
-  get getSocket(): Socket | null {
-    return this.socket;
   }
 }

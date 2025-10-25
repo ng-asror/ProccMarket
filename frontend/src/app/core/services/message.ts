@@ -7,7 +7,7 @@ import {
   IConversationsRes,
   ICreateConversationRes,
   IMessage,
-  IMessageRes,
+  IMessageResSocket,
   IUserInfoChat,
 } from '../interfaces';
 import { SocketService } from './socket';
@@ -32,19 +32,20 @@ export class MessageService {
 
   getConversation(id: number): Observable<IConversationRes> {
     // const params = new HttpParams().set('sort', sort).set('page', page);
-    return this.http.get<IConversationRes>(`${environment.apiUrl}/chat/conversations/${id}`);
+    return this.http.get<IConversationRes>(`${environment.apiUrl}/chat/conversations/${id}`).pipe(
+      tap(() => {
+        this.socket.emit<[number]>('join-conversations', [id]);
+      })
+    );
   }
 
-  sendMessage(id: number, content: string): Observable<IMessageRes> {
-    return this.http
-      .post<IMessageRes>(`${environment.apiUrl}/chat/conversations/${id}/messages`, {
+  sendMessage(id: number, content: string): Observable<IMessageResSocket> {
+    return this.http.post<IMessageResSocket>(
+      `${environment.apiUrl}/chat/conversations/${id}/messages`,
+      {
         content,
-      })
-      .pipe(
-        tap((res) => {
-          this.socket.emit('message.send', { message: res.data });
-        })
-      );
+      }
+    );
   }
 
   userInfo(id: number): Observable<IUserInfoChat> {

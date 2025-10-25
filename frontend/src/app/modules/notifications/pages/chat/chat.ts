@@ -13,7 +13,7 @@ import { icons, LucideAngularModule } from 'lucide-angular';
 
 import {
   IConversationRes,
-  IMessage,
+  IMessageResSocket,
   MessageService,
   SocketService,
   Telegram,
@@ -59,13 +59,14 @@ export class Chat implements OnInit, OnDestroy, AfterViewInit {
   ngOnInit(): void {
     this.telegram.showBackButton('/inbox/messages');
     this.getChats();
-    this.socketService.listen<IMessage>('message.send').subscribe({
+    this.socketService.listen<any>('message.sent').subscribe({
       next: (res) => {
+        console.log(res);
         this.messages.update((current) => {
           if (!current) return current;
           return {
             ...current,
-            messages: [...current.messages, res],
+            messages: [...current.messages, res.message],
           };
         });
         this.scrollToBottom();
@@ -77,8 +78,6 @@ export class Chat implements OnInit, OnDestroy, AfterViewInit {
   }
 
   getChats(): void {
-    const chat_id = Number(this.chat_id());
-    this.socketService.emit<number>('join-conversations', chat_id);
     this.sub.add(
       this.messagesService.getConversation(Number(this.chat_id())).subscribe({
         next: (res) => {

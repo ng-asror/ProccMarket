@@ -10,8 +10,10 @@ export interface IConversationRes {
   messages: IMessage[];
   pagination: IPagination;
 }
-export interface IMessageRes extends ResultData {
-  data: IMessage;
+export interface IMessageResSocket {
+  message: IMessage;
+  conversation_id: number;
+  timestamp: Date;
 }
 
 export interface IMessage {

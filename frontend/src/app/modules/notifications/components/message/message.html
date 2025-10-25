@@ -1,7 +1,6 @@
 @if (messageSignal(); as content) {
 @let user_id = message().user_id;
-<div class="chat transform opacity-0"
-	[ngClass]="content.user_id === user_id || content.user.is_admin? 'chat-start':'chat-end'">
+<div class="chat" [ngClass]="content.user_id === user_id || content.user.is_admin? 'chat-start':'chat-end'">
 	<div class="chat-image avatar">
 		<div class="w-10 rounded-full">
 			<img alt="Tailwind CSS chat bubble component"

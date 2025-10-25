@@ -1,4 +1,4 @@
-import { Component, inject, OnDestroy, OnInit, resource, signal } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit, signal } from '@angular/core';
 import { Layout } from '../../../../layout/layout';
 import { ISectionsDashboard, Section, Telegram } from '../../../../core';
 import { firstValueFrom } from 'rxjs';

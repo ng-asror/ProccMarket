@@ -1,7 +1,7 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { environment } from '../../../environments/environment.development';
-import { Observable } from 'rxjs';
+import { Observable, tap } from 'rxjs';
 import {
   IConversationRes,
   IConversationsRes,
@@ -9,12 +9,14 @@ import {
   IMessage,
   IUserInfoChat,
 } from '../interfaces';
+import { SocketService } from './socket';
 
 @Injectable({
   providedIn: 'root',
 })
 export class MessageService {
   private http = inject(HttpClient);
+  private socket = inject(SocketService);
 
   getConversations(page: number = 1): Observable<IConversationsRes> {
     const params = new HttpParams().set('page', page);
@@ -41,15 +43,19 @@ export class MessageService {
   userInfo(id: number): Observable<IUserInfoChat> {
     return this.http.get<IUserInfoChat>(`${environment.apiUrl}/chat/users/${id}`);
   }
-
+  myInfo(): Observable<IUserInfoChat> {
+    return this.http.get<IUserInfoChat>(`${environment.apiUrl}/chat/users/me`);
+  }
   deleteConversation(id: number): Observable<{ message: string }> {
     return this.http.delete<{ message: string }>(`${environment.apiUrl}/chat/conversations/${id}`);
   }
-
   isRead(message_id: number): Observable<{ data: IMessage }> {
-    return this.http.post<{ data: IMessage }>(
-      `${environment.apiUrl}/chat/messages/${message_id}/read`,
-      { isRead: true }
-    );
+    return this.http
+      .post<{ data: IMessage }>(`${environment.apiUrl}/chat/messages/${message_id}/read`, {})
+      .pipe(
+        tap((res) => {
+          this.socket.emit('message-read', { message: res.data });
+        })
+      );
   }
 }

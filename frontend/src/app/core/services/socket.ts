@@ -3,7 +3,6 @@ import { io, Socket } from 'socket.io-client';
 import { environment } from '../../../environments/environment.development';
 import { Telegram } from './telegram';
 import { Observable } from 'rxjs';
-import { IMessageResSocket } from '../interfaces';
 
 @Injectable({
   providedIn: 'root',
@@ -14,11 +13,7 @@ export class SocketService {
 
   /** Socket ulanishini boshlash */
   initSocket(token: string | null) {
-    if (!token) {
-      console.warn('Token mavjud emas, socket ulanmaydi.');
-      return;
-    }
-
+    if (!token) return console.warn('Token mavjud emas, socket ulanmaydi.');
     this.socket = io(environment.socketUrl, {
       auth: { token },
       transports: ['websocket', 'polling'],
@@ -76,7 +71,13 @@ export class SocketService {
       });
     });
   }
-
+  listenAnyEvent(event: string): Observable<any> {
+    return new Observable((observer) => {
+      this.socket?.on(event, (data) => {
+        observer.next(data);
+      });
+    });
+  }
   /** Socket obyektini olish */
   get getSocket(): Socket | null {
     return this.socket;

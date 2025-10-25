@@ -35,7 +35,8 @@
 						<p class="text-[14px] text-[#030300] leading-[100%] font-[400]">Лайки</p>
 					</div>
 					<div class="flex-1 px-[10px]">
-						<h1 class="text-[16px] text-[#030300] leading-[100%] font-[400] mb-[4px]">{{profile.analytics.views_count|
+						<h1 class="text-[16px] text-[#030300] leading-[100%] font-[400] mb-[4px]">{{profile.analytics.views_count *
+							3 |
 							numeral: '0a'}}</h1>
 						<p class="text-[14px] text-[#030300] leading-[100%] font-[400]">Просмотры</p>
 					</div>

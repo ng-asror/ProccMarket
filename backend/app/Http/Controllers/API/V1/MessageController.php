@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\API\V1;
 
 use App\Events\MessageSent;
+use App\Events\MessagesRead;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\SendMessageRequest;
 use App\Http\Requests\UpdateMessageRequest;
@@ -27,7 +28,6 @@ class MessageController extends Controller
     {
         $user = $request->user();
 
-        // Check authorization: user must be a participant or admin
         if (! $user->is_admin && ! $conversation->hasParticipant($user->id)) {
             return response()->json([
                 'message' => 'Unauthorized to send messages in this conversation',
@@ -50,8 +50,26 @@ class MessageController extends Controller
             $fileSize = $file->getSize();
         }
 
-        // Mark all previous unread messages as read (user entered chat and wrote message)
-        Message::unreadForUser($conversation->id, $user->id)->update(['read_at' => now()]);
+        // ========== BATCH READ EVENT ==========
+        // User chat ga kirib xabar yozganda barcha o'qilmagan xabarlarni read qilish
+        $unreadMessages = Message::unreadForUser($conversation->id, $user->id)->get();
+        
+        if ($unreadMessages->isNotEmpty()) {
+            // Barcha unread message ID larini olamiz
+            $messageIds = $unreadMessages->pluck('id')->toArray();
+            
+            // Database da barcha xabarlarni read qilamiz (bir query bilan)
+            Message::whereIn('id', $messageIds)->update(['read_at' => now()]);
+            
+            // Bitta batch event yuboramiz (bir marta broadcast)
+            // toOthers() - o'zi uchun yuborilmaydi
+            broadcast(new MessagesRead(
+                $messageIds,
+                $conversation->id,
+                $user->id
+            ))->toOthers();
+        }
+        // ========================================
 
         // Create the message
         $message = Message::create([
@@ -133,8 +151,9 @@ class MessageController extends Controller
         }
 
         // Only mark as read if the user is not the sender
-        if ($message->user_id !== $user->id) {
-            $message->markAsRead();
+        if ($message->user_id !== $user->id && !$message->isRead()) {
+            // markAsRead avtomatik broadcast qiladi
+            $message->markAsRead($user->id);
         }
 
         return response()->json([

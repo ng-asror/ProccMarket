@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Events\MessageRead;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\Storage;
@@ -93,10 +94,13 @@ class Message extends Model
     /**
      * Mark this message as read
      */
-    public function markAsRead(): void
+    public function markAsRead(int $readByUserId = null): void
     {
         if (! $this->isRead()) {
             $this->update(['read_at' => now()]);
+            
+            // Broadcast event - toOthers() o'zi uchun yuborilmaydi
+            broadcast(new MessageRead($this, $readByUserId ?? auth()->id()))->toOthers();
         }
     }
 

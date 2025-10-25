@@ -557,6 +557,25 @@ Yangi xabar yuborilganda broadcast qilinadi.
 }
 ```
 
+#### MessageRead Event
+
+Agar xabar o'qilsa broadcast qilinadi.
+
+**Channel:** `private-conversation.{conversationId}`  
+**Event:** `.message.read`
+
+**Payload:**
+```json
+
+{
+  "message_id": 356,
+  "conversation_id": 27,
+  "read_at": "2025-10-25T12:19:24+00:00",
+  "read_by_user_id": 1,
+  "timestamp": "2025-10-25T12:19:24+00:00"
+}
+```
+
 ---
 
 ## Angular Implementation

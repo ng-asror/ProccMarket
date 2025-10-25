@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\API\V1;
 
+use App\Events\MessagesRead;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StartConversationRequest;
 use App\Http\Resources\ConversationResource;
@@ -117,10 +118,27 @@ class ConversationController extends Controller
             ->orderBy('created_at', $sort)
             ->paginate(50);
 
-        // Mark unread messages as read if user is not admin and is a participant
+        // ========== BATCH READ EVENT ==========
+        // Mark unread messages as read and broadcast event
         if (! $user->is_admin && $conversation->hasParticipant($user->id)) {
-            Message::unreadForUser($conversation->id, $user->id)->update(['read_at' => now()]);
+            $unreadMessages = Message::unreadForUser($conversation->id, $user->id)->get();
+            
+            if ($unreadMessages->isNotEmpty()) {
+                // Barcha unread message ID larini olamiz
+                $messageIds = $unreadMessages->pluck('id')->toArray();
+                
+                // Database da barcha xabarlarni read qilamiz (bir query bilan)
+                Message::whereIn('id', $messageIds)->update(['read_at' => now()]);
+                
+                // Bitta batch event yuboramiz
+                broadcast(new MessagesRead(
+                    $messageIds,
+                    $conversation->id,
+                    $user->id
+                ))->toOthers();
+            }
         }
+        // ========================================
 
         return response()->json([
             'conversation' => new ConversationResource($conversation),

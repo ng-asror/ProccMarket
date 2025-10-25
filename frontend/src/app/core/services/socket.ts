@@ -44,12 +44,13 @@ export class SocketService {
   }
 
   listen<T>(event: string): Observable<T> {
-    return new Observable((observer) => {
+    return new Observable<T>((observer) => {
       if (!this.socket) {
-        console.warn(`Socket ulanmagan: emit "${event}" ishlamadi.`);
+        console.warn(`Socket ulanmagan: "${event}" ni tinglab bo‘lmaydi.`);
         return;
       }
-      this.socket.on(event, (data: T) => observer.next(data));
+      const listener = (data: T) => observer.next(data);
+      this.socket.on(event, listener);
     });
   }
 }

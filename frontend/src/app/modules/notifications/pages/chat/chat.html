@@ -6,7 +6,7 @@
 		@defer (when messages(); prefetch on idle) {
 		@if(messages(); as msgs) {
 		@for (item of msgs.messages; track item.id) {
-		<app-message [message]="{message:item, user_id: +user_id()!}"></app-message>
+		<app-message [message]="{message:item, user_id: user_id()!, my_id: my_id()!}"></app-message>
 		}
 		@if (msgs.messages.length === 0) {
 		<div class="w-full h-full flex flex-col items-center justify-center">

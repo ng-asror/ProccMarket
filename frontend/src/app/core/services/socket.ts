@@ -1,21 +1,19 @@
 import { inject, Injectable } from '@angular/core';
 import { io, Socket } from 'socket.io-client';
 import { environment } from '../../../environments/environment.development';
-import { Telegram } from './telegram';
 import { Observable } from 'rxjs';
+
 @Injectable({
   providedIn: 'root',
 })
 export class SocketService {
   private socket: Socket | null = null;
-  private telegram = inject(Telegram);
 
+  /** Socket ulanishini boshlash */
   initSocket(token: string | null) {
-    if (!token) {
-      return;
-    }
+    if (!token) return console.warn('Token mavjud emas, socket ulanmaydi.');
     this.socket = io(environment.socketUrl, {
-      auth: { token: token },
+      auth: { token },
       transports: ['websocket', 'polling'],
       reconnection: true,
       reconnectionDelay: 1000,
@@ -26,6 +24,7 @@ export class SocketService {
     this.socket.on('connect', () => {
       console.log('✅ Socket.io ulandi:', this.socket?.id);
     });
+
     this.socket.on('disconnect', (reason) => {
       console.log('⚠️ Aloqa uzildi:', reason);
     });
@@ -35,26 +34,23 @@ export class SocketService {
     });
   }
 
-  joinConversation(id: number) {
-    if (!this.socket) return;
-    this.socket.emit('join-conversations', [id]);
-  }
-  leaveConversation(id: number) {
-    if (!this.socket) return;
-    this.socket.emit('leave-conversations', [id]);
+  /** Event yuborish */
+  emit<T>(event: string, data: T): void {
+    if (!this.socket) {
+      console.warn(`Socket ulanmagan: emit "${event}" ishlamadi.`);
+      return;
+    }
+    this.socket.emit(event, data);
   }
 
-  emit(event: string, data: any) {
-    this.socket?.emit(event, data);
-  }
-  on(event: string): Observable<any> {
-    return new Observable((observer) => {
-      this.socket?.on(event, (data) => {
-        observer.next(data);
-      });
+  listen<T>(event: string): Observable<T> {
+    return new Observable<T>((observer) => {
+      if (!this.socket) {
+        console.warn(`Socket ulanmagan: "${event}" ni tinglab bo‘lmaydi.`);
+        return;
+      }
+      const listener = (data: T) => observer.next(data);
+      this.socket.on(event, listener);
     });
-  }
-  get getSocket(): Socket | null {
-    return this.socket;
   }
 }

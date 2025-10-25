@@ -1,6 +1,6 @@
-import { Inject, Injectable, PLATFORM_ID } from '@angular/core';
-import { ITgUser } from '../interfaces';
+import { inject, Inject, Injectable, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
+import { ITgUser } from '../interfaces';
 import { Router } from '@angular/router';
 
 interface TgButton {
@@ -13,19 +13,11 @@ interface TgButton {
   providedIn: 'root',
 })
 export class Telegram {
-  private tg: any;
-  private isBrowser: boolean;
-
-  constructor(@Inject(PLATFORM_ID) private platformId: Object, private router: Router) {
-    this.isBrowser = isPlatformBrowser(this.platformId);
-    if (this.isBrowser) {
-      this.tg = (window as any).Telegram?.WebApp;
-      this.tg?.ready(); // Telegram WebApp faollashadi
-    }
-  }
+  private router = inject(Router);
+  private tg = (window as any).Telegram?.WebApp;
 
   async getTgUser(): Promise<ITgUser | null> {
-    if (!this.isBrowser || !this.tg) return null;
+    if (!this.tg) return null;
     return this.tg.initDataUnsafe;
   }
 
@@ -37,8 +29,8 @@ export class Telegram {
     return this.tg.BackButton;
   }
 
-  init(headerColor: string): void {
-    if (!this.isBrowser || !this.tg) return;
+  async init(headerColor: string): Promise<void> {
+    if (!this.tg) return;
     this.tg.ready();
     this.tg.setHeaderColor(headerColor);
     this.tg.expand();
@@ -46,12 +38,12 @@ export class Telegram {
   }
 
   hapticFeedback(type: 'light' | 'medium' | 'heavy' | 'rigid' | 'soft'): void {
-    if (!this.isBrowser || !this.tg?.HapticFeedback) return;
+    if (!this.tg?.HapticFeedback) return;
     this.tg.HapticFeedback.impactOccurred(type);
   }
 
   async setCloudItem(key: string, value: string): Promise<void> {
-    if (!this.isBrowser || !this.tg?.CloudStorage) return;
+    if (!this.tg?.CloudStorage) return;
     return new Promise((resolve, reject) => {
       this.tg.CloudStorage.setItem(key, value, (error: any, success: boolean) => {
         if (error) reject(error);
@@ -61,7 +53,7 @@ export class Telegram {
   }
 
   async getCloudStorage(key: string): Promise<string | null> {
-    if (!this.isBrowser || !this.tg?.CloudStorage) return null;
+    if (!this.tg?.CloudStorage) return null;
     return new Promise((resolve, reject) => {
       this.tg.CloudStorage.getItem(key, (error: any, value: string) => {
         if (error) reject(error);
@@ -71,7 +63,7 @@ export class Telegram {
   }
 
   async removeCloudItem(key: string): Promise<void> {
-    if (!this.isBrowser || !this.tg?.CloudStorage) return;
+    if (!this.tg?.CloudStorage) return;
     return new Promise((resolve, reject) => {
       this.tg.CloudStorage.removeItem(key, (error: any, success: boolean) => {
         if (error) reject(error);
@@ -81,7 +73,7 @@ export class Telegram {
   }
 
   showAlert(message: string): void {
-    if (!this.isBrowser || !this.tg) return;
+    if (!this.tg) return;
     this.tg.showAlert(message);
   }
 

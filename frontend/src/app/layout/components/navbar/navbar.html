@@ -36,8 +36,8 @@
 							</summary>
 							<ul>
 								@for (item of section.children; track item.id) {
-								<li>
-									<a [routerLink]="'/home/section/' + item.id">{{ item.name }}</a>
+								<li [routerLink]="'/home/section/' + item.id">
+									<a>{{ item.name }}</a>
 								</li>
 								}
 							</ul>

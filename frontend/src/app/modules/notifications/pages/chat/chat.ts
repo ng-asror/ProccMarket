@@ -5,6 +5,7 @@ import {
   inject,
   OnDestroy,
   OnInit,
+  resource,
   signal,
   ViewChild,
 } from '@angular/core';
@@ -18,14 +19,15 @@ import {
   Telegram,
 } from '../../../../core';
 import { ActivatedRoute } from '@angular/router';
-import { Subscription } from 'rxjs';
+import { firstValueFrom, Subscription } from 'rxjs';
 import { FormsModule } from '@angular/forms';
 import { Header, Message, MessageForm } from '../../components';
+
 @Component({
   selector: 'app-chat',
   imports: [LucideAngularModule, FormsModule, Message, MessageForm, Header],
   templateUrl: './chat.html',
-  styleUrl: './chat.scss',
+  styleUrls: ['./chat.scss'],
 })
 export class Chat implements OnInit, OnDestroy, AfterViewInit {
   private telegram = inject(Telegram);
@@ -35,33 +37,47 @@ export class Chat implements OnInit, OnDestroy, AfterViewInit {
   private sub: Subscription = new Subscription();
 
   protected ICONS = icons;
-  chat_id = signal<string | null>(null);
-  user_id = signal<string | null>(null);
+  chat_id = signal<number | null>(null);
+  user_id = signal<number | null>(null);
+  my_id = signal<number | null>(null);
   messages = signal<IConversationRes | null>(null);
 
   @ViewChild('chatCanvas') chatContent!: ElementRef<HTMLDivElement>;
 
   constructor() {
-    this.chat_id.set(this.activatedRoute.snapshot.paramMap.get('chat_id'));
-    this.user_id.set(this.activatedRoute.snapshot.paramMap.get('user_id'));
+    this.chat_id.set(Number(this.activatedRoute.snapshot.paramMap.get('chat_id')));
+    this.user_id.set(Number(this.activatedRoute.snapshot.paramMap.get('user_id')));
   }
+
+  private myInfo = resource({
+    loader: () =>
+      firstValueFrom(this.messagesService.myInfo()).then((res) => {
+        this.my_id.set(res.data.id);
+      }),
+  }).asReadonly();
 
   ngOnInit(): void {
     this.telegram.showBackButton('/inbox/messages');
     this.getChats();
-    this.socketService.on('message.send').subscribe((res: IMessageResSocket) => {
-      this.messages.update((current) => {
-        if (!current) return current;
+    this.socketService.listen<any>('message.sent').subscribe({
+      next: (res) => {
+        console.log(res);
+        this.messages.update((current) => {
+          if (!current) return current;
+          return {
+            ...current,
+            messages: [...current.messages, res.message],
+          };
+        });
         this.scrollToBottom();
-        return {
-          ...current,
-          messages: [...current.messages, res.message],
-        };
-      });
+      },
+      error: (err) => {
+        console.error('Socket xatosi:', err);
+      },
     });
   }
+
   getChats(): void {
-    this.socketService.joinConversation(Number(this.chat_id()));
     this.sub.add(
       this.messagesService.getConversation(Number(this.chat_id())).subscribe({
         next: (res) => {
@@ -69,6 +85,9 @@ export class Chat implements OnInit, OnDestroy, AfterViewInit {
         },
         complete: () => {
           this.scrollToBottom();
+        },
+        error: (err) => {
+          console.error('Xabarlarni olishda xato:', err);
         },
       })
     );
@@ -90,7 +109,8 @@ export class Chat implements OnInit, OnDestroy, AfterViewInit {
 
   ngOnDestroy(): void {
     this.sub.unsubscribe();
-    this.socketService.leaveConversation(Number(this.chat_id()));
+    const chatId = Number(this.chat_id());
+    if (chatId) this.socketService.emit<number>('leave-conversations', chatId);
     this.telegram.hiddeBackButton('/inbox/messages');
   }
 }

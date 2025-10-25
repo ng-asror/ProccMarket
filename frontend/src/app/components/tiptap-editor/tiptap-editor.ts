@@ -70,9 +70,9 @@ export class TiptapEditorComponent implements OnInit, OnDestroy {
       ],
       onCreate: ({ editor }) => {
         const content = this.value();
-        if (content) editor.commands.setContent(content);
+        if (content) editor.commands.setContent(content, false);
       },
-      onUpdate: ({ editor }) => {
+      onBlur: ({ editor }) => {
         this.valueChange.emit(editor.getHTML());
       },
       editorProps: {

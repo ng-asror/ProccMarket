@@ -11,7 +11,13 @@ import {
 } from '@angular/core';
 import { icons, LucideAngularModule } from 'lucide-angular';
 
-import { IConversationRes, MessageService, SocketService, Telegram } from '../../../../core';
+import {
+  IConversationRes,
+  IMessage,
+  MessageService,
+  SocketService,
+  Telegram,
+} from '../../../../core';
 import { ActivatedRoute } from '@angular/router';
 import { firstValueFrom, Subscription } from 'rxjs';
 import { FormsModule } from '@angular/forms';
@@ -53,27 +59,26 @@ export class Chat implements OnInit, OnDestroy, AfterViewInit {
   ngOnInit(): void {
     this.telegram.showBackButton('/inbox/messages');
     this.getChats();
-    this.sub.add(
-      this.socketService.onMessage().subscribe({
-        next: (res) => {
-          this.messages.update((current) => {
-            if (!current) return current;
-            return {
-              ...current,
-              messages: [...current.messages, res.message],
-            };
-          });
-          this.scrollToBottom();
-        },
-        error: (err) => {
-          console.error('Socket xatosi:', err);
-        },
-      })
-    );
+    this.socketService.listen<IMessage>('message.send').subscribe({
+      next: (res) => {
+        this.messages.update((current) => {
+          if (!current) return current;
+          return {
+            ...current,
+            messages: [...current.messages, res],
+          };
+        });
+        this.scrollToBottom();
+      },
+      error: (err) => {
+        console.error('Socket xatosi:', err);
+      },
+    });
   }
 
   getChats(): void {
-    this.socketService.joinConversation(Number(this.chat_id()));
+    const chat_id = Number(this.chat_id());
+    this.socketService.emit<number>('join-conversations', chat_id);
     this.sub.add(
       this.messagesService.getConversation(Number(this.chat_id())).subscribe({
         next: (res) => {
@@ -106,7 +111,7 @@ export class Chat implements OnInit, OnDestroy, AfterViewInit {
   ngOnDestroy(): void {
     this.sub.unsubscribe();
     const chatId = Number(this.chat_id());
-    if (chatId) this.socketService.leaveConversation(chatId);
+    if (chatId) this.socketService.emit<number>('leave-conversations', chatId);
     this.telegram.hiddeBackButton('/inbox/messages');
   }
 }

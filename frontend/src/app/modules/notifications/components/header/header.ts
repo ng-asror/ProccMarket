@@ -46,7 +46,7 @@ export class Header implements OnInit {
 
   ngOnInit(): void {
     this.orderForm.patchValue({ conversation_id: this.IDS().chat_id });
-    this.socketService.listenAnyEvent('order.created').subscribe((data) => {
+    this.socketService.listen('order.created').subscribe((data) => {
       console.log(data);
     });
   }

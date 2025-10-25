@@ -8,7 +8,7 @@
 				<p class="capitalize text-[16px]">{{topic.created_at | dateFormat:'DD MMM HH:MM'}}</p>
 				<div class="flex items-center gap-x-[3px]">
 					<lucide-icon [name]="ICONS.Eye" size="20"></lucide-icon>
-					<p>{{topic.views_count | numeral: '0a'}}</p>
+					<p>{{topic.views_count * 3| numeral: '0a'}}</p>
 				</div>
 			</div>
 			<h1 class="text-2xl font-semibold">{{topic.title}}</h1>

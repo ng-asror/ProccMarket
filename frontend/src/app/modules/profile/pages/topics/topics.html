@@ -18,7 +18,7 @@
 				<div class="flex gap-x-[15px]">
 					<div class="flex items-center gap-x-[5px] opacity-50">
 						<lucide-icon [name]="ICONS.Eye" size="20"></lucide-icon>
-						<p class="text-[18px] leading-[100%]">{{item.views_count| numeral:'0a'}}</p>
+						<p class="text-[18px] leading-[100%]">{{item.views_count * 3| numeral:'0a'}}</p>
 					</div>
 					<div class="flex items-center gap-x-[5px] opacity-50">
 						<lucide-icon [name]="ICONS.ThumbsUp" size="20"></lucide-icon>
